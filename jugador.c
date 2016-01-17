@@ -11,11 +11,14 @@
 #define N_CARTAS_MAZO 40
 #define N_CARTAS_MANO 4
 #define N_PALOS 4
+#define N_JUGADORES 4
 
 int main(int argc, char **argv) {
-    int rank, size, namelen, version, subversion, psize, corte, repartidor;
+    int rank, size, namelen, version, subversion, psize, corte, postre, sizeMazo, sizeDescartadas, ok;
+    int buffer[3];
     MPI_Comm parent;
     Carta mazo[N_CARTAS_MAZO];
+    Carta mano[N_CARTAS_MANO];
     char *palos[] = { "Oros", "Copas", "Espadas", "Bastos"};
     char * paloCorte = (char *)malloc(7*sizeof(char));
     char processor_name[MPI_MAX_PROCESSOR_NAME];
@@ -26,13 +29,13 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Get_processor_name(processor_name, &namelen);
     MPI_Get_version(&version, &subversion);
-    printf("Jugador con identificador %d  de un total de  %d  en  %s  ejecutando  MPI  %d.%d\n", rank, size,
+    printf("[jugador %d] Jugador con identificador %d  de un total de  %d  en  %s  ejecutando  MPI  %d.%d\n", rank, rank, size,
            processor_name, version, subversion);
 
     MPI_Comm_get_parent(&parent);
 
     if (parent == MPI_COMM_NULL) {
-        printf("Error: no se ha encontrado proceso padre.\n");
+        printf("[jugador %d] Error: no se ha encontrado proceso padre.\n", rank);
         exit(1);
     }
 
@@ -40,18 +43,20 @@ int main(int argc, char **argv) {
 
     if (psize != 1) {
 
-        printf("Error:  el número de padres debería ser 1 y no %d.\n", psize);
+        printf("[jugador %d] Error:  el número de padres debería ser 1 y no %d.\n", rank, psize);
         exit(2);
     }
 
-    printf("Jugador %d: Listo para jugar!\n", rank);
+    printf("[jugador %d] Jugador %d: Listo para jugar!\n", rank, rank);
+    MPI_Bcast(&sizeMazo, 1, MPI_INT, 0, parent);
+    MPI_Bcast(&sizeDescartadas, 1, MPI_INT, 0, parent);
     MPI_Bcast(&corte, 1, MPI_INT, 0, parent);
-    //MPI_Barrier(parent);
+
 
     if (rank == corte) {
         /* Este proceso debe realizar el corte */
         /* Para ello debe recibir el mazo */
-        printf("Proceso corte recibiendo mazo; el proceso corte es: %d\n", corte);
+        printf("[jugador %d] Proceso corte recibiendo mazo\n", rank);
         /*
         int i=0;
         for (i=0; i<N_CARTAS_MAZO;i++) {
@@ -66,25 +71,26 @@ int main(int argc, char **argv) {
         recibirMazo(mazo, 0, parent, stat);
         //printMazo(mazo);
         cortarMazo(mazo, &paloCorte);
-        printf("El palo de corte es: %s\n", paloCorte);
+        printf("[jugador %d] El palo de corte es: %s\n", rank, paloCorte);
         int j=0;
         for(j=0; j < N_PALOS; j++) {
             if (strcmp(paloCorte, palos[j]) == 0 ) {
 
-                repartidor=j;
-                /* Envío del id del repartidor al proceso maestro */
+                postre=j;
+                /* Envío del id del postre al proceso maestro */
 
-                MPI_Send(&repartidor, 1, MPI_INT, 0, 0, parent);
-                //MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent);
+                MPI_Send(&postre, 1, MPI_INT, 0, 0, parent);
+                //MPI_Bcast(&postre, 1, MPI_INT, 0, parent);
             }
         }
 
 
     }
-    MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent);
-    if (rank == repartidor) {
+    MPI_Bcast(&postre, 1, MPI_INT, 0, parent);
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (rank == postre && sizeMazo==40) {
 
-        printf("Proceso repartidor recibiendo mazo\n");
+        printf("[postre %d] Proceso postre recibiendo mazo\n", rank);
         /*
         int i=0;
         for (i=0; i<N_CARTAS_MAZO;i++) {
@@ -96,33 +102,71 @@ int main(int argc, char **argv) {
             MPI_Recv(mazo[i].cara, 8, MPI_CHAR, 0, 0, parent, &stat);
         }*/
         recibirMazo(mazo, 0, parent, stat);
-        printMazo(mazo);
+        //printMazo(mazo);
 
-        //int recibido;
-        //char *palabras = (char *) malloc(2*sizeof(char *));
+        int i=0;
+        int j=0;
+        int k=0;
 
-        //printf("VALOR 1: %s\n" , mazo[0].palo);
-       // printMazo(mazo);
-          //  MPI_Recv(palabras, 10, MPI_CHAR, 0, 0, parent, &stat);
+        int siguienteJugador = postre;
+        for (i=0; i<N_CARTAS_MANO;i++) {
+            for (j=0; j<N_JUGADORES; j++) {
 
-        //MPI_Bcast(&recibido, 1, MPI_INT, 0, parent);
-       // printf("RECIBIDO: %d\n" , recibido);
+                siguienteJugador = add_mod(siguienteJugador, 1, 4);
 
-        //printf("PALABRAS: %s\n" , palabras);
+                buffer[0]=i;
+                buffer[1]=siguienteJugador;
 
-/*
-        MPI_Datatype cartaType, tipos[2] = {MPI_CHAR, MPI_INT};
-        MPI_Aint offsets[2], extent;
-        int blocklen[2] = {1, 8};
-        offsets[0] = offsetof(Carta, palo);
-        offsets[1] = offsetof(Carta, id);
-        MPI_Type_extent(MPI_CHAR, &extent);
-        MPI_Type_struct(2, blocklen, offsets, tipos, &cartaType);
-        MPI_Type_commit(&cartaType);
-        MPI_Recv(mazo, N_CARTAS_MANO, cartaType, 0, 0, MPI_COMM_WORLD, &stat);
-        printMazo(mazo);*/
+                if (siguienteJugador != postre) {
+
+                    enviarCarta(mazo[k], siguienteJugador, MPI_COMM_WORLD);
+                    MPI_Send(&buffer, 2, MPI_INT, 0, 0, parent);
+                    //MPI_Recv(&ok, 1, MPI_INT, siguienteJugador, 0, MPI_COMM_WORLD, &stat);
+
+                }
+                else {
+                    //printf("[postre %d] Se reparte carta %d al postre %d\n", rank, i, siguienteJugador);
+                    MPI_Send(&buffer, 2, MPI_INT, 0, 0, parent);
+                    mano[i] = mazo [k];
+                    buffer[0]=rank;
+                    buffer[1]=i;
+                    buffer[2]=mano[i].valor;
+                    MPI_Send(&buffer, 3, MPI_INT, 0, 0, parent);
+                    //printf("[postre %d] Jugador %d recibe carta %d con valor %d\n", rank, rank, k, mano[i].valor );
+                }
+                sizeMazo--;
+                sizeDescartadas++;
+                k++;
+            }
+        }
+        //MPI_Bcast(&sizeMazo, 1, MPI_INT, postre, parent);
+        MPI_Send(&sizeMazo, 1, MPI_INT, 0, 0, parent);
+        MPI_Bcast(&sizeMazo, 1, MPI_INT, postre, MPI_COMM_WORLD);
+        //printf("[jugador %d] tamaño del mazo: %d\n", rank, sizeMazo);
+
     }
+    else {
+        int i = 0;
+        for (i = 0; i < N_CARTAS_MANO; i++) {
 
+            mano[i] = recibirCarta(postre, MPI_COMM_WORLD, stat);
+            buffer[0]=rank;
+            buffer[1]=i;
+            buffer[2]=mano[i].valor;
+            MPI_Send(&buffer, 3, MPI_INT, 0, 0, parent);
+            //printf("[jugador %d] Jugador %d recibe carta %d con valor %d\n", rank, rank, i, mano[i].valor );
+            //ok =1;
+            //MPI_Send(&ok, 1, MPI_INT, postre, 0, MPI_COMM_WORLD);
+            //ok=0;
+        }
+        MPI_Bcast(&sizeMazo, 1, MPI_INT, postre, MPI_COMM_WORLD);
+        //printf("[jugador %d] tamaño del mazo: %d\n", rank, sizeMazo);
+
+
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    //printf("[jugador %d], MANO PARA EL JUGADOR %d\n", rank, rank);
+    //printMazo(mano, N_CARTAS_MANO);
     MPI_Comm_disconnect(&parent);
     MPI_Finalize();
     return 0;
