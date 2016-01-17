@@ -1,6 +1,7 @@
 /* C Example */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mpi.h>
 #include "mus.h"
 
@@ -141,8 +142,54 @@ Carta recibirCarta(int proceso, MPI_Comm wComm, MPI_Status stat) {
         MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
     //printf("Recibida carta: %s de %s con valor %d\n", wCarta.cara, wCarta.palo, wCarta.valor);
     return wCarta;
-
 }
+
+ int cuentaCartasMano(Carta * wMano, char * cara) {
+        int i = 0;
+        int cuenta =0;
+        for (i=0; i<N_CARTAS_MANO; i++){
+            if (strcmp(wMano[i].cara, cara) == 0) {
+                cuenta++;
+            }
+        }
+     return cuenta;
+ }
+
+int maximoArray(int array[], int longitud) {
+    int i = 0;
+    int max = array[0];
+
+    for(i; i<longitud; i++)
+    {
+        if(max < array[i])
+        {
+            max = array[i];
+        }
+    }
+    return max;
+}
+
+int ocurrenciasArray(int array[], int longitud, int numero) {
+    int n=0;
+    int i=0;
+    for(i=0;i<longitud;i++)
+    {
+        if(numero == array[i])
+            n++;
+    }
+    return n;
+}
+
+int buscaIndice( int a[], int longitud, int numero )
+{
+    int index = 0;
+
+    while ( index < longitud && a[index] != numero ) ++index;
+
+    return ( index == longitud ? -1 : index );
+}
+
+
 
 
 

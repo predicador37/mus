@@ -25,4 +25,9 @@ void enviarMazo(Carta * wMazo, int proceso, MPI_Comm wComm);
 void recibirMazo(Carta * wMazo, int proceso, MPI_Comm wCommm, MPI_Status stat);
 void enviarCarta (Carta wCarta, int proceso, MPI_Comm wComm);
 Carta recibirCarta( int proceso, MPI_Comm wCommm, MPI_Status stat);
+int cuentaCartasMano(Carta * wMano, char * cara);
+int maximoArray(int array[], int longitud);
+int ocurrenciasArray(int array[], int longitud, int numero);
+int buscaIndice( int a[], int longitud, int numero );
+
 #endif //MUS_MUS_H
