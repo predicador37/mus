@@ -68,10 +68,10 @@ int main(int argc, char **argv) {
         int j = 0;
         for (j = 0; j < N_PALOS; j++) {
             if (strcmp(paloCorte, palos[j]) == 0) {
-                    /* corresponde repartir primero al primer jugador de su derecha si sale oros;
-                     * al segundo si sale copas; al tercero si sale espadas y al mismo que cortó si sale bastos*/
+                /* corresponde repartir primero al primer jugador de su derecha si sale oros;
+                 * al segundo si sale copas; al tercero si sale espadas y al mismo que cortó si sale bastos*/
 
-                    postre = add_mod(corte, j+1, 4);
+                postre = add_mod(corte, j + 1, 4);
 
                 /* Envío del id del postre al proceso maestro */
                 MPI_Send(&postre, 1, MPI_INT, 0, 0, parent);
@@ -145,19 +145,74 @@ int main(int argc, char **argv) {
 
     /* una vez repartidas las cartas, se evalúan para cada uno de los lances */
     int cuenta = 0;
-    int i =0;
-    for (i=N_CARTAS_PALO-1;i>=0;i--) {
+    int i = 0;
+    for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
         cuenta = cuentaCartasMano(mano, caras[i]);
         cuentaCartas[N_CARTAS_PALO - i - 1] = cuenta;
         //printf("CUENTA %d para carta %s: %d\n", i, caras[i], cuenta);
     }
+
+
     //for (i=0;i<10;i++){
     //    printf("[jugador %d] CUENTA %d: %d\n", rank, i, cuentaCartas[i]);
-   // }
+    // }
     //int counts[5]={10, 10, 10, 10, 0};
     //int displs[5]={0, 10, 20, 30, 40};
     //MPI_Gatherv(cuentaCartas, 10, MPI_INT, rbuf, counts, displs, MPI_INT, 0, parent);
+    int invertido[N_CARTAS_PALO];
+    invertirArray(cuentaCartas, invertido, N_CARTAS_PALO);
+
     MPI_Gather(cuentaCartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
+    MPI_Gather(invertido, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
+
+    /* PARES */
+    int pares[5]; /*primera posición: duplesIguales, 1 entero*/
+    /*segunda posición: medias, 1 entero */
+    /*tercera posición: duples parejas y pareja, 3 enteros */
+
+    int duplesIguales = 99; //10 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
+    int medias = 99; //10 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
+
+
+    int equivalencias[4];
+    for (i = 0; i < N_CARTAS_MANO; i++) {
+        equivalencias[i] = mano[i].equivalencia;
+    }
+    int *parejas = (int *) malloc(3 * sizeof(int));
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 4);
+
+    if (parejas[0] > 0) {
+        duplesIguales = parejas[1];
+        //printf("Duples de la misma carta: %s\n", caras[duplesIguales]);
+    }
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
+    if (parejas[0] > 0) {
+        medias = parejas[1];
+        /*printf("MEDIAS DE: %s\n", caras[medias]);*/
+    }
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
+
+    pares[0] = duplesIguales;
+    pares[1] = medias;
+    pares[2] = parejas[0];
+    pares[3] = parejas[1];
+    pares[4] = parejas[2];
+    MPI_Gather(pares, 5, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
+
+
+    /* juego */
+    int *valores = (int *) malloc(4 * sizeof(int));;
+
+    for (i = 0; i < N_CARTAS_MANO; i++) {
+        valores[i] = mano[i].valor;
+    }
+    int juego = 0;
+    juego = sumaArray(valores, N_CARTAS_MANO);
+
+    MPI_Gather(&juego, 1, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
 
     printf("MANO DEL JUGADOR %d\n", rank);
     printMazo(mano, N_CARTAS_MANO);

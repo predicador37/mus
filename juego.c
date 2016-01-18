@@ -15,6 +15,7 @@
 #define N_CARTAS_MAZO 40
 #define N_CARTAS_MANO 4
 #define N_JUGADORES 4
+#define N_LANCES 4
 
 
 int main(int argc, char **argv) {
@@ -30,10 +31,11 @@ int main(int argc, char **argv) {
 
     char *palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
     int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
+    int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
 
     srand(time(NULL)); /* randomize */
 
-    sizeMazo = crearMazo(mazo, caras, palos, valores); /* llena el mazo de cartas */
+    sizeMazo = crearMazo(mazo, caras, palos, valores, equivalencias); /* llena el mazo de cartas */
     sizeDescartadas = 0;
     printf("[maestro] Tamaño del mazo: %d\n", sizeMazo);
     //printMazo(mazo); /*Imprime el mazo*/
@@ -89,113 +91,58 @@ int main(int argc, char **argv) {
 
     MPI_Recv(&sizeMazo, 1, MPI_INT, postre, 0, juego_comm, MPI_STATUS_IGNORE);
     printf("[maestro] tamaño del mazo: %d\n", sizeMazo);
-    int counts[5]={10, 10, 10, 10,0};
-    int displs[5]={0, 10, 20, 30,40};
+    int counts[5] = {10, 10, 10, 10, 0};
+    int displs[5] = {0, 10, 20, 30, 40};
     int conteos[10];
-    for (i=0;i<10;i++) {
-        conteos[i]=0;
+    int paresBuf[25];
+    int juegoBuf[5];
+    for (i = 0; i < 10; i++) {
+        conteos[i] = 0;
     }
     int rbuf[50];
-    int ganador;
+    int rbufInv[50];
+    int lances[N_LANCES];
     //MPI_Gatherv(conteos, 0, MPI_INT, rbuf, counts, displs, MPI_INT, MPI_ROOT, juego_comm);
     MPI_Gather(conteos, 10, MPI_INT, rbuf, 10, MPI_INT, MPI_ROOT, juego_comm);
+    MPI_Gather(conteos, 10, MPI_INT, rbufInv, 10, MPI_INT, MPI_ROOT, juego_comm);
+    MPI_Gather(conteos, 5, MPI_INT, paresBuf, 5, MPI_INT, MPI_ROOT, juego_comm);
+    MPI_Gather(conteos, 1, MPI_INT, juegoBuf, 1, MPI_INT, MPI_ROOT, juego_comm);
 
-    int k=0;
-    int empates[4];
-    for (i=0;i<4;i++){
-        empates[i]=0;
-    }
-    for (k=0; k<40; k++){
-        printf("Conteo carta %d: %d\n", k, rbuf[k]);
-    }
 
-    /*cálculo de puntos a grande*/
-    /* TODO: empaquetar para siempre*/
-    /* parametros: rbuf */
-    /* mover array de empates adentro */
-    /* devuelve entero con proceso ganador */
+    int k = 0;
 
-    for (k=0; k<10; k++) {
-        if (k==0) { /* se buscan reyes y treses*/
-            printf("Contando reyes\n");
-            int suma[4];
-            suma[0]=rbuf[0]+rbuf[7];
-            printf("Reyes para proceso 0: %d\n", suma[0]);
-            suma[1]=rbuf[10]+rbuf[17];
-            printf("Reyes para proceso 1: %d\n", suma[1]);
-            suma[2]=rbuf[20]+rbuf[27];
-            printf("Reyes para proceso 2: %d\n", suma[2]);
-            suma[3]=rbuf[30]+rbuf[37];
-            printf("Reyes para proceso 3: %d\n", suma[3]);
-            int maximo = maximoArray(suma, 4);
-            printf("Conteo máximo: %d\n", maximo);
-            int ocurrencias = ocurrenciasArray(suma, 4, maximo);
-            if (ocurrencias == 1) { //el jugador gana porque tiene más reyes
-                ganador = buscaIndice(suma, 4, maximo);
-                break;
-            }
-            else {
-                for (i=0; i<4; i++){
-                    if (suma[i] == maximo){
-                        empates[i] =1;
-                    }
-                }
-            }
+
+    /*cálculo de manos*/
+    lances[0] = calculaGrande(rbuf);
+    lances[1] = calculaChica(rbufInv);
+    lances[2] = calcularPares(paresBuf);
+    lances[3] = calcularJuego(juegoBuf);
+    printf("Mejor mano a grande: jugador %d\n", lances[0]);
+    printf("Mejor mano a chica: jugador %d\n", lances[1]);
+    printf("Mejor mano a pares: jugador %d\n", lances[2]);
+    printf("Mejor mano a juego: jugador %d\n", lances[3]);
+
+    for (i = 0; i < N_JUGADORES; i++) {
+
+        if (paresBuf[5 * i] != 99) {
+            printf("[jugador %d] Duples de la misma carta: %s\n", i, caras[paresBuf[5 * i]]);
         }
-
-        else if (k>0 && k<7) {
-            int suma[4];
-            suma[0] = rbuf[k] * empates[0];
-            suma[1] = rbuf[k+10] * empates[1];
-            suma[2] = rbuf[k+20] * empates[2];
-            suma[3] = rbuf[k+30] * empates[3];
-            if (k==1){
-                printf("Caballos para proceso 0: %d\n", suma[0]);
-
-                printf("Caballos para proceso 1: %d\n", suma[1]);
-
-                printf("Caballos para proceso 2: %d\n", suma[2]);
-
-                printf("Caballos para proceso 3: %d\n", suma[3]);
-            }
-            int maximo = maximoArray(suma, 4);
-            if (maximo!=0) {
-                int ocurrencias = ocurrenciasArray(suma, 4, maximo);
-                if (ocurrencias == 1 && empates[buscaIndice(suma, 4, maximo)] == 1) {
-                    ganador = buscaIndice(suma, 4, maximo);
-                    break;
-                }
-                else {
-                    for (i = 0; i < 4; i++) {
-                        if (suma[i] == maximo && empates[i] == 1) {
-                            empates[i] = 1;
-                        }
-                        else {
-                            empates[i] = 0;
-                        }
-                    }
-                    if (ocurrenciasArray(empates, 4, 1) == 1) {
-                        ganador = buscaIndice(suma, 4, 1);
-                        break;
-                    }
-                }
-            }
+        else if (paresBuf[5 * i + 2] == 2) {
+            printf("[jugador %d] DUPLES PAREJAS DE %s Y %s\n", i, caras[paresBuf[5 * i + 3]],
+                   caras[paresBuf[5 * i + 4]]);
         }
-        else if (k==8){  /*se buscan doses y ases*/
-            int suma[4];
-            suma[0]=rbuf[8]+rbuf[9];
-            suma[1]=rbuf[18]+rbuf[19];
-            suma[2]=rbuf[28]+rbuf[29];
-            suma[3]=rbuf[38]+rbuf[39];
-            int maximo = maximoArray(suma, 4);
-            int ocurrencias = ocurrenciasArray(suma, 4, maximo);
-            if (ocurrencias == 1) { //el jugador gana porque tiene más reyes
-                ganador = buscaIndice(suma, 4, maximo);
-                break;
-            }
+        else if (paresBuf[5 * i + 1] != 99) {
+            printf("[jugador %d] MEDIAS DE: %s\n", i, caras[paresBuf[5 * i + 1]]);
+        }
+        else if (paresBuf[5 * i + 2] == 1) {
+            printf("[jugador %d] PAREJA DE %s\n", i, caras[paresBuf[5 * i + 3]]);
         }
     }
-    printf("Mejor mano a grande: jugador %d\n", ganador);
+
+    for (i = 0; i < N_JUGADORES; i++) {
+        printf("JUEGO DE JUGADOR %d: %d\n", i, juegoBuf[i]);
+    }
+
     MPI_Comm_disconnect(&juego_comm);
     MPI_Finalize();
     return 0;
