@@ -15,6 +15,7 @@ struct carta {
     int orden;
     int valor;
     int equivalencia;
+    int estado; // 0: en mazo, 1: en mano, 2: descartada
 };
 /* fin struct carta */
 typedef struct carta Carta;
@@ -32,9 +33,9 @@ int add_mod(int a, int b, int m);
 
 void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm);
 
-void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wCommm, MPI_Status stat);
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wCommm, MPI_Status * stat);
 
-void enviarCarta(Carta wCarta, int proceso, MPI_Comm wComm);
+void repartirCarta(Carta wCarta, int proceso, MPI_Comm wComm);
 
 Carta recibirCarta(int proceso, MPI_Comm wCommm, MPI_Status stat);
 
@@ -65,5 +66,10 @@ int calcularPares(int paresBuf[]);
 int sumaArray(int a[], int longitud);
 
 int calcularJuego(int juegoBuf[]);
+int tengoJuego(int suma);
+int tengoMedias(int *paresBuf);
+int tengoDuples(int *paresBuf);
+int tengoPares(int *paresBuf);
+int cortarMus(int *valores, int *equivalencias, int *paresBuf);
 
 #endif //MUS_MUS_H

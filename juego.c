@@ -19,7 +19,7 @@
 
 
 int main(int argc, char **argv) {
-    int rank, size, version, subversion, namelen, universe_size, postre, sizeMazo, sizeDescartadas;
+    int rank, size, version, subversion, namelen, universe_size, postre, jugadorMano, repartidor, sizeMazo, sizeDescartadas;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
     MPI_Comm juego_comm;
     Carta mazo[N_CARTAS_MAZO];
@@ -69,28 +69,37 @@ int main(int argc, char **argv) {
     MPI_Bcast(&corte, 1, MPI_INT, MPI_ROOT, juego_comm); /* envío del id de proceso que realizará el corte a todos*/
 
     /* envío del mazo al jugador que va a cortar la baraja*/
+
     enviarMazo(mazo, corte, juego_comm);
-    MPI_Recv(&postre, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
-    int mano = add_mod(postre, 1, 4);
-    printf("[maestro] El jugador postre es: %d\n", postre);
-    printf("[maestro] El jugador mano es: %d\n", mano);
-    MPI_Bcast(&postre, 1, MPI_INT, MPI_ROOT, juego_comm);
-    /* envío del mazo al jugador postre, que va a repartir */
-    enviarMazo(mazo, postre, juego_comm);
+    MPI_Recv(&repartidor, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
+    printf("[maestro] El jugador repartidor es: %d\n", repartidor);
+
+
+    //int mano = add_mod(postre, 1, 4);
+    //printf("[maestro] El jugador mano es: %d\n", mano);
+    MPI_Bcast(&repartidor, 1, MPI_INT, MPI_ROOT, juego_comm);
+
+    /* envío del mazo al jugador que va a repartir */
+    enviarMazo(mazo, repartidor, juego_comm);
 
     /* e/s auxiliar reparto de cartas */
     int i = 0;
     for (i = 0; i <= (N_CARTAS_MANO * N_JUGADORES - 1); i++) {
         int buffer[3];
-        MPI_Recv(&buffer, 3, MPI_INT, postre, 0, juego_comm, MPI_STATUS_IGNORE);
-        printf("[postre %d] Se reparte carta %d al jugador %d\n", postre, buffer[0], buffer[1]);
+        MPI_Recv(&buffer, 3, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
+        printf("[repartidor %d] Repartida carta %d al jugador %d\n", repartidor, buffer[0], buffer[1]);
         int siguiente = buffer[1];
         MPI_Recv(&buffer, 3, MPI_INT, siguiente, 0, juego_comm, MPI_STATUS_IGNORE);
         printf("[jugador %d] Jugador %d recibe carta %d con valor %d\n", buffer[0], buffer[0], buffer[1], buffer[2]);
     }
 
-    MPI_Recv(&sizeMazo, 1, MPI_INT, postre, 0, juego_comm, MPI_STATUS_IGNORE);
+    MPI_Recv(&sizeMazo, 1, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
+    recibirMazo(mazo, repartidor, juego_comm, MPI_STATUS_IGNORE);
     printf("[maestro] tamaño del mazo: %d\n", sizeMazo);
+    MPI_Recv(&jugadorMano, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
+
+
+
     int counts[5] = {10, 10, 10, 10, 0};
     int displs[5] = {0, 10, 20, 30, 40};
     int conteos[10];
@@ -102,7 +111,8 @@ int main(int argc, char **argv) {
     int rbuf[50];
     int rbufInv[50];
     int lances[N_LANCES];
-    //MPI_Gatherv(conteos, 0, MPI_INT, rbuf, counts, displs, MPI_INT, MPI_ROOT, juego_comm);
+
+    /* Recepción de datos para evaluar las manos de los jugadores */
     MPI_Gather(conteos, 10, MPI_INT, rbuf, 10, MPI_INT, MPI_ROOT, juego_comm);
     MPI_Gather(conteos, 10, MPI_INT, rbufInv, 10, MPI_INT, MPI_ROOT, juego_comm);
     MPI_Gather(conteos, 5, MPI_INT, paresBuf, 5, MPI_INT, MPI_ROOT, juego_comm);
@@ -139,9 +149,11 @@ int main(int argc, char **argv) {
         }
     }
 
+
     for (i = 0; i < N_JUGADORES; i++) {
         printf("JUEGO DE JUGADOR %d: %d\n", i, juegoBuf[i]);
     }
+    printMazo(mazo, N_CARTAS_MAZO);
 
     MPI_Comm_disconnect(&juego_comm);
     MPI_Finalize();

@@ -37,6 +37,7 @@ int crearMazo(Carta *mazo, char *strCara[],
         mazo[i].equivalencia = intEquivalencias[i % 10];
         mazo[i].id = i;
         mazo[i].orden = i % 10;
+        mazo[i].estado = 0;
         sizeMazo++;
 
     } /* fin for */
@@ -48,8 +49,8 @@ int crearMazo(Carta *mazo, char *strCara[],
 void printMazo(Carta *wMazo, int sizeMazo) {
     int i;
     for (i = 0; i <= sizeMazo - 1; i++) {
-        printf("El valor de %-8s\t de \t%-8s es \t%d \tcon id \t%d y orden %d\n \t", wMazo[i].cara,
-               wMazo[i].palo, wMazo[i].valor, wMazo[i].id, wMazo[i].orden);
+        printf("El valor de %-8s\t de \t%-8s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
+               wMazo[i].palo, wMazo[i].valor,  wMazo[i].orden, wMazo[i].estado);
         printf("\n");
     }
     printf("Fin del contenido del mazo.\n");
@@ -109,32 +110,34 @@ void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm) {
         MPI_Send(&wMazo[j].valor, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(&wMazo[j].equivalencia, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(&wMazo[j].orden, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].estado, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(wMazo[j].palo, 7, MPI_CHAR, proceso, 0, wComm);
         MPI_Send(wMazo[j].cara, 8, MPI_CHAR, proceso, 0, wComm);
     }
 }
 
-void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, MPI_Status stat) {
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, MPI_Status * stat) {
 
     int i = 0;
     for (i = 0; i < N_CARTAS_MAZO; i++) {
         wMazo[i].palo = (char *) malloc(5 * sizeof(char));
         wMazo[i].cara = (char *) malloc(8 * sizeof(char));
-        MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, &stat);
-        MPI_Recv(&wMazo[i].valor, 1, MPI_INT, proceso, 0, wComm, &stat);
-        MPI_Recv(&wMazo[i].equivalencia, 1, MPI_INT, proceso, 0, wComm, &stat);
-        MPI_Recv(&wMazo[i].orden, 1, MPI_INT, proceso, 0, wComm, &stat);
-        MPI_Recv(wMazo[i].palo, 7, MPI_CHAR, proceso, 0, wComm, &stat);
-        MPI_Recv(wMazo[i].cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
+        MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].valor, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].orden, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].estado, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(wMazo[i].palo, 7, MPI_CHAR, proceso, 0, wComm, stat);
+        MPI_Recv(wMazo[i].cara, 8, MPI_CHAR, proceso, 0, wComm, stat);
     }
 }
 
-void enviarCarta(Carta wCarta, int proceso, MPI_Comm wComm) {
-
+void repartirCarta(Carta wCarta, int proceso, MPI_Comm wComm) {
     MPI_Send(&wCarta.id, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm);
+    MPI_Send(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm);
     MPI_Send(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm);
     //printf("Enviada carta: %s de %s con valor %d\n", wCarta.cara, wCarta.palo, wCarta.valor);
@@ -149,8 +152,10 @@ Carta recibirCarta(int proceso, MPI_Comm wComm, MPI_Status stat) {
     MPI_Recv(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm, &stat);
     MPI_Recv(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm, &stat);
     MPI_Recv(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm, &stat);
+    MPI_Recv(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm, &stat);
     MPI_Recv(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm, &stat);
     MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
+    wCarta.estado=1;
     //printf("Recibida carta: %s de %s con valor %d\n", wCarta.cara, wCarta.palo, wCarta.valor);
     return wCarta;
 }
@@ -632,7 +637,7 @@ int calcularJuego(int juegoBuf[]) {
     }
 
     if (ganador == 99) { // al punto
-        for (i = 29; i >= 0; i--) {
+        for (i = 30; i >= 0; i--) {
             ocurrencias = ocurrenciasArray(juegoBuf, 4, i);
 
             if (ocurrencias == 1) {
@@ -647,6 +652,57 @@ int calcularJuego(int juegoBuf[]) {
     return ganador;
 }
 
+int tengoJuego(int suma) {
+    int juegosGanadores[7] = {31, 40, 37, 36, 35, 34, 33};
+    if (ocurrenciasArray(juegosGanadores, 7, suma) == 1) {
+        //hay juego
+        return 1;
+    }
+    else return 0;
+}
+
+int tengoMedias(int *paresBuf) {
+    if (paresBuf[1] != 99) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+int tengoDuples(int *paresBuf) {
+
+    if (paresBuf[0] != 99 || paresBuf[2] == 2) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+int tengoPares(int *paresBuf) {
+    if (paresBuf[2] == 1) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 
+/*
+ if (contrario a 5 puntos de ganar) cortar mus */
+    int juego = sumaArray(valores, N_CARTAS_MANO);
+    if ((juego == 31) || (tengoDuples(paresBuf) == 1) || (tengoMedias(paresBuf) == 1) ||
+        (tengoPares(paresBuf) && tengoJuego(juego))) {
+        return 1;
+    }
 
+    else {
+        return 0;
+    }
+
+
+}
