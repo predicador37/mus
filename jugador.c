@@ -15,7 +15,7 @@
 #define N_JUGADORES 4
 
 int main(int argc, char **argv) {
-    int rank, size, namelen, version, subversion, psize, corte, postre, sizeMazo, sizeDescartadas, ok;
+    int rank, size, namelen, version, subversion, psize, corte, postre, jugadorMano, repartidor, sizeMazo, sizeDescartadas, ok;
     int buffer[3], rbuf[50];
     MPI_Comm parent;
     Carta mazo[N_CARTAS_MAZO];
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
         /* Este proceso debe realizar el corte */
         /* Para ello debe recibir el mazo */
         printf("[jugador %d] Proceso corte recibiendo mazo\n", rank);
-        recibirMazo(mazo, 0, parent, stat);
+        recibirMazo(mazo, 0, parent, &stat);
         cortarMazo(mazo, &paloCorte);
         printf("[jugador %d] El palo de corte es: %s\n", rank, paloCorte);
         int j = 0;
@@ -71,20 +71,21 @@ int main(int argc, char **argv) {
                 /* corresponde repartir primero al primer jugador de su derecha si sale oros;
                  * al segundo si sale copas; al tercero si sale espadas y al mismo que cortó si sale bastos*/
 
-                postre = add_mod(corte, j + 1, 4);
+                repartidor = add_mod(corte, j + 1, 4);
 
-                /* Envío del id del postre al proceso maestro */
-                MPI_Send(&postre, 1, MPI_INT, 0, 0, parent);
+                /* Envío del id del repartidor al proceso maestro */
+                MPI_Send(&repartidor, 1, MPI_INT, 0, 0, parent);
             }
         }
     }
-    MPI_Bcast(&postre, 1, MPI_INT, 0, parent);
-    int manoId = add_mod(postre, 1, 4);
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == postre && sizeMazo == 40) {
+    MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent);
+    //int manoId = add_mod(postre, 1, 4);
 
-        printf("[postre %d] Proceso postre recibiendo mazo\n", rank);
-        recibirMazo(mazo, 0, parent, stat);
+
+    if (rank == repartidor && sizeMazo == 40) {
+
+        printf("[repartidor %d] Proceso repartidor recibiendo mazo\n", rank);
+        recibirMazo(mazo, 0, parent, &stat);
 
         /* A continuación tiene lugar el reparto de cartas secuencial*/
         /* Por este requisito no se ha utilizado scatter*/
@@ -94,7 +95,7 @@ int main(int argc, char **argv) {
         int j = 0;
         int k = 0;
 
-        int siguienteJugador = postre;
+        int siguienteJugador = repartidor;
         for (i = 0; i < N_CARTAS_MANO; i++) {
             for (j = 0; j < N_JUGADORES; j++) { /* En total se reparten 16 cartas */
 
@@ -102,15 +103,16 @@ int main(int argc, char **argv) {
                 buffer[0] = i;
                 buffer[1] = siguienteJugador;
 
-                if (siguienteJugador != postre) {
-
-                    enviarCarta(mazo[k], siguienteJugador, MPI_COMM_WORLD);
+                if (siguienteJugador != repartidor) {
+                    repartirCarta(mazo[k], siguienteJugador, MPI_COMM_WORLD);
+                    mazo[k].estado = 1; // la carta pasa a estado repartida
                     MPI_Send(&buffer, 2, MPI_INT, 0, 0, parent);
 
                 }
                 else {
                     /* Para repartirse a sí mismo no tiene sentido utilizar MPI */
                     MPI_Send(&buffer, 2, MPI_INT, 0, 0, parent);
+                    mazo[k].estado = 1;// la carta pasa a estado repartida
                     mano[i] = mazo[k];
                     buffer[0] = rank;
                     buffer[1] = i;
@@ -125,53 +127,49 @@ int main(int argc, char **argv) {
 
         /* Todos los procesos deben conocer cuál es el tamaño actual del mazo */
         MPI_Send(&sizeMazo, 1, MPI_INT, 0, 0, parent);
-        MPI_Bcast(&sizeMazo, 1, MPI_INT, postre, MPI_COMM_WORLD);
+        MPI_Bcast(&sizeMazo, 1, MPI_INT, repartidor, MPI_COMM_WORLD);
+
+        /* El proceso maestro debe contar con el mazo actualizado */
+        enviarMazo(mazo, 0, parent);
 
 
     }
     else { /* el proceso no es corte ni postre; es decir, un jugador estándar */
         int i = 0;
+
         for (i = 0; i < N_CARTAS_MANO; i++) {
 
-            mano[i] = recibirCarta(postre, MPI_COMM_WORLD, stat);
+            mano[i] = recibirCarta(repartidor, MPI_COMM_WORLD, stat);
             buffer[0] = rank;
             buffer[1] = i;
             buffer[2] = mano[i].valor;
             MPI_Send(&buffer, 3, MPI_INT, 0, 0, parent);
         }
-        MPI_Bcast(&sizeMazo, 1, MPI_INT, postre, MPI_COMM_WORLD);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast(&sizeMazo, 1, MPI_INT, repartidor, MPI_COMM_WORLD);
+        int siguienteJugador = add_mod(repartidor, 1, 4);
 
-    /* una vez repartidas las cartas, se evalúan para cada uno de los lances */
+   /* una vez repartidas las cartas, mus corrido */
+    /* hay que evaluar la mano... */
+
+    /* Grande y chica */
     int cuenta = 0;
-    int i = 0;
+    i = 0;
     for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
         cuenta = cuentaCartasMano(mano, caras[i]);
         cuentaCartas[N_CARTAS_PALO - i - 1] = cuenta;
         //printf("CUENTA %d para carta %s: %d\n", i, caras[i], cuenta);
     }
 
-
-    //for (i=0;i<10;i++){
-    //    printf("[jugador %d] CUENTA %d: %d\n", rank, i, cuentaCartas[i]);
-    // }
-    //int counts[5]={10, 10, 10, 10, 0};
-    //int displs[5]={0, 10, 20, 30, 40};
-    //MPI_Gatherv(cuentaCartas, 10, MPI_INT, rbuf, counts, displs, MPI_INT, 0, parent);
     int invertido[N_CARTAS_PALO];
     invertirArray(cuentaCartas, invertido, N_CARTAS_PALO);
-
-    MPI_Gather(cuentaCartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
-    MPI_Gather(invertido, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
 
     /* PARES */
     int pares[5]; /*primera posición: duplesIguales, 1 entero*/
     /*segunda posición: medias, 1 entero */
     /*tercera posición: duples parejas y pareja, 3 enteros */
 
-    int duplesIguales = 99; //10 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
-    int medias = 99; //10 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
+    int duplesIguales = 99; //99 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
+    int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
 
 
     int equivalencias[4];
@@ -200,11 +198,12 @@ int main(int argc, char **argv) {
     pares[2] = parejas[0];
     pares[3] = parejas[1];
     pares[4] = parejas[2];
-    MPI_Gather(pares, 5, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
+
 
 
     /* juego */
     int *valores = (int *) malloc(4 * sizeof(int));;
+
 
     for (i = 0; i < N_CARTAS_MANO; i++) {
         valores[i] = mano[i].valor;
@@ -212,10 +211,32 @@ int main(int argc, char **argv) {
     int juego = 0;
     juego = sumaArray(valores, N_CARTAS_MANO);
 
-    MPI_Gather(&juego, 1, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
+        if (rank == siguienteJugador) {
+            int mus = cortarMus(valores, equivalencias, pares);
+            jugadorMano = 99;
+            if (mus == 1) {
+                printf("[jugador %d] CORTO MUS!!\n", rank);
+                jugadorMano = rank;
+                //jugar lances: empiezo yo
+            }
 
-    printf("MANO DEL JUGADOR %d\n", rank);
-    printMazo(mano, N_CARTAS_MANO);
+            MPI_Send(&buffer, 2, MPI_INT, 0, 0, parent);
+        }
+
+    /* Envío de datos al maestro para que evalúe*/
+    MPI_Gather(cuentaCartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
+    MPI_Gather(invertido, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
+    MPI_Gather(pares, 5, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
+    MPI_Gather(&juego, 1, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
+    }
+//    printf("MANO DEL JUGADOR %d\n", rank);
+//    printMazo(mano, N_CARTAS_MANO);
+
+
+
+     /* no cortar mus */
+    // si eres mano y puedes descartar
+
     MPI_Comm_disconnect(&parent);
     MPI_Finalize();
     return 0;
