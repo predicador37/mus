@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 
     //int mano = add_mod(postre, 1, 4);
     //printf("[maestro] El jugador mano es: %d\n", mano);
-    MPI_Bcast(&repartidor, 1, MPI_INT, MPI_ROOT, juego_comm);
+    MPI_Bcast(&repartidor, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del repartidor a todos los procesos
 
     /* envío del mazo al jugador que va a repartir */
     enviarMazo(mazo, repartidor, juego_comm);
@@ -96,9 +96,30 @@ int main(int argc, char **argv) {
     MPI_Recv(&sizeMazo, 1, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
     recibirMazo(mazo, repartidor, juego_comm, MPI_STATUS_IGNORE);
     printf("[maestro] tamaño del mazo: %d\n", sizeMazo);
-    MPI_Recv(&jugadorMano, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
 
+    MPI_Bcast(&sizeMazo, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del tamaño del mazo a resto de procesos
 
+    int siguienteJugador = add_mod(repartidor, 1, 4);
+    int noSiguiente = 99;
+    jugadorMano = 99;
+    int bufferSnd[2] = {99,siguienteJugador};
+    int bufferRcv[2] = {99, siguienteJugador};
+
+    while (jugadorMano == 99) {
+        printf("DENTRO DEL WHILE\n");
+        MPI_Recv(&bufferRcv[0], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+
+        MPI_Recv(&bufferRcv[1], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+        jugadorMano = bufferRcv[0];
+        siguienteJugador = bufferRcv[1];
+        bufferSnd[0] = jugadorMano;
+        bufferSnd[1] = siguienteJugador;
+
+            MPI_Bcast(&bufferSnd, 2, MPI_INT, MPI_ROOT, juego_comm);
+            //MPI_Bcast(&siguienteJugador, 1, MPI_INT, MPI_ROOT, juego_comm);
+
+    }
+    printf("[maestro] La mano es: %d\n", jugadorMano);
 
     int counts[5] = {10, 10, 10, 10, 0};
     int displs[5] = {0, 10, 20, 30, 40};
@@ -111,6 +132,9 @@ int main(int argc, char **argv) {
     int rbuf[50];
     int rbufInv[50];
     int lances[N_LANCES];
+
+
+
 
     /* Recepción de datos para evaluar las manos de los jugadores */
     MPI_Gather(conteos, 10, MPI_INT, rbuf, 10, MPI_INT, MPI_ROOT, juego_comm);
