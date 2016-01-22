@@ -157,85 +157,63 @@ int main(int argc, char **argv) {
     //printf("[proceso %d] tamaño del mazo: %d\n", rank, sizeMazo);
 
         int siguienteJugador = add_mod(repartidor, 1, 4);
-
+    printf("[jugador %d] antes de charangas, siguiente jugador es: %d\n", rank, siguienteJugador);
 
    /* una vez repartidas las cartas, mus corrido */
     /* hay que evaluar la mano... */
     // todo encapsular en funciones
-
-    /* Grande y chica */
-    int cuenta = 0;
     int i = 0;
+    int juego = 0;
+    int invertido[N_CARTAS_PALO];
+    int pares[5];
+    int equivalencias[N_CARTAS_MANO];
+
+    for (i = 0; i < N_CARTAS_MANO; i++) {
+        equivalencias[i] = mano[i].equivalencia;
+    }
+
+    int valores[N_CARTAS_MANO];
+    for (i = 0; i < N_CARTAS_MANO; i++) {
+        valores[i] = mano[i].valor;
+    }
+
+    /* Grande */
+    int cuenta = 0;
+
     for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
         cuenta = cuentaCartasMano(mano, caras[i]);
         cuentaCartas[N_CARTAS_PALO - i - 1] = cuenta;
         //printf("CUENTA %d para carta %s: %d\n", i, caras[i], cuenta);
     }
 
-    int invertido[N_CARTAS_PALO];
+    /* chica */
+
     invertirArray(cuentaCartas, invertido, N_CARTAS_PALO);
 
-    /* PARES */
-    int pares[5]; /*primera posición: duplesIguales, 1 entero*/
-    /*segunda posición: medias, 1 entero */
-    /*tercera posición: duples parejas y pareja, 3 enteros */
+   /* pares */
 
-    int duplesIguales = 99; //99 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
-    int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
-
-
-    int equivalencias[4];
-    for (i = 0; i < N_CARTAS_MANO; i++) {
-        equivalencias[i] = mano[i].equivalencia;
-    }
-    int *parejas = (int *) malloc(3 * sizeof(int));
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 4);
-
-    if (parejas[0] > 0) {
-        duplesIguales = parejas[1];
-        //printf("Duples de la misma carta: %s\n", caras[duplesIguales]);
-    }
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
-    if (parejas[0] > 0) {
-        medias = parejas[1];
-        /*printf("MEDIAS DE: %s\n", caras[medias]);*/
-    }
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
-
-    pares[0] = duplesIguales;
-    pares[1] = medias;
-    pares[2] = parejas[0];
-    pares[3] = parejas[1];
-    pares[4] = parejas[2];
-
-
+    preparaPares(equivalencias, pares);
 
     /* juego */
-    int *valores = (int *) malloc(4 * sizeof(int));;
+
+    juego = sumaArray(valores, N_CARTAS_MANO);
 
 
-    for (i = 0; i < N_CARTAS_MANO; i++) {
-        valores[i] = mano[i].valor;
-    }
-    int juego = 0;
     int ronda = 0;
     int turno = 0;
-    juego = sumaArray(valores, N_CARTAS_MANO);
-        jugadorMano = 99;
     int bufferRcv[3] = {99, siguienteJugador, turno};
     int descartes[4] = {99,99,99,99};
     int descarte = 99;
+    jugadorMano = 99;
     int temp;
+    int turnoDescartes=1;
         while (jugadorMano==99) {
 
 
             if (rank == siguienteJugador) {
 
 
-             if ((turno % 4) == 0 && (turno != 0)) {
+             if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes==1)) {
                       printf("[jugador %d] ME TOCA turno %d de descartes\n", rank, turno);
 
                     for (i=0;i<N_CARTAS_MANO;i++) {
@@ -256,43 +234,56 @@ int main(int argc, char **argv) {
 
                     }
 
+                 // volver a evaluar pares para ver si se corta el mus
+                 preparaPares(equivalencias, pares);
+
                  siguienteJugador=add_mod(siguienteJugador,1,4);
 
                  MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
+                 MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
             // todo este broadcast bloquea programa
                 // MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
 
-                 MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
-                 siguienteJugador = temp;
+                 //MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+                 //siguienteJugador = temp;
                  printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
-                 break;
+                 //break;
 
                 }
+                else {
+                 MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
                 // todo quizá poner un else aqui y abajo
                 int mus = cortarMus(valores, equivalencias, pares);
+                 printf("MUS CORRIDO CON SIGUIENTE JUGADOR: %d\n", siguienteJugador);
+                 siguienteJugador=add_mod(siguienteJugador, 1, 4);
                 musCorrido(mus, &rank, &jugadorMano, &turno, &siguienteJugador, bufferRcv, parent);
-
+             }
             }
             else { // al jugador no le toca
 
-              if ((turno % 4) == 0 && (turno != 0)) {
+              if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes==1)) {
 
-                    MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
-                  siguienteJugador =temp;
+                  //MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+                  //siguienteJugador =temp;
+                  MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
                   printf("[jugador %d] NO ME TOCA turno %d de descartes\n", rank, turno);
                   printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
-                  break;
+                  //break;
 
                  }
-
+                else {
+                  MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
                     MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
                 //MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
                 jugadorMano = bufferRcv[0];
                 printf("[jugador %d] recibe mano %d\n", rank, jugadorMano);
                 siguienteJugador = bufferRcv[1];
                 turno=bufferRcv[2];
+              }
             }
-
+            MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+            siguienteJugador = temp;
+            printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
         }
 
     printf("[proceso %d] MANO A TRANSMITIR AL JUEGO: %d\n", rank, jugadorMano);

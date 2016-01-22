@@ -50,7 +50,7 @@ void printMazo(Carta *wMazo, int sizeMazo) {
     int i;
     for (i = 0; i <= sizeMazo - 1; i++) {
         printf("El valor de %-8s\t de \t%-8s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
-               wMazo[i].palo, wMazo[i].valor,  wMazo[i].orden, wMazo[i].estado);
+               wMazo[i].palo, wMazo[i].valor, wMazo[i].orden, wMazo[i].estado);
         printf("\n");
     }
     printf("Fin del contenido del mazo.\n");
@@ -116,7 +116,7 @@ void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm) {
     }
 }
 
-void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, MPI_Status * stat) {
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, MPI_Status *stat) {
 
     int i = 0;
     for (i = 0; i < N_CARTAS_MAZO; i++) {
@@ -155,7 +155,7 @@ Carta recibirCarta(int proceso, MPI_Comm wComm, MPI_Status stat) {
     MPI_Recv(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm, &stat);
     MPI_Recv(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm, &stat);
     MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
-    wCarta.estado=1;
+    wCarta.estado = 1;
     //printf("Recibida carta: %s de %s con valor %d\n", wCarta.cara, wCarta.palo, wCarta.valor);
     return wCarta;
 }
@@ -706,27 +706,25 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 
 }
-void musCorrido(int mus, int *rank, int* jugadorMano, int * turno, int * siguienteJugador, int bufferRcv[], MPI_Comm parent ) {
 
+void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguienteJugador, int bufferRcv[],
+                MPI_Comm parent) {
+
+    (*turno)++;
     if (mus == 1) {
-printf("[jugador %d] CORTO MUS!!\n", *rank);
-*jugadorMano = *rank;
-
-        (*turno)++;
-
-MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
-MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
-MPI_Send(turno,1,MPI_INT,0,0,parent);
-MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
+        printf("[jugador %d] CORTO MUS!!\n", *rank);
+        *jugadorMano = *rank;
+        MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
+        MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
 //jugar lances: empiezo yo
-} else {
-MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
-*siguienteJugador=add_mod(*siguienteJugador,1,4);
-MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
-        (*turno)++;
-MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
-MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
-}
+    } else {
+        MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
+        MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
+    }
 }
 
 void marcarDescarte(Carta *wMazo, int sizeMazo, int id) {
@@ -736,4 +734,38 @@ void marcarDescarte(Carta *wMazo, int sizeMazo, int id) {
             wMazo[i].estado = 2;
         }
     }
+}
+
+int *preparaPares(int equivalencias[], int *pares) {
+/* PARES */
+// pares[5]; /*primera posición: duplesIguales, 1 entero*/
+/*segunda posición: medias, 1 entero */
+/*tercera posición: duples parejas y pareja, 3 enteros */
+
+    int duplesIguales = 99; //99 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
+    int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
+
+
+    int *parejas = (int *) malloc(3 * sizeof(int));
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 4);
+
+    if (parejas[0] > 0) {
+        duplesIguales = parejas[1];
+//printf("Duples de la misma carta: %s\n", caras[duplesIguales]);
+    }
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
+    if (parejas[0] > 0) {
+        medias = parejas[1];
+/*printf("MEDIAS DE: %s\n", caras[medias]);*/
+    }
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
+
+    pares[0] = duplesIguales;
+    pares[1] = medias;
+    pares[2] = parejas[0];
+    pares[3] = parejas[1];
+    pares[4] = parejas[2];
 }
