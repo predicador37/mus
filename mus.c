@@ -706,3 +706,34 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 
 }
+void musCorrido(int mus, int *rank, int* jugadorMano, int * turno, int * siguienteJugador, int bufferRcv[], MPI_Comm parent ) {
+
+    if (mus == 1) {
+printf("[jugador %d] CORTO MUS!!\n", *rank);
+*jugadorMano = *rank;
+
+        (*turno)++;
+
+MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
+MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
+MPI_Send(turno,1,MPI_INT,0,0,parent);
+MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
+//jugar lances: empiezo yo
+} else {
+MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
+*siguienteJugador=add_mod(*siguienteJugador,1,4);
+MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
+        (*turno)++;
+MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
+MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
+}
+}
+
+void marcarDescarte(Carta *wMazo, int sizeMazo, int id) {
+    int i;
+    for (i = 0; i <= sizeMazo - 1; i++) {
+        if (wMazo[i].id = id) {
+            wMazo[i].estado = 2;
+        }
+    }
+}

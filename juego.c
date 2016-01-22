@@ -102,21 +102,56 @@ int main(int argc, char **argv) {
     int siguienteJugador = add_mod(repartidor, 1, 4);
     int noSiguiente = 99;
     jugadorMano = 99;
+    int turno = 0;
     int bufferSnd[2] = {99,siguienteJugador};
-    int bufferRcv[2] = {99, siguienteJugador};
-
+    int bufferRcv[3] = {99, siguienteJugador, turno};
+    int descarte = 99;
     while (jugadorMano == 99) {
-        printf("DENTRO DEL WHILE\n");
-        MPI_Recv(&bufferRcv[0], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+        printf("[maestro] TURNO: %d\n", turno);
 
+       if ((turno % 4) == 0 && (turno != 0)) {
+
+           printf("[maestro] turno %d de descartes\n", turno);
+           printf("[maestro] jugador %d descarta\n", siguienteJugador);
+
+
+
+
+           // recibe identificador de carta a descartar
+
+            //  while (descarte != 98) {
+
+           for (i=0;i<N_CARTAS_MANO;i++) {
+               MPI_Recv(&descarte, 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+               printf("[maestro]: DESCARTE DE %d : %d\n", siguienteJugador, descarte);
+               if (descarte != 99 && descarte != 98) {
+                   marcarDescarte(mazo, N_CARTAS_MAZO, descarte);
+                   repartirCarta(mazo[N_CARTAS_MAZO - sizeMazo], siguienteJugador, juego_comm);
+                   sizeMazo--;
+               }
+
+           }
+
+           MPI_Recv(&bufferRcv[1], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+           siguienteJugador = bufferRcv[1];
+           printf("[maestro] recibido siguiente jugador: %d\n", siguienteJugador);
+
+           MPI_Bcast(&siguienteJugador, 1, MPI_INT, MPI_ROOT, juego_comm);
+            break;
+       }
+        MPI_Recv(&bufferRcv[0], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
         MPI_Recv(&bufferRcv[1], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+        MPI_Recv(&bufferRcv[2], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
         jugadorMano = bufferRcv[0];
         siguienteJugador = bufferRcv[1];
+        turno = bufferRcv[2];
         bufferSnd[0] = jugadorMano;
         bufferSnd[1] = siguienteJugador;
-
-            MPI_Bcast(&bufferSnd, 2, MPI_INT, MPI_ROOT, juego_comm);
+        bufferSnd[2] = turno;
+        printf("[maestro] TURNO: %d\n", turno);
+            MPI_Bcast(&bufferSnd, 3, MPI_INT, MPI_ROOT, juego_comm);
             //MPI_Bcast(&siguienteJugador, 1, MPI_INT, MPI_ROOT, juego_comm);
+
 
     }
     printf("[maestro] La mano es: %d\n", jugadorMano);
