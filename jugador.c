@@ -78,7 +78,8 @@ int main(int argc, char **argv) {
             }
         }
     }
-    MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent);
+    MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent); //recepción del repartidor desde el proceso maestro
+
     //int manoId = add_mod(postre, 1, 4);
 
 
@@ -126,11 +127,14 @@ int main(int argc, char **argv) {
         }
 
         /* Todos los procesos deben conocer cuál es el tamaño actual del mazo */
-        MPI_Send(&sizeMazo, 1, MPI_INT, 0, 0, parent);
-        MPI_Bcast(&sizeMazo, 1, MPI_INT, repartidor, MPI_COMM_WORLD);
 
+
+        //MPI_Bcast(&sizeMazo, 1, MPI_INT, repartidor, MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
         /* El proceso maestro debe contar con el mazo actualizado */
+        MPI_Send(&sizeMazo, 1, MPI_INT, 0, 0, parent);
         enviarMazo(mazo, 0, parent);
+
 
 
     }
@@ -145,15 +149,23 @@ int main(int argc, char **argv) {
             buffer[2] = mano[i].valor;
             MPI_Send(&buffer, 3, MPI_INT, 0, 0, parent);
         }
-        MPI_Bcast(&sizeMazo, 1, MPI_INT, repartidor, MPI_COMM_WORLD);
+
+
+    }//se termina el reparto
+    MPI_Bcast(&sizeMazo, 1, MPI_INT, 0, parent);
+    MPI_Barrier(MPI_COMM_WORLD);
+    //printf("[proceso %d] tamaño del mazo: %d\n", rank, sizeMazo);
+
         int siguienteJugador = add_mod(repartidor, 1, 4);
+
 
    /* una vez repartidas las cartas, mus corrido */
     /* hay que evaluar la mano... */
+    // todo encapsular en funciones
 
     /* Grande y chica */
     int cuenta = 0;
-    i = 0;
+    int i = 0;
     for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
         cuenta = cuentaCartasMano(mano, caras[i]);
         cuentaCartas[N_CARTAS_PALO - i - 1] = cuenta;
@@ -209,26 +221,89 @@ int main(int argc, char **argv) {
         valores[i] = mano[i].valor;
     }
     int juego = 0;
+    int ronda = 0;
+    int turno = 0;
     juego = sumaArray(valores, N_CARTAS_MANO);
+        jugadorMano = 99;
+    int bufferRcv[3] = {99, siguienteJugador, turno};
+    int descartes[4] = {99,99,99,99};
+    int descarte = 99;
+    int temp;
+        while (jugadorMano==99) {
 
-        if (rank == siguienteJugador) {
-            int mus = cortarMus(valores, equivalencias, pares);
-            jugadorMano = 99;
-            if (mus == 1) {
-                printf("[jugador %d] CORTO MUS!!\n", rank);
-                jugadorMano = rank;
-                //jugar lances: empiezo yo
+
+            if (rank == siguienteJugador) {
+
+
+             if ((turno % 4) == 0 && (turno != 0)) {
+                      printf("[jugador %d] ME TOCA turno %d de descartes\n", rank, turno);
+
+                    for (i=0;i<N_CARTAS_MANO;i++) {
+                        //se descarta cualquier carta que no sea un rey
+                        if (mano[i].equivalencia != 10) {
+                            MPI_Send(&mano[i].id, 1, MPI_INT, 0, 0, parent);
+                            mano[i] = recibirCarta(0, parent, stat);
+                            valores[i] = mano[i].valor;
+                            equivalencias[i] = mano[i].equivalencia;
+
+                            // enviar peticion de carta y descarte
+
+                        }
+                        else {
+                            MPI_Send(&descarte, 1, MPI_INT, 0, 0, parent);
+
+                        }
+
+                    }
+
+                 siguienteJugador=add_mod(siguienteJugador,1,4);
+
+                 MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
+            // todo este broadcast bloquea programa
+                // MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
+
+                 MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+                 siguienteJugador = temp;
+                 printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
+                 break;
+
+                }
+                // todo quizá poner un else aqui y abajo
+                int mus = cortarMus(valores, equivalencias, pares);
+                musCorrido(mus, &rank, &jugadorMano, &turno, &siguienteJugador, bufferRcv, parent);
+
+            }
+            else { // al jugador no le toca
+
+              if ((turno % 4) == 0 && (turno != 0)) {
+
+                    MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+                  siguienteJugador =temp;
+                  printf("[jugador %d] NO ME TOCA turno %d de descartes\n", rank, turno);
+                  printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
+                  break;
+
+                 }
+
+                    MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
+                //MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
+                jugadorMano = bufferRcv[0];
+                printf("[jugador %d] recibe mano %d\n", rank, jugadorMano);
+                siguienteJugador = bufferRcv[1];
+                turno=bufferRcv[2];
             }
 
-            MPI_Send(&buffer, 2, MPI_INT, 0, 0, parent);
         }
 
+    printf("[proceso %d] MANO A TRANSMITIR AL JUEGO: %d\n", rank, jugadorMano);
+
+   // MPI_Barrier(MPI_COMM_WORLD);
     /* Envío de datos al maestro para que evalúe*/
     MPI_Gather(cuentaCartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
     MPI_Gather(invertido, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
     MPI_Gather(pares, 5, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
     MPI_Gather(&juego, 1, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
-    }
+
 //    printf("MANO DEL JUGADOR %d\n", rank);
 //    printMazo(mano, N_CARTAS_MANO);
 

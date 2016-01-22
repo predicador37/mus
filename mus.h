@@ -71,5 +71,6 @@ int tengoMedias(int *paresBuf);
 int tengoDuples(int *paresBuf);
 int tengoPares(int *paresBuf);
 int cortarMus(int *valores, int *equivalencias, int *paresBuf);
-
+void musCorrido(int mus, int *rank, int* jugadorMano, int * turno, int * siguienteJugador, int bufferRcv[], MPI_Comm parent );
+void marcarDescarte(Carta *wMazo, int sizeMazo, int id);
 #endif //MUS_MUS_H
