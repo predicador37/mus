@@ -13,6 +13,7 @@
 #define N_CARTAS_PALO 10
 #define N_PALOS 4
 #define N_JUGADORES 4
+#define N_LANCES 4
 
 int main(int argc, char **argv) {
     int rank, size, namelen, version, subversion, psize, corte, postre, jugadorMano, repartidor, sizeMazo, sizeDescartadas, ok;
@@ -136,7 +137,6 @@ int main(int argc, char **argv) {
         enviarMazo(mazo, 0, parent);
 
 
-
     }
     else { /* el proceso no es corte ni postre; es decir, un jugador estándar */
         int i = 0;
@@ -156,10 +156,10 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     //printf("[proceso %d] tamaño del mazo: %d\n", rank, sizeMazo);
 
-        int siguienteJugador = add_mod(repartidor, 1, 4);
-    printf("[jugador %d] antes de charangas, siguiente jugador es: %d\n", rank, siguienteJugador);
+    int siguienteJugador = add_mod(repartidor, 1, 4);
 
-   /* una vez repartidas las cartas, mus corrido */
+
+    /* una vez repartidas las cartas, mus corrido */
     /* hay que evaluar la mano... */
     // todo encapsular en funciones
     int i = 0;
@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
 
     invertirArray(cuentaCartas, invertido, N_CARTAS_PALO);
 
-   /* pares */
+    /* pares */
 
     preparaPares(equivalencias, pares);
 
@@ -202,105 +202,178 @@ int main(int argc, char **argv) {
     int ronda = 0;
     int turno = 0;
     int bufferRcv[3] = {99, siguienteJugador, turno};
-    int descartes[4] = {99,99,99,99};
+    int descartes[4] = {99, 99, 99, 99};
     int descarte = 99;
     jugadorMano = 99;
     int temp;
-    int turnoDescartes=1;
-        while (jugadorMano==99) {
+    int turnoDescartes = 1;
+    while (jugadorMano == 99) {
 
 
-            if (rank == siguienteJugador) {
+        if (rank == siguienteJugador) {
 
 
-             if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes==1)) {
-                      printf("[jugador %d] ME TOCA turno %d de descartes\n", rank, turno);
+            if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes == 1)) {
 
-                    for (i=0;i<N_CARTAS_MANO;i++) {
-                        //se descarta cualquier carta que no sea un rey
-                        if (mano[i].equivalencia != 10) {
-                            MPI_Send(&mano[i].id, 1, MPI_INT, 0, 0, parent);
-                            mano[i] = recibirCarta(0, parent, stat);
-                            valores[i] = mano[i].valor;
-                            equivalencias[i] = mano[i].equivalencia;
 
-                            // enviar peticion de carta y descarte
+                for (i = 0; i < N_CARTAS_MANO; i++) {
+                    //se descarta cualquier carta que no sea un rey
+                    if (mano[i].equivalencia != 10) {
+                        MPI_Send(&mano[i].id, 1, MPI_INT, 0, 0, parent);
+                        mano[i] = recibirCarta(0, parent, stat);
+                        valores[i] = mano[i].valor;
+                        equivalencias[i] = mano[i].equivalencia;
 
-                        }
-                        else {
-                            MPI_Send(&descarte, 1, MPI_INT, 0, 0, parent);
+                        // enviar peticion de carta y descarte
 
-                        }
+                    }
+                    else {
+                        descarte = 99;
+                        MPI_Send(&descarte, 1, MPI_INT, 0, 0, parent);
 
                     }
 
-                 // volver a evaluar pares para ver si se corta el mus
-                 preparaPares(equivalencias, pares);
+                }
 
-                 siguienteJugador=add_mod(siguienteJugador,1,4);
+                // volver a evaluar pares para ver si se corta el mus
+                preparaPares(equivalencias, pares);
 
-                 MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
-                 MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
-            // todo este broadcast bloquea programa
+                siguienteJugador = add_mod(siguienteJugador, 1, 4);
+
+                MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
+                MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
+                // todo este broadcast bloquea programa
                 // MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
 
-                 //MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
-                 //siguienteJugador = temp;
-                 printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
-                 //break;
+                //MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+                //siguienteJugador = temp;
 
-                }
-                else {
-                 MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
+                //break;
+
+            }
+            else {
+                MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
                 // todo quizá poner un else aqui y abajo
                 int mus = cortarMus(valores, equivalencias, pares);
-                 printf("MUS CORRIDO CON SIGUIENTE JUGADOR: %d\n", siguienteJugador);
-                 siguienteJugador=add_mod(siguienteJugador, 1, 4);
+
+                siguienteJugador = add_mod(siguienteJugador, 1, 4);
                 musCorrido(mus, &rank, &jugadorMano, &turno, &siguienteJugador, bufferRcv, parent);
-             }
             }
-            else { // al jugador no le toca
+        }
+        else { // al jugador no le toca
 
-              if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes==1)) {
+            if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes == 1)) {
 
-                  //MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
-                  //siguienteJugador =temp;
-                  MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
-                  printf("[jugador %d] NO ME TOCA turno %d de descartes\n", rank, turno);
-                  printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
-                  //break;
 
-                 }
-                else {
-                  MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
-                    MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
+                MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
+
+
+            }
+            else {
+                MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
+                MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
                 //MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
                 jugadorMano = bufferRcv[0];
-                printf("[jugador %d] recibe mano %d\n", rank, jugadorMano);
+
                 siguienteJugador = bufferRcv[1];
-                turno=bufferRcv[2];
-              }
+                turno = bufferRcv[2];
             }
-            MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
-            siguienteJugador = temp;
-            printf("[jugador %d] recibido siguiente jugador: %d\n", rank, siguienteJugador);
         }
+        MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
+        siguienteJugador = temp;
 
-    printf("[proceso %d] MANO A TRANSMITIR AL JUEGO: %d\n", rank, jugadorMano);
+    }
 
-   // MPI_Barrier(MPI_COMM_WORLD);
+    /* envites */
+    int enviteMano[2];
+    int envite[2];
+    int enviteAnterior[2];
+    envite[0]=0;
+    envite[1]=0;
+    enviteAnterior[0]=0;
+    enviteAnterior[1]=0;
+    int enviteContraria[2];
+    enviteContraria[0]=99;
+    enviteContraria[1]=0;
+    int hayPares;
+    int hayJuego;
+
+    for (i=0; i< N_LANCES+1; i++) {
+        /* ronda de envites */
+        if (i == 2) { // ver si hay pares
+            hayPares = tengoPares(pares);
+            MPI_Gather(&hayPares, 1, MPI_INT, rbuf, 1, MPI_INT, 0, parent);
+        }
+        if (i == 3) {
+            hayJuego = tengoJuego(sumaArray(equivalencias, 4));
+            MPI_Gather(&hayJuego, 1, MPI_INT, rbuf, 1, MPI_INT, 0, parent);
+        }
+        if ((i == 0) || (i == 1) || ((i == 2) && (hayPares == 1)) || ((i == 3) && (hayJuego == 1)) ||
+            ((i == 4) && (hayJuego == 0))) {
+            /* empieza la mano */
+            if (rank == jugadorMano) {
+                //enviar envite a maestro
+
+                // TODO: funcion envite
+                // campo 1: 0: no, 2: envida o sí, 5: sube o iguala 5
+                // campo 2: a qué pareja le toca contestar: 0 postre, 1 mano
+                enviteMano[0] = envido(equivalencias, N_CARTAS_MANO, i, 0); //no hay apuestas, así que 0
+                enviteMano[1] = 1;
+                MPI_Send(&enviteMano, 2, MPI_INT, 0, 0, parent);
+                MPI_Bcast(&envite, 2, MPI_INT, 0, parent);
+                enviteAnterior[0]=envite[0];
+                enviteAnterior[1]=envite[1];
+                //MPI_Gather(enviteMano, 2, MPI_INT, rbuf, 2, MPI_INT, 0, parent);
+                //MPI_Bcast(&enviteContraria, 2, MPI_INT, 0, parent);
+
+            }
+            else { //resto de jugadores
+                // recibir envite del maestro
+                MPI_Bcast(&envite, 2, MPI_INT, 0, parent);
+                enviteAnterior[0]=envite[0];
+                enviteAnterior[1]=envite[1];
+                // calcular envite
+                //envite[0] = envido(equivalencias, N_CARTAS_MANO, 0);;
+                //envite[1] = 99;
+               // MPI_Gather(envite, 2, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
+                //MPI_Bcast(&enviteContraria, 2, MPI_INT, 0, parent);
+                //printf("[proceso %d] contraria envida: %d\n", enviteContraria[0]);
+            }
+
+            //while (envite[1] != 99) {
+                //cualquier jugador calcula su envite y lo envía
+                // calcular envite
+                if ((i==2) && (tengoPares(pares) == 0) ){
+                    envite[0]=0; // no tengo pares, no envido
+                }
+             else if ((i==3) && tengoJuego(sumaArray(equivalencias, 4))==0){
+                envite[0]=0; // no tengo juego, no envido
+                }
+            else {//resto de lances
+                 envite[0] = envido(equivalencias, N_CARTAS_MANO, i, enviteAnterior[0]);
+                }
+
+                printf("[proceso %d] Envido %d a lance %d\n", rank, envite[0], i);
+                envite[1] = queParejaSoy(rank, jugadorMano);
+                MPI_Gather(envite, 2, MPI_INT, rbuf, 2, MPI_INT, 0, parent);
+                MPI_Bcast(&enviteContraria, 2, MPI_INT, 0, parent);
+            //}
+        }
+    }
+
+    // MPI_Barrier(MPI_COMM_WORLD);
     /* Envío de datos al maestro para que evalúe*/
     MPI_Gather(cuentaCartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
     MPI_Gather(invertido, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
     MPI_Gather(pares, 5, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
     MPI_Gather(&juego, 1, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
 
-//    printf("MANO DEL JUGADOR %d\n", rank);
-//    printMazo(mano, N_CARTAS_MANO);
+    printf("MANO DEL JUGADOR %d\n", rank);
+    printMazo(mano, N_CARTAS_MANO);
 
 
 
-     /* no cortar mus */
+    /* no cortar mus */
     // si eres mano y puedes descartar
 
     MPI_Comm_disconnect(&parent);
