@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
         /* Este proceso debe realizar el corte */
         /* Para ello debe recibir el mazo */
         printf("[jugador %d] Proceso corte recibiendo mazo\n", rank);
-        recibirMazo(mazo, 0, parent, &stat);
+        recibirMazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
         cortarMazo(mazo, &paloCorte);
         printf("[jugador %d] El palo de corte es: %s\n", rank, paloCorte);
         int j = 0;
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     if (rank == repartidor && sizeMazo == 40) {
 
         printf("[repartidor %d] Proceso repartidor recibiendo mazo\n", rank);
-        recibirMazo(mazo, 0, parent, &stat);
+        recibirMazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
 
         /* A continuación tiene lugar el reparto de cartas secuencial*/
         /* Por este requisito no se ha utilizado scatter*/
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
         //MPI_Barrier(MPI_COMM_WORLD);
         /* El proceso maestro debe contar con el mazo actualizado */
         MPI_Send(&sizeMazo, 1, MPI_INT, 0, 0, parent);
-        enviarMazo(mazo, 0, parent);
+        enviarMazo(mazo, 0, parent, N_CARTAS_MAZO);
 
 
     }
@@ -305,8 +305,11 @@ int main(int argc, char **argv) {
             MPI_Gather(&hayPares, 1, MPI_INT, rbuf, 1, MPI_INT, 0, parent);
         }
         if (i == 3) {
-            hayJuego = tengoJuego(sumaArray(equivalencias, 4));
+
+            hayJuego = tengoJuego(sumaArray(valores, 4));
+            printf("[proceso %d] HAY JUEGO: %d\n", rank, hayJuego);
             MPI_Gather(&hayJuego, 1, MPI_INT, rbuf, 1, MPI_INT, 0, parent);
+            MPI_Bcast(&hayJuego, 2, MPI_INT, 0, parent);
         }
         if ((i == 0) || (i == 1) || ((i == 2) && (hayPares == 1)) || ((i == 3) && (hayJuego == 1)) ||
             ((i == 4) && (hayJuego == 0))) {
@@ -317,7 +320,16 @@ int main(int argc, char **argv) {
                 // TODO: funcion envite
                 // campo 1: 0: no, 2: envida o sí, 5: sube o iguala 5
                 // campo 2: a qué pareja le toca contestar: 0 postre, 1 mano
-                enviteMano[0] = envido(equivalencias, N_CARTAS_MANO, i, 0); //no hay apuestas, así que 0
+                if (i==3 && hayJuego ==1){
+                    enviteMano[0] = envido(valores, N_CARTAS_MANO, i, 0); // calculo de la suma
+                }
+                else if (i==4 && hayJuego ==0){
+                    enviteMano[0] = envido(valores, N_CARTAS_MANO, i, 0); //
+                }
+                else { //resto de lances, no se trabaja con valores
+                    enviteMano[0] = envido(equivalencias, N_CARTAS_MANO, i, 0); //no hay apuestas, así que 0
+                }
+
                 enviteMano[1] = 1;
                 MPI_Send(&enviteMano, 2, MPI_INT, 0, 0, parent);
                 MPI_Bcast(&envite, 2, MPI_INT, 0, parent);
@@ -346,9 +358,15 @@ int main(int argc, char **argv) {
                 if ((i==2) && (tengoPares(pares) == 0) ){
                     envite[0]=0; // no tengo pares, no envido
                 }
-             else if ((i==3) && tengoJuego(sumaArray(equivalencias, 4))==0){
+             else if ((i==3) && tengoJuego(sumaArray(valores, 4))==0){
                 envite[0]=0; // no tengo juego, no envido
                 }
+                    else if ((i==3) && tengoJuego(sumaArray(valores, 4))==1) {
+                    envite[0] = envido(valores, N_CARTAS_MANO, i, enviteAnterior[0]);
+                }
+                    else if ((i==4) && tengoJuego(sumaArray(valores, 4))==0) {
+                envite[0] = envido(valores, N_CARTAS_MANO, i, enviteAnterior[0]);
+            }
             else {//resto de lances
                  envite[0] = envido(equivalencias, N_CARTAS_MANO, i, enviteAnterior[0]);
                 }
@@ -368,13 +386,9 @@ int main(int argc, char **argv) {
     MPI_Gather(pares, 5, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
     MPI_Gather(&juego, 1, MPI_INT, rbuf, 5, MPI_INT, 0, parent);
 
-    printf("MANO DEL JUGADOR %d\n", rank);
-    printMazo(mano, N_CARTAS_MANO);
-
-
-
     /* no cortar mus */
     // si eres mano y puedes descartar
+    enviarMazo(mano, 0, parent, N_CARTAS_MANO);
 
     MPI_Comm_disconnect(&parent);
     MPI_Finalize();

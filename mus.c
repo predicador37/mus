@@ -114,10 +114,10 @@ int add_mod(int a, int b, int m) {
         return m - b + a;
 }
 
-void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm) {
+void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
 
     int j = 0;
-    for (j = 0; j < N_CARTAS_MAZO; j++) {
+    for (j = 0; j < nCartas; j++) {
         MPI_Send(&wMazo[j].id, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(&wMazo[j].valor, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(&wMazo[j].equivalencia, 1, MPI_INT, proceso, 0, wComm);
@@ -128,10 +128,11 @@ void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm) {
     }
 }
 
-void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, MPI_Status *stat) {
+
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_Status *stat) {
 
     int i = 0;
-    for (i = 0; i < N_CARTAS_MAZO; i++) {
+    for (i = 0; i <nCartas; i++) {
         wMazo[i].palo = (char *) malloc(5 * sizeof(char));
         wMazo[i].cara = (char *) malloc(8 * sizeof(char));
         MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);

@@ -24,7 +24,10 @@ int main(int argc, char **argv) {
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
     MPI_Comm juego_comm;
     Carta mazo[N_CARTAS_MAZO];
-
+    Carta mano0[N_CARTAS_MANO];
+    Carta mano1[N_CARTAS_MANO];
+    Carta mano2[N_CARTAS_MANO];
+    Carta mano3[N_CARTAS_MANO];
 
     char *caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
                      "Seis", "Siete", "Sota", "Caballo", "Rey"};
@@ -73,7 +76,7 @@ int main(int argc, char **argv) {
 
     /* envío del mazo al jugador que va a cortar la baraja*/
 
-    enviarMazo(mazo, corte, juego_comm);
+    enviarMazo(mazo, corte, juego_comm, N_CARTAS_MAZO);
     MPI_Recv(&repartidor, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
     printf("[maestro] El jugador repartidor es: %d\n", repartidor);
 
@@ -83,7 +86,7 @@ int main(int argc, char **argv) {
     MPI_Bcast(&repartidor, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del repartidor a todos los procesos
 
     /* envío del mazo al jugador que va a repartir */
-    enviarMazo(mazo, repartidor, juego_comm);
+    enviarMazo(mazo, repartidor, juego_comm, N_CARTAS_MAZO);
 
     /* e/s auxiliar reparto de cartas */
     int i = 0;
@@ -97,7 +100,7 @@ int main(int argc, char **argv) {
     }
 
     MPI_Recv(&sizeMazo, 1, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
-    recibirMazo(mazo, repartidor, juego_comm, MPI_STATUS_IGNORE);
+    recibirMazo(mazo, repartidor, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
     printf("[maestro] tamaño del mazo: %d\n", sizeMazo);
 
 
@@ -228,6 +231,7 @@ int main(int argc, char **argv) {
                 }
             }
             printf("HAY JUEGO: %d\n", hayJuego);
+            MPI_Bcast(&hayJuego, 1, MPI_INT, MPI_ROOT, juego_comm);
         }
 
         // recibir envite de la mano
@@ -313,9 +317,27 @@ int main(int argc, char **argv) {
         }
 
     }
+    //todo: mostrar las cartas sincronizadamente
+    //todo: ordagos
+    //todo : jugador interactivo
+    //todo: vacas y varias partidas
+
     // printMazo(mazo, N_CARTAS_MAZO);
     printf("PIEDRAS MANO: %d\n", piedras[1]);
     printf("PIEDRAS POSTRE: %d\n", piedras[0]);
+    recibirMazo(mano0, 0, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+    recibirMazo(mano1, 1, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+    recibirMazo(mano2, 2, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+    recibirMazo(mano3, 3, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+
+    printf("MANO DEL JUGADOR 0:\n");
+    printMazo(mano0, N_CARTAS_MANO);
+    printf("MANO DEL JUGADOR 1:\n");
+    printMazo(mano1, N_CARTAS_MANO);
+    printf("MANO DEL JUGADOR 2:\n");
+    printMazo(mano2, N_CARTAS_MANO);
+    printf("MANO DEL JUGADOR 3:\n");
+    printMazo(mano3, N_CARTAS_MANO);
     MPI_Comm_disconnect(&juego_comm);
     MPI_Finalize();
     return 0;

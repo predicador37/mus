@@ -33,9 +33,9 @@ void printCartaById(Carta *wMazo, int id);
 
 int add_mod(int a, int b, int m);
 
-void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm);
+void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas);
 
-void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wCommm, MPI_Status *stat);
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wCommm, int nCartas, MPI_Status *stat);
 
 void repartirCarta(Carta wCarta, int proceso, MPI_Comm wComm);
 
