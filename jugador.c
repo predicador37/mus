@@ -299,6 +299,9 @@ int main(int argc, char **argv) {
     int hayJuego;
 
     for (i=0; i< N_LANCES+1; i++) {
+
+
+
         /* ronda de envites */
         if (i == 2) { // ver si hay pares
             hayPares = tengoPares(pares);

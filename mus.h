@@ -86,10 +86,16 @@ void marcarDescarte(Carta *wMazo, int sizeMazo, int id);
 
 int *preparaPares(int equivalencias[], int *pares);
 
-int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *piedras);
-int envido(int * equivalencias, int longitud, int lance, int apuestaVigor);
+int calcularEnvite(int *envites, int *enviteAnterior, int jugadorMano, int *piedras);
+
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor);
+
 int queParejaSoy(int rank, int jugadorMano);
-int deshacerEmpate(int * conteos, int jugadorMano, int valor);
-int deshacerEmpateComplementario(int * conteos, int jugadorMano, int valor);
+
+int deshacerEmpate(int *conteos, int jugadorMano, int valor);
+
+int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor);
+
+int ordago();
 
 #endif //MUS_MUS_H

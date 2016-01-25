@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
+#include <time.h>
 #include "mus.h"
 
 
@@ -946,7 +947,11 @@ int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *pi
 
 int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
 
-    if (lance == 0) { // a grande
+    if (ordago()==1) { // ordago!
+        return 99;
+    }
+
+    else if (lance == 0) { // a grande
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
         if (reyes >= 3) {
             return 5;
@@ -1023,5 +1028,16 @@ int queParejaSoy(int rank, int jugadorMano){ //1 mano, 0 postre
     }
     else if (add_mod(jugadorMano,3,4) == rank) {
         return 0;
+    }
+}
+
+int ordago(){
+    srand(time(0));
+    double r =  (double)rand() / (double)RAND_MAX ;
+    if (r < 0.90){
+        return 0;
+    }
+    else {
+        return 1;
     }
 }

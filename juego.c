@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
             // recibir respuesta de todos los jugadores: de la pareja contraria, prima la más alta
             MPI_Gather(conteos, 10, MPI_INT, envites, 2, MPI_INT, MPI_ROOT, juego_comm);
             printf("[maestro] recibe envites\n");
-
+                //todo if algun envite es ordago, then esto nada
          /*   for (i=0; i<8;i++){
                 printf("[maestro] Envite %d\n", envites[i]);
             }*/
@@ -267,6 +267,7 @@ int main(int argc, char **argv) {
 
    // }
     // almacenar envites
+    //todo if algun envite es ordago, pasamos directamente a calcular jugada del lance
 
     /* Recepción de datos para evaluar las manos de los jugadores */
     MPI_Gather(conteos, 10, MPI_INT, rbuf, 10, MPI_INT, MPI_ROOT, juego_comm);
@@ -317,7 +318,7 @@ int main(int argc, char **argv) {
         }
 
     }
-    //todo: mostrar las cartas sincronizadamente
+
     //todo: ordagos
     //todo : jugador interactivo
     //todo: vacas y varias partidas
