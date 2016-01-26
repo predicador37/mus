@@ -83,7 +83,7 @@ void cortarMazo(Carta *wMazo, char **paloCorte) {
 
     int r; /* índice aleatorio para el mazo*/
     //int N = 0, M = N_CARTAS_MAZO - 1; /* valores del intervalo */
-    r= rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
+    r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
     //printf("\nCarta visible al cortar el mazo: \n");
     // printf("%-8s\t de \t%-8s es \t%d \tcon id \t%d\n \t", wMazo[r].cara,
@@ -134,7 +134,7 @@ void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
 void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_Status *stat) {
 
     int i = 0;
-    for (i = 0; i <nCartas; i++) {
+    for (i = 0; i < nCartas; i++) {
         wMazo[i].palo = (char *) malloc(5 * sizeof(char));
         wMazo[i].cara = (char *) malloc(8 * sizeof(char));
         MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);
@@ -190,7 +190,7 @@ int maximoArray(int array[], int longitud) {
     int i = 0;
     int max = array[0];
 
-    for (i=0; i < longitud; i++) {
+    for (i = 0; i < longitud; i++) {
         if (max < array[i]) {
             max = array[i];
         }
@@ -202,7 +202,7 @@ int maximoArrayExcluyendo(int array[], int longitud, int excluido) {
     int i = 0;
     int max = array[0];
 
-    for (i=0; i < longitud; i++) {
+    for (i = 0; i < longitud; i++) {
         if (max < array[i] && array[i] != excluido) {
             max = array[i];
         }
@@ -240,7 +240,7 @@ void invertirArray(int *orig, int *dest, int longitud) {
     int i = longitud - 1;
     int j = 0;
 
-    for (i=0; i >= 0; i--) //increment a and decrement b until they meet each other
+    for (i = 0; i >= 0; i--) //increment a and decrement b until they meet each other
     {
         dest[j] = orig[i];
         j++;
@@ -643,7 +643,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
         return ganador;
     }
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
-        for (i=0; i<N_JUGADORES;i++) {
+        for (i = 0; i < N_JUGADORES; i++) {
             printf("Se deshace empate con distancia a la mano...\n");
             ganador = deshacerEmpate(juegoBuf, jugadorMano, i);
         }
@@ -698,16 +698,16 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
     return ganador;
 }
 
-int deshacerEmpate(int * conteos, int jugadorMano, int valor){
+int deshacerEmpate(int *conteos, int jugadorMano, int valor) {
     int j = 0;
-    for (j=0; j<N_JUGADORES;j++ ){
-        if (conteos[j]==valor && j==jugadorMano) {
+    for (j = 0; j < N_JUGADORES; j++) {
+        if (conteos[j] == valor && j == jugadorMano) {
             return j;
         }
-        else if (conteos[j]==valor && j == add_mod(jugadorMano,1,4)){
+        else if (conteos[j] == valor && j == add_mod(jugadorMano, 1, 4)) {
             return j;
         }
-        else if (conteos[j]==valor && j == add_mod(jugadorMano,2,4)){
+        else if (conteos[j] == valor && j == add_mod(jugadorMano, 2, 4)) {
             return j;
         }
     }
@@ -715,16 +715,16 @@ int deshacerEmpate(int * conteos, int jugadorMano, int valor){
     return 99;
 }
 
-int deshacerEmpateComplementario(int * conteos, int jugadorMano, int valor){
+int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor) {
     int j = 0;
-    for (j=0; j<N_JUGADORES;j++ ){
-        if (conteos[j]!=valor && j==jugadorMano) {
+    for (j = 0; j < N_JUGADORES; j++) {
+        if (conteos[j] != valor && j == jugadorMano) {
             return j;
         }
-        else if (conteos[j]!=valor && j == add_mod(jugadorMano,1,4)){
+        else if (conteos[j] != valor && j == add_mod(jugadorMano, 1, 4)) {
             return j;
         }
-        else if (conteos[j]!=valor && j == add_mod(jugadorMano,2,4)){
+        else if (conteos[j] != valor && j == add_mod(jugadorMano, 2, 4)) {
             return j;
         }
 
@@ -762,7 +762,8 @@ int tengoDuples(int *paresBuf) {
 }
 
 int tengoPares(int *paresBuf) {
-    if (((paresBuf[2] >= 0) && paresBuf[2] != 99|| (paresBuf[1] >=0) && paresBuf[1]!=99 || (paresBuf[0]>=0)) && (paresBuf[0]!=99)) {
+    if((paresBuf[0]!= 99) || paresBuf[1]!= 99 || paresBuf[2] == 2 || paresBuf[2] == 1) {
+
         return 1;
     }
     else {
@@ -790,7 +791,7 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguienteJugador, int bufferRcv[],
                 MPI_Comm parent) {
-printf("MUS CORRIDO JUGADOR %d\n", *rank);
+    printf("MUS CORRIDO JUGADOR %d\n", *rank);
     (*turno)++;
     if (mus == 1) {
         //printf("[jugador %d] CORTO MUS!!\n", *rank);
@@ -802,7 +803,7 @@ printf("MUS CORRIDO JUGADOR %d\n", *rank);
         MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
 //jugar lances: empiezo yo
     } else {
-        *jugadorMano=99;
+        *jugadorMano = 99;
         printf("MANO CUANDO NO HAY MUS: %d\n", *jugadorMano);
         MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
         MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
@@ -853,8 +854,9 @@ void *preparaPares(int equivalencias[], int *pares) {
     pares[3] = parejas[1];
     pares[4] = parejas[2];
 }
+
 //devuelve apuestas del lance
-int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *piedras) {
+int calcularEnvite(int *envites, int *enviteAnterior, int jugadorMano, int *piedras) {
 
     int envitesPostre[4];
     int envitesMano[4];
@@ -863,30 +865,30 @@ int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *pi
     int soloEnvitesMano[2];
     int enviteMano[2];
 
-       envitesPostre[0] = envites[add_mod(jugadorMano, 1, 4) * 2];
-       envitesPostre[1] = envites[add_mod(jugadorMano, 1, 4) * 2 + 1];
-       envitesPostre[2] = envites[add_mod(jugadorMano, 3, 4) * 2];
-       envitesPostre[3] = envites[add_mod(jugadorMano, 3, 4) * 2 + 1];
+    envitesPostre[0] = envites[add_mod(jugadorMano, 1, 4) * 2];
+    envitesPostre[1] = envites[add_mod(jugadorMano, 1, 4) * 2 + 1];
+    envitesPostre[2] = envites[add_mod(jugadorMano, 3, 4) * 2];
+    envitesPostre[3] = envites[add_mod(jugadorMano, 3, 4) * 2 + 1];
 
-       envitesMano[0] = envites[(jugadorMano) * 2];
-       envitesMano[1] = envites[(jugadorMano) * 2 + 1];
-       envitesMano[2] = envites[add_mod(jugadorMano, 2, 4) * 2];
-       envitesMano[3] = envites[add_mod(jugadorMano, 2, 4) * 2 + 1];
+    envitesMano[0] = envites[(jugadorMano) * 2];
+    envitesMano[1] = envites[(jugadorMano) * 2 + 1];
+    envitesMano[2] = envites[add_mod(jugadorMano, 2, 4) * 2];
+    envitesMano[3] = envites[add_mod(jugadorMano, 2, 4) * 2 + 1];
 
-       soloEnvitesPostre[0]=envitesPostre[0];
-       soloEnvitesPostre[1]=envitesPostre[2];
+    soloEnvitesPostre[0] = envitesPostre[0];
+    soloEnvitesPostre[1] = envitesPostre[2];
 
-       int maximoPostre = maximoArray(soloEnvitesPostre, 2);
-       envitePostre[0]= envitesPostre[buscaIndice(soloEnvitesPostre,2,maximoPostre)*2];
-       envitePostre[1]= envitesPostre[buscaIndice(soloEnvitesPostre,2,maximoPostre)*2+1];
+    int maximoPostre = maximoArray(soloEnvitesPostre, 2);
+    envitePostre[0] = envitesPostre[buscaIndice(soloEnvitesPostre, 2, maximoPostre) * 2];
+    envitePostre[1] = envitesPostre[buscaIndice(soloEnvitesPostre, 2, maximoPostre) * 2 + 1];
 
-        soloEnvitesMano[0]=envitesMano[0];
-        soloEnvitesMano[1]=envitesMano[2];
-       int maximoMano = maximoArray(soloEnvitesMano, 2);
-       enviteMano[0]= envitesMano[buscaIndice(soloEnvitesMano,2,maximoMano)*2];
-       enviteMano[1]= envitesMano[buscaIndice(soloEnvitesMano,2,maximoMano)*2+1];
+    soloEnvitesMano[0] = envitesMano[0];
+    soloEnvitesMano[1] = envitesMano[2];
+    int maximoMano = maximoArray(soloEnvitesMano, 2);
+    enviteMano[0] = envitesMano[buscaIndice(soloEnvitesMano, 2, maximoMano) * 2];
+    enviteMano[1] = envitesMano[buscaIndice(soloEnvitesMano, 2, maximoMano) * 2 + 1];
 
-    if (envites[jugadorMano*2] != 0) { //la mano ha envidado
+    if (envites[jugadorMano * 2] != 0) { //la mano ha envidado
 
         if (enviteAnterior[0] > envitePostre[0]) { // pareja postre no iguala la apuesta
 
@@ -898,11 +900,11 @@ int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *pi
             printf("HAY APUESTA\n");
             return enviteAnterior[0]; //se devuelve la cantidad apostada, 2 o 5 en caso de esta logica
         }
-        if (enviteAnterior[0] < envitePostre[0]){ //jugador mano no iguala la apuesta
+        if (enviteAnterior[0] < envitePostre[0]) { //jugador mano no iguala la apuesta
             if (enviteMano[0] > envitePostre[0]) {
                 // pareja postre no iguala la apuesta
                 piedras[1]++; //uno por el no
-                piedras[1]+=envitePostre[0]; // lo que tuviera envidado la pareja postre
+                piedras[1] += envitePostre[0]; // lo que tuviera envidado la pareja postre
                 return 0; //no hay apuestas
             }
             else if (enviteMano[0] == envitePostre[0]) {
@@ -917,14 +919,15 @@ int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *pi
         }
 
     }
-    else if (envites[jugadorMano*2] == 0) { //la mano no ha envidado)
+    else if (envites[jugadorMano * 2] == 0) { //la mano no ha envidado)
         printf("MANO NO ENVIDA\n");
-        if (envitePostre[0]!= 0) { // pareja postre si ha envidado
+        printf("ENVITE POSTRE: %d\n", envitePostre[0]);
+        if (envitePostre[0] != 0) { // pareja postre si ha envidado
             printf("POSTRE HA ENVIDADO\n");
-            if (envitePostre[0]>enviteMano[0]) { // pareja mano no acepta envite
+            if (envitePostre[0] > enviteMano[0]) { // pareja mano no acepta envite
 
                 piedras[0]++; //por el no
-                printf("POSTRE SE LLEVA PIEDRA, en tota: %d\n", piedras[0]);
+                printf("POSTRE SE LLEVA PIEDRA, en total: %d\n", piedras[0]);
                 return 0;
             }
             else if (envitePostre[0] == enviteMano[0]) { // pareja mano acepta la apuesta
@@ -933,26 +936,26 @@ int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *pi
             else if (envitePostre[0] < enviteMano[1]) { // pareja mano sube apuesta y postre no la iguala
                 printf("MANO SE LLEVA APUESTA DESPUES DE RAJARSE POSTRE\n");
                 piedras[1]++;
-                piedras[1]+=envitePostre[0];
+                piedras[1] += envitePostre[0];
                 return 0;
             }
         }
-        else if ((envitePostre[0]==0) && (enviteMano[0]!=0)){ //envida pareja de la mano y no se la aceptan
+        else if ((envitePostre[0] == 0) && (enviteMano[0] != 0)) { //envida pareja de la mano y no se la aceptan
             piedras[1]++;
             return 0;
         }
-        else if ((envitePostre[0]==0) && (enviteMano[0]==0)){ //nadie envida
+        else if ((envitePostre[0] == 0) && (enviteMano[0] == 0)) { //nadie envida
             // no hay piedras ni apuestas
             printf("[maestro] NO HAY PIEDRAS NI APUESTAS\n");
             return 0;
         }
     }
-return 0;
+    return 0;
 }
 
-int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
 
-    if (ordago()==1) { // ordago!
+    if (ordago() == 1) { // ordago!
         return 99;
     }
 
@@ -964,7 +967,7 @@ int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
         else if ((reyes == 2) && (apuestaVigor <= 2)) {
             return 2;
         }
-        else  {
+        else {
             return 0;
         }
     }
@@ -973,27 +976,27 @@ int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
         if (ases >= 3) {
             return 5;
         }
-        else if ((ases == 2)  && (apuestaVigor <= 2)) {
+        else if ((ases == 2) && (apuestaVigor <= 2)) {
             return 2;
         }
-        else  {
+        else {
             return 0;
         }
     }
     else if (lance == 2) { // a pares
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
-        if (reyes >=3) { //duples o medias de reyes
+        if (reyes >= 3) { //duples o medias de reyes
             return 5;
         }
-        else if ((reyes == 2)&& (apuestaVigor <= 2)) { // pareja de reyes
+        else if ((reyes == 2) && (apuestaVigor <= 2)) { // pareja de reyes
             return 2;
         }
-        else  { // pareja de otra cosa
+        else { // pareja de otra cosa
             return 0;
         }
 
     }
-    else if (lance ==3) { // a juego
+    else if (lance == 3) { // a juego
         int suma = sumaArray(equivalencias, 4);
         if (suma == 31) {
             return 5;
@@ -1007,12 +1010,12 @@ int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
 
     }
 
-    else if (lance ==4) { // al punto
+    else if (lance == 4) { // al punto
         int suma = sumaArray(equivalencias, 4);
         if (suma >= 27) {
             return 5;
         }
-        else if ((suma >= 24) && (suma < 27)&& (apuestaVigor <= 2)) {
+        else if ((suma >= 24) && (suma < 27) && (apuestaVigor <= 2)) {
             return 2;
         }
         else {
@@ -1025,26 +1028,27 @@ int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
     }
     return 0;
 }
-int queParejaSoy(int rank, int jugadorMano){ //1 mano, 0 postre
+
+int queParejaSoy(int rank, int jugadorMano) { //1 mano, 0 postre
     if (rank == jugadorMano) {
         return 1;
     }
-    else if (add_mod(jugadorMano,1,4)== rank){
+    else if (add_mod(jugadorMano, 1, 4) == rank) {
         return 0;
     }
-    else if (add_mod(jugadorMano,2,4) == rank) {
+    else if (add_mod(jugadorMano, 2, 4) == rank) {
         return 1;
     }
-    else if (add_mod(jugadorMano,3,4) == rank) {
+    else if (add_mod(jugadorMano, 3, 4) == rank) {
         return 0;
     }
     else return 99;
 }
 
-int ordago(){
+int ordago() {
     srand(time(0));
-    double r =  (double)rand() / (double)RAND_MAX ;
-    if (r < 0.95){
+    double r = (double) rand() / (double) RAND_MAX;
+    if (r < 0.98) {
         return 0;
     }
     else {
@@ -1055,8 +1059,7 @@ int ordago(){
 void clearInputBuffer() // works only if the input buffer is not empty
 {
     char c;
-    do
-    {
-         c = getchar();
+    do {
+        c = getchar();
     } while (c != '\n' && c != EOF);
 }
