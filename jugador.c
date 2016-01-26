@@ -168,9 +168,7 @@ int main(int argc, char **argv) {
 
     int siguienteJugador = add_mod(repartidor, 1, 4);
     //si jugamos con humano, hay que enviar la mano al maestro
-    if ((modo=='I'|| modo == 'i') && (rank == jugadorHumano)) {
-        enviarMazo(mano, 0, parent, N_CARTAS_MANO);
-    }
+
 
     /* una vez repartidas las cartas, mus corrido */
     /* hay que evaluar la mano... */
@@ -226,6 +224,9 @@ int main(int argc, char **argv) {
 
 
         if (rank == siguienteJugador) {
+            if ((modo=='I'|| modo == 'i') && (rank == jugadorHumano)) {
+                enviarMazo(mano, 0, parent, N_CARTAS_MANO);
+            }
 
 
             if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes == 1)) {//descartes
@@ -289,15 +290,10 @@ int main(int argc, char **argv) {
             else { // mus corrido jugador al que le toca
                 MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
 
-                printf("[proceso %d] ANTES DE MUS CORRIDO!\n", rank);
-                printf("MODO: %c\n", modo);
-                printf("[proceso %d], jugador humano: %d\n", rank, jugadorHumano);
-                //MPI_Bcast(&musRecibido, 1, MPI_INT, 0, parent);
-
                 if ((modo == 'I' || modo == 'i') && rank==jugadorHumano){
                     MPI_Recv(&musRecibido, 1, MPI_INT, 0, 0, parent, &stat);
                     mus= musRecibido;
-                    printf("[proceso %d] RECIBIDA VARIABLE MUS: %d\n", rank, mus);
+
                 } else { //auto
                     mus = cortarMus(valores, equivalencias, pares);
                 }
@@ -308,15 +304,13 @@ int main(int argc, char **argv) {
                 if (mus == 1) {
                     //printf("[jugador %d] CORTO MUS!!\n", *rank);
                     jugadorMano = rank;
-                    printf("MANO ANTES DE CORTAR: %d\n", jugadorMano);
                     MPI_Send(&jugadorMano, 1, MPI_INT, 0, 0, parent);
                     MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
                     MPI_Send(&turno, 1, MPI_INT, 0, 0, parent);
                     MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
-//jugar lances: empiezo yo
+                    //jugar lances: empiezo yo
                 } else {
                     jugadorMano=99;
-                    printf("MANO CUANDO NO HAY MUS: %d\n", jugadorMano);
                     MPI_Send(&jugadorMano, 1, MPI_INT, 0, 0, parent);
                     MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
                     MPI_Send(&turno, 1, MPI_INT, 0, 0, parent);
@@ -335,13 +329,8 @@ int main(int argc, char **argv) {
             }
             else { // mus corrido jugador no le toca
                 MPI_Bcast(&turnoDescartes, 1, MPI_INT, 0, parent);
-                //MPI_Bcast(&descarteHumano, 1, MPI_INT, 0, parent);
-                //MPI_Bcast(&musRecibido, 1, MPI_INT, 0, parent);
-
                 MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
-                //MPI_Bcast(&siguienteJugador, 1, MPI_INT, 0, parent);
                 jugadorMano = bufferRcv[0];
-
                 siguienteJugador = bufferRcv[1];
                 turno = bufferRcv[2];
             }

@@ -136,10 +136,8 @@ int main(int argc, char **argv) {
     MPI_Bcast(&sizeMazo, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del tamaño del mazo a resto de procesos
 
     int siguienteJugador = add_mod(repartidor, 1, 4);
-    if ((modo == 'I' || modo == 'i') && jugadorHumano == siguienteJugador) {
-        recibirMazo(manoJugadorHumano,jugadorHumano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
-        printMazo(manoJugadorHumano, N_CARTAS_MANO);
-    }
+
+
     jugadorMano = 99;
     int turno = 0;
     int turnoDescartes = 1;
@@ -152,6 +150,10 @@ int main(int argc, char **argv) {
 
     while (jugadorMano == 99) {
         printf("[maestro] TURNO: %d\n", turno);
+        if ((modo == 'I' || modo == 'i') && siguienteJugador == jugadorHumano) {
+            recibirMazo(manoJugadorHumano,jugadorHumano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+            printMazo(manoJugadorHumano, N_CARTAS_MANO);
+        }
 
         if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes == 1)) { //turno de descartes
 
@@ -219,8 +221,9 @@ int main(int argc, char **argv) {
                 fflush(stdout);
                 scanf(" %c", &c);
 
+                //c = getchar();
                 getchar();
-
+                printf("OPCION: %c\n", c);
                 if (c == 'S' || c == 's') {
                     mus = 0;
                 }
