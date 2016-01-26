@@ -39,4 +39,5 @@ Makefile
 cmake_install.cmake
 juego
 jugador
+*.pdf
 

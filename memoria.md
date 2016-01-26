@@ -1,5 +1,20 @@
+% Asignatura Procesamiento paralelo
+% PED 2015-2016: "EL MUS"
+% Miguel Expósito Martín - DNI: 72056097H, Tlf. 626509868, e-mail:mexposito37@alumnos.uned.es,  Calle El Campizo 10, 2ºA, CP 39012 Santander (Cantabria)
+
+\pagebreak
+
 # Entorno de desarrollo
 
+Para agilizar el desarrollo se optó por utilizar un IDE potente con funcionalidades avanzadas tales como guardado automático, construcción y ejecución, resaltado de sintaxis, comprobación previa a la compilación, etc.
+Conociendo la fama de otros entornos de la compañía [Jetbrains](https://www.jetbrains.com/), se optó por usar [CLion 1.2](https://www.jetbrains.com/clion/) con licencia de estudiante.
+
+# Entregables
+
+- Memoria en formato Markdown (md)
+- Memoria en formato PDF
+- Código fuente del programa y archivos de configuración para su compilación y construcción
+- Programas compilado y linkado con ejecutable: `juego` y `jugador`
 
 # Estructura y compilación del programa
 
@@ -10,6 +25,21 @@ El programa está dividido en los siguientes archivos:
 - `mus.h`: cabeceras de funciones auxiliares utilizadas para la lógica del juego.
 - `mus.c`: implementación de las funciones descritas en el archivo anterior.
 - `CMakeLists.txt`: configuración de CMake para la compilación del programa.
+
+Para compilar y construir el programa, se ha utilizado la herramienta [CMake](https://cmake.org/), incluida en la mayor parte de las distribuciones Linux (entre ellas, Ubuntu). Se entiende que su uso no altera sustancialmente los requisitos de la práctica, puesto que facilita la construcción y compilación del programa. Para usarlo, es preciso instalar el paquete correspondiente:
+
+        sudo apt-get install cmake
+        
+La contraseña es la del usuario `alumnopp`, es decir, `alumnopp`.
+
+Una vez instalado el paquete, para construir el proyecto basta con ejecutar, en el direcotrio del proyecto:
+ 
+        cmake ./
+        make
+        
+Los anteriores comandos crearán, entre otros, dos archivos: `jugador` y `juego`. Para ejecutar el programa, basta con ejecutar el comando `./juego`.
+
+\pagebreak
 
 # Memoria descriptiva
 
@@ -117,7 +147,7 @@ Se siguieron las fases descritas en el enunciado de la siguiente forma:
 Las **dificultades encontradas** para el desarrollo de la práctica han sido realmente reseñables. Partiendo de la falta de costumbre de desarrollar en C (el autor de esta memoria hace más de diez años que no lo usa) y de la novedad de la materia de MPI, se citan las siguientes:
 
 - Puesta en marcha de un entorno de desarrollo en C que permitiese agilizar la programación incluyendo avisos y resaltado de errores sin necesidad de compilación.
-- Sincronización entre procesos: **sin duda la parte con mayor dificultad de la práctica**, debido a la necesidad de pensar como 5 programas en uno. En muchos casos los procesos quedaban bloqueados y, pese a la separación de la lógica en jugadores y maestro, es difícil superponer mentalmente la lógica de cada jugador en un mismo código. Igualmente, la dificultad de la depuración se multiplica por el número de procesos existentes.
+- **Sincronización entre procesos: sin duda la parte con mayor dificultad de la práctica**, debido a la necesidad de pensar como 5 programas en uno. En muchos casos los procesos quedaban bloqueados y, pese a la separación de la lógica en jugadores y maestro, es difícil superponer mentalmente la lógica de cada jugador en un mismo código. Igualmente, la dificultad de la depuración se multiplica por el número de procesos existentes.
 - Dificultad de depuración en C: en muchos casos errores debido a un tamaño de buffer incorrecto por descuido o una errata de intercambiar un paréntesis con un signo igual pasaban desapercibidos provocando comportamientos inesperado y errores de segmentación, siendo realmente difíciles de corregir.
 - Dificultad del lenguaje de programación C: al tratarse de un lenguaje de bajo nivel muy tipado, cualquier tarea sencilla requiere de la programación de una función específica (por ejemplo, invertir un `array` o calcular su máximo). Esto hace que el número de líneas del código crezca y posteriormente sea realmente complejo navegar entre ellas.
 - Dificultad del juego del mus: para los que, como el autor de esta práctica, nunca hemos jugado al mus, la comprensión y asimilación de sus reglas supone un esfuerzo adicional bastante notable.

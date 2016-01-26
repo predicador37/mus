@@ -97,6 +97,9 @@ int deshacerEmpate(int *conteos, int jugadorMano, int valor);
 int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor);
 
 int ordago();
+
 void clearInputBuffer();
+
+int enQueParejaEstoy(int rank);
 
 #endif //MUS_MUS_H

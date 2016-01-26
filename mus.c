@@ -55,7 +55,7 @@ void printMazo(Carta *wMazo, int sizeMazo) {
                wMazo[i].palo, wMazo[i].valor, wMazo[i].orden, wMazo[i].estado);
         printf("\n");
     }
-    printf("Fin del contenido del mazo.\n");
+    printf("Fin del contenido del mazo/mano.\n");
 }
 
 /* FUNCION barajarMazo: baraja las cartas del mazo*/
@@ -82,12 +82,9 @@ void barajarMazo(Carta *wMazo) {
 void cortarMazo(Carta *wMazo, char **paloCorte) {
 
     int r; /* índice aleatorio para el mazo*/
-    //int N = 0, M = N_CARTAS_MAZO - 1; /* valores del intervalo */
     r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
-    //printf("\nCarta visible al cortar el mazo: \n");
-    // printf("%-8s\t de \t%-8s es \t%d \tcon id \t%d\n \t", wMazo[r].cara,
-    //       wMazo[r].palo, wMazo[r].valor, wMazo[r].id);
+
     *paloCorte = wMazo[r].palo;
 
 }
@@ -155,7 +152,6 @@ void repartirCarta(Carta wCarta, int proceso, MPI_Comm wComm) {
     MPI_Send(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm);
     MPI_Send(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm);
-    //printf("Enviada carta: %s de %s con valor %d\n", wCarta.cara, wCarta.palo, wCarta.valor);
 
 }
 
@@ -171,7 +167,6 @@ Carta recibirCarta(int proceso, MPI_Comm wComm, MPI_Status stat) {
     MPI_Recv(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm, &stat);
     MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
     wCarta.estado = 1;
-    //printf("Recibida carta: %s de %s con valor %d\n", wCarta.cara, wCarta.palo, wCarta.valor);
     return wCarta;
 }
 
@@ -259,18 +254,12 @@ int calculaGrande(int rbuf[], int jugadorMano) {
     int ganador;
     for (k = 0; k < 10; k++) {
         if (k == 0) { /* se buscan reyes y treses*/
-            printf("Contando reyes\n");
             int suma[4];
             suma[0] = rbuf[0] + rbuf[7];
-            printf("Reyes para proceso 0: %d\n", suma[0]);
             suma[1] = rbuf[10] + rbuf[17];
-            printf("Reyes para proceso 1: %d\n", suma[1]);
             suma[2] = rbuf[20] + rbuf[27];
-            printf("Reyes para proceso 2: %d\n", suma[2]);
             suma[3] = rbuf[30] + rbuf[37];
-            printf("Reyes para proceso 3: %d\n", suma[3]);
             int maximo = maximoArray(suma, 4);
-            printf("Conteo máximo: %d\n", maximo);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene más reyes
                 ganador = buscaIndice(suma, 4, maximo);
@@ -291,15 +280,6 @@ int calculaGrande(int rbuf[], int jugadorMano) {
             suma[1] = rbuf[k + 10] * empates[1];
             suma[2] = rbuf[k + 20] * empates[2];
             suma[3] = rbuf[k + 30] * empates[3];
-            if (k == 1) {
-                printf("Caballos para proceso 0: %d\n", suma[0]);
-
-                printf("Caballos para proceso 1: %d\n", suma[1]);
-
-                printf("Caballos para proceso 2: %d\n", suma[2]);
-
-                printf("Caballos para proceso 3: %d\n", suma[3]);
-            }
             int maximo = maximoArray(suma, 4);
             if (maximo != 0) {
                 int ocurrencias = ocurrenciasArray(suma, 4, maximo);
@@ -335,7 +315,7 @@ int calculaGrande(int rbuf[], int jugadorMano) {
                 ganador = buscaIndice(suma, 4, maximo);
                 break;
             }
-            else if (ocurrencias != 0){ //gana la mano o el más cercano
+            else if (ocurrencias != 0) { //gana la mano o el más cercano
                 printf("Se deshace empate con distancia a la mano...\n");
                 ganador = deshacerEmpate(suma, jugadorMano, 1);
                 break;
@@ -356,24 +336,18 @@ int calculaChica(int rbufInv[]) {
     int ganador;
     for (k = 0; k < 10; k++) {
         if (k == 0) { /* se buscan Ases y treses*/
-            printf("Contando ases\n");
             int suma[4];
             suma[0] = rbufInv[0] + rbufInv[1];
-            printf("Ases para proceso 0: %d\n", suma[0]);
             suma[1] = rbufInv[10] + rbufInv[11];
-            printf("Ases para proceso 1: %d\n", suma[1]);
             suma[2] = rbufInv[20] + rbufInv[21];
-            printf("Ases para proceso 2: %d\n", suma[2]);
             suma[3] = rbufInv[30] + rbufInv[31];
-            printf("Ases para proceso 3: %d\n", suma[3]);
             int maximo = maximoArray(suma, 4);
-            printf("Conteo máximo: %d\n", maximo);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene más Ases
                 ganador = buscaIndice(suma, 4, maximo);
                 break;
             }
-            else if (ocurrencias !=0) {
+            else if (ocurrencias != 0) {
                 for (i = 0; i < 4; i++) {
                     if (suma[i] == maximo) {
                         empates[i] = 1;
@@ -388,15 +362,6 @@ int calculaChica(int rbufInv[]) {
             suma[1] = rbufInv[k + 10] * empates[1];
             suma[2] = rbufInv[k + 20] * empates[2];
             suma[3] = rbufInv[k + 30] * empates[3];
-            if (k == 3) {
-                printf("Cuatros para proceso 0: %d\n", suma[0]);
-
-                printf("Cuatros para proceso 1: %d\n", suma[1]);
-
-                printf("Cuatros para proceso 2: %d\n", suma[2]);
-
-                printf("Cuatros para proceso 3: %d\n", suma[3]);
-            }
             int maximo = maximoArray(suma, 4);
             if (maximo != 0) {
                 int ocurrencias = ocurrenciasArray(suma, 4, maximo);
@@ -463,7 +428,7 @@ int *uniquePairs(int *array, int longitud, int repeticion) {
             c++;
             i++;
         }
-        //printf("Number: %d, Count: %d\n", num ,c);
+
         // if we spotted number just 2 times, increment result
         if (c == repeticion) {
             res[0]++;
@@ -636,7 +601,7 @@ int sumaArray(int a[], int longitud) {
 
 int calcularJuego(int juegoBuf[], int jugadorMano) {
     /* JUEGO */
-
+    printf("Calculando juego...\n");
     int ocurrencias = 0;
     int ganador = 99;
     int i = 0;
@@ -716,7 +681,6 @@ int deshacerEmpate(int *conteos, int jugadorMano, int valor) {
             return j;
         }
     }
-    printf("WARNING!!! REACHED 99\n");
     return 99;
 }
 
@@ -734,7 +698,6 @@ int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor) {
         }
 
     }
-    printf("WARNING!!! REACHED 99\n");
     return 99;
 }
 
@@ -744,7 +707,9 @@ int tengoJuego(int suma) {
         //hay juego
         return 1;
     }
-    else return 0;
+    else {
+        return 0;
+    }
 }
 
 int tengoMedias(int *paresBuf) {
@@ -767,7 +732,7 @@ int tengoDuples(int *paresBuf) {
 }
 
 int tengoPares(int *paresBuf) {
-    if((paresBuf[0]== 1) || paresBuf[1]== 1 || paresBuf[2] == 2 || paresBuf[2] == 1) {
+    if ((paresBuf[0] == 1) || paresBuf[1] == 1 || paresBuf[2] == 2 || paresBuf[2] == 1) {
 
         return 1;
     }
@@ -796,12 +761,10 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguienteJugador, int bufferRcv[],
                 MPI_Comm parent) {
-    printf("MUS CORRIDO JUGADOR %d\n", *rank);
     (*turno)++;
     if (mus == 1) {
         //printf("[jugador %d] CORTO MUS!!\n", *rank);
         *jugadorMano = *rank;
-        printf("MANO ANTES DE CORTAR: %d\n", *jugadorMano);
         MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
         MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
         MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
@@ -809,7 +772,6 @@ void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguiente
 //jugar lances: empiezo yo
     } else {
         *jugadorMano = 99;
-        printf("MANO CUANDO NO HAY MUS: %d\n", *jugadorMano);
         MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
         MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
         MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
@@ -842,13 +804,13 @@ void *preparaPares(int equivalencias[], int *pares) {
 
     if (parejas[0] > 0) {
         duplesIguales = parejas[1];
-//printf("Duples de la misma carta: %s\n", caras[duplesIguales]);
+
     }
 
     parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
     if (parejas[0] > 0) {
         medias = parejas[1];
-/*printf("MEDIAS DE: %s\n", caras[medias]);*/
+
     }
 
     parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
@@ -1049,6 +1011,16 @@ int queParejaSoy(int rank, int jugadorMano) { //1 mano, 0 postre
     }
     else return 99;
 }
+
+int enQueParejaEstoy(int rank) {
+    if ((rank == 0) || (rank == 2)) {
+        return 1;
+    }
+    else {
+        return 2;
+    }
+}
+
 
 int ordago() {
     srand(time(0));
