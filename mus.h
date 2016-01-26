@@ -84,7 +84,7 @@ void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguiente
 
 void marcarDescarte(Carta *wMazo, int sizeMazo, int id);
 
-int *preparaPares(int equivalencias[], int *pares);
+void *preparaPares(int equivalencias[], int *pares);
 
 int calcularEnvite(int *envites, int *enviteAnterior, int jugadorMano, int *piedras);
 

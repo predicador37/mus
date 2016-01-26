@@ -82,7 +82,7 @@ void barajarMazo(Carta *wMazo) {
 void cortarMazo(Carta *wMazo, char **paloCorte) {
 
     int r; /* índice aleatorio para el mazo*/
-    int N = 0, M = N_CARTAS_MAZO - 1; /* valores del intervalo */
+    //int N = 0, M = N_CARTAS_MAZO - 1; /* valores del intervalo */
     r= rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
     //printf("\nCarta visible al cortar el mazo: \n");
@@ -190,7 +190,7 @@ int maximoArray(int array[], int longitud) {
     int i = 0;
     int max = array[0];
 
-    for (i; i < longitud; i++) {
+    for (i=0; i < longitud; i++) {
         if (max < array[i]) {
             max = array[i];
         }
@@ -202,7 +202,7 @@ int maximoArrayExcluyendo(int array[], int longitud, int excluido) {
     int i = 0;
     int max = array[0];
 
-    for (i; i < longitud; i++) {
+    for (i=0; i < longitud; i++) {
         if (max < array[i] && array[i] != excluido) {
             max = array[i];
         }
@@ -239,9 +239,8 @@ int buscarIndiceNumeroNoIgual(int a[], int longitud, int numero) {
 void invertirArray(int *orig, int *dest, int longitud) {
     int i = longitud - 1;
     int j = 0;
-    int swap;
 
-    for (i; i >= 0; i--) //increment a and decrement b until they meet each other
+    for (i=0; i >= 0; i--) //increment a and decrement b until they meet each other
     {
         dest[j] = orig[i];
         j++;
@@ -487,11 +486,9 @@ int calcularPares(int paresBuf[], int jugadorMano) {
     int jugadores[4];
     int valoresPares[4];
     int ganador = 99;
-    int empates[4];
+
     int i = 0;
-    for (i = 0; i < 4; i++) {
-        empates[i] = 0;
-    }
+
     /* se buscan duples de la misma carta*/
     jugadores[0] = paresBuf[0];
     jugadores[1] = paresBuf[5];
@@ -714,6 +711,8 @@ int deshacerEmpate(int * conteos, int jugadorMano, int valor){
             return j;
         }
     }
+    printf("WARNING!!! REACHED 99\n");
+    return 99;
 }
 
 int deshacerEmpateComplementario(int * conteos, int jugadorMano, int valor){
@@ -728,7 +727,10 @@ int deshacerEmpateComplementario(int * conteos, int jugadorMano, int valor){
         else if (conteos[j]!=valor && j == add_mod(jugadorMano,2,4)){
             return j;
         }
+
     }
+    printf("WARNING!!! REACHED 99\n");
+    return 99;
 }
 
 int tengoJuego(int suma) {
@@ -760,7 +762,7 @@ int tengoDuples(int *paresBuf) {
 }
 
 int tengoPares(int *paresBuf) {
-    if ((paresBuf[2] >= 0) && paresBuf[2] != 99|| (paresBuf[1] >=0) && paresBuf[1]!=99 || (paresBuf[0]>=0) && paresBuf[0]!=99) {
+    if (((paresBuf[2] >= 0) && paresBuf[2] != 99|| (paresBuf[1] >=0) && paresBuf[1]!=99 || (paresBuf[0]>=0)) && (paresBuf[0]!=99)) {
         return 1;
     }
     else {
@@ -818,7 +820,7 @@ void marcarDescarte(Carta *wMazo, int sizeMazo, int id) {
     }
 }
 
-int *preparaPares(int equivalencias[], int *pares) {
+void *preparaPares(int equivalencias[], int *pares) {
 /* PARES */
 // pares[5]; /*primera posición: duplesIguales, 1 entero*/
 /*segunda posición: medias, 1 entero */
@@ -854,7 +856,6 @@ int *preparaPares(int equivalencias[], int *pares) {
 //devuelve apuestas del lance
 int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *piedras) {
 
-    int nuevosEnvites[4];
     int envitesPostre[4];
     int envitesMano[4];
     int envitePostre[2];
@@ -946,7 +947,7 @@ int calcularEnvite(int * envites, int * enviteAnterior, int jugadorMano, int *pi
             return 0;
         }
     }
-
+return 0;
 }
 
 int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
@@ -1019,6 +1020,10 @@ int envido(int * equivalencias, int longitud, int lance, int apuestaVigor){
         }
 
     }
+    else {
+        return 0;
+    }
+    return 0;
 }
 int queParejaSoy(int rank, int jugadorMano){ //1 mano, 0 postre
     if (rank == jugadorMano) {
@@ -1033,12 +1038,13 @@ int queParejaSoy(int rank, int jugadorMano){ //1 mano, 0 postre
     else if (add_mod(jugadorMano,3,4) == rank) {
         return 0;
     }
+    else return 99;
 }
 
 int ordago(){
     srand(time(0));
     double r =  (double)rand() / (double)RAND_MAX ;
-    if (r < 0.90){
+    if (r < 0.95){
         return 0;
     }
     else {
