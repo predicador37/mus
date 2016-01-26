@@ -31,3 +31,12 @@
 # Debug files
 *.dSYM/
 ./idea/workspace.xml
+.idea/workspace.xml
+CMakeCache.txt
+./CMakeFiles/
+./CMakeFiles/*
+Makefile
+cmake_install.cmake
+juego
+jugador
+

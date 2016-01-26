@@ -1,0 +1,1 @@
+mpicc   -Wall    CMakeFiles/jugador.dir/jugador.c.o CMakeFiles/jugador.dir/mus.c.o  -o jugador -rdynamic 
