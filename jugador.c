@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     MPI_Comm parent;
     Carta mazo[N_CARTAS_MAZO];
     Carta mano[N_CARTAS_MANO];
-    char *palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
+    char *palos[] = La;
     char *caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
                      "Seis", "Siete", "Sota", "Caballo", "Rey"};
     int cuentaCartas[N_CARTAS_PALO];
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 
     /* una vez repartidas las cartas, mus corrido */
     /* hay que evaluar la mano... */
-    // todo encapsular en funciones
+
     int i = 0;
     int juego = 0;
     int invertido[N_CARTAS_PALO];
@@ -359,6 +359,10 @@ int main(int argc, char **argv) {
 
         /* ronda de envites */
         if (i == 2) { // ver si hay pares
+            int k=0;
+            for (k=0;k<5;k++) {
+                printf("[proceso %d] PARES %d: %d\n", rank, k, pares[k]);
+            }
             hayPares = tengoPares(pares);
             printf("[proceso %d] MIS PARES: %d\n", rank, hayPares);
             MPI_Gather(&hayPares, 1, MPI_INT, rbuf, 1, MPI_INT, 0, parent);
@@ -370,11 +374,11 @@ int main(int argc, char **argv) {
             MPI_Gather(&hayJuego, 1, MPI_INT, rbuf, 1, MPI_INT, 0, parent);
             MPI_Bcast(&hayJuego, 2, MPI_INT, 0, parent);
         }
-
+        printf("[proceso %d] SIGUIENTE JUGADOR: %d\n", rank, siguienteJugador);
             /* empieza la mano */
             if (rank == jugadorMano && rank == siguienteJugador) {
                 //enviar envite a maestro
-                printf("[proceso %d] SIGUIENTE JUGADOR: %d\n", rank, siguienteJugador);
+
                 if ((i == 0) || (i == 1) || ((i == 2) && (hayPares == 1)) || ((i == 3) && (hayJuego == 1)) ||
                     ((i == 4) && (hayJuego == 0))) {
                     if ((modo == 'I' || modo == 'i') && (rank == jugadorHumano)) {//jugador humano
@@ -411,34 +415,42 @@ int main(int argc, char **argv) {
                 //MPI_Bcast(&enviteContraria, 2, MPI_INT, 0, parent);
 
             }
-            else { //resto de jugadores incluida la mano
+            else if (rank != jugadorMano) { //resto de jugadores incluida la mano
                 // recibir envite del maestro
                 MPI_Bcast(&envite, 2, MPI_INT, 0, parent);
                 enviteAnterior[0] = envite[0];
                 enviteAnterior[1] = envite[1];
 
-                if ((modo == 'I' || modo == 'i') && (rank == jugadorHumano) && siguienteJugador == jugadorHumano) {//jugador humano
+                if ((modo == 'I' || modo == 'i') && (rank == jugadorHumano)) {//jugador humano
                     printf("[proceso %d] HUMANO \n", rank);
+
                     if ((i == 2) && (tengoPares(pares) == 0)) {
                         int humanoTienePares = 0;
-                        MPI_Send(&humanoTienePares, 2, MPI_INT, 0, 0, parent);
+                        MPI_Send(&humanoTienePares, 1, MPI_INT, 0, 0, parent);
                         envite[0] = 0; // no tengo pares, no envido
                     }
                     else if ((i == 3) && tengoJuego(sumaArray(valores, 4)) == 0) {
                         int humanoTienePares = 0;
-                        MPI_Send(&humanoTienePares, 2, MPI_INT, 0, 0, parent);
+                        MPI_Send(&humanoTienePares, 1, MPI_INT, 0, 0, parent);
                         envite[0] = 0; // no tengo juego, no envido
                     }
-                    else {
+                    else if ((i==2 && tengoPares(pares) ==1) || (i==3 && tengoJuego(sumaArray(valores,4))==1)) {
                         int humanoTienePares = 1;
-                        MPI_Send(&humanoTienePares, 2, MPI_INT, 0, 0, parent);
+                        MPI_Send(&humanoTienePares, 1, MPI_INT, 0, 0, parent);
+                        enviarMazo(mano, 0, parent, N_CARTAS_MANO);
+                        MPI_Recv(&enviteHumano, 1, MPI_INT, 0, 0, parent, &stat);
+                        envite[0] = enviteHumano;
+                    }
+                    else { //grande, chica, punto
+                        int humanoTienePares = 1;
+                        MPI_Send(&humanoTienePares, 1, MPI_INT, 0, 0, parent);
                         enviarMazo(mano, 0, parent, N_CARTAS_MANO);
                         MPI_Recv(&enviteHumano, 1, MPI_INT, 0, 0, parent, &stat);
                         envite[0] = enviteHumano;
                     }
                 }
 
-                else {
+                else { //resto jugadores no humanos
                     if ((i == 2) && (tengoPares(pares) == 0)) {
                         envite[0] = 0; // no tengo pares, no envido
                     }
@@ -456,6 +468,7 @@ int main(int argc, char **argv) {
                     }
                 }
             }
+        MPI_Barrier(MPI_COMM_WORLD);
             printf("[proceso %d] Envido %d a lance %d\n", rank, envite[0], i);
             envite[1] = queParejaSoy(rank, jugadorMano);
             MPI_Gather(envite, 2, MPI_INT, rbuf, 2, MPI_INT, 0, parent);

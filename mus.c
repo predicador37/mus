@@ -240,7 +240,7 @@ void invertirArray(int *orig, int *dest, int longitud) {
     int i = longitud - 1;
     int j = 0;
 
-    for (i = 0; i >= 0; i--) //increment a and decrement b until they meet each other
+    for (i = longitud - 1; i >= 0; i--) //increment a and decrement b until they meet each other
     {
         dest[j] = orig[i];
         j++;
@@ -248,7 +248,7 @@ void invertirArray(int *orig, int *dest, int longitud) {
 }
 
 
-int calculaGrande(int rbuf[]) {
+int calculaGrande(int rbuf[], int jugadorMano) {
 
     int empates[4];
     int i, k = 0;
@@ -276,7 +276,7 @@ int calculaGrande(int rbuf[]) {
                 ganador = buscaIndice(suma, 4, maximo);
                 break;
             }
-            else {
+            else if (ocurrencias != 0) {
                 for (i = 0; i < 4; i++) {
                     if (suma[i] == maximo) {
                         empates[i] = 1;
@@ -307,9 +307,9 @@ int calculaGrande(int rbuf[]) {
                     ganador = buscaIndice(suma, 4, maximo);
                     break;
                 }
-                else {
+                else if (ocurrencias != 0) {
                     for (i = 0; i < 4; i++) {
-                        if (suma[i] == maximo && empates[i] == 1) {
+                        if ((suma[i] == maximo) && (empates[i] == 1)) {
                             empates[i] = 1;
                         }
                         else {
@@ -331,8 +331,13 @@ int calculaGrande(int rbuf[]) {
             suma[3] = rbuf[38] + rbuf[39];
             int maximo = maximoArray(suma, 4);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
-            if (ocurrencias == 1) { //el jugador gana porque tiene más reyes
+            if (ocurrencias == 1) { //el jugador gana porque tiene mejores cartas
                 ganador = buscaIndice(suma, 4, maximo);
+                break;
+            }
+            else if (ocurrencias != 0){ //gana la mano o el más cercano
+                printf("Se deshace empate con distancia a la mano...\n");
+                ganador = deshacerEmpate(suma, jugadorMano, 1);
                 break;
             }
         }
@@ -368,7 +373,7 @@ int calculaChica(int rbufInv[]) {
                 ganador = buscaIndice(suma, 4, maximo);
                 break;
             }
-            else {
+            else if (ocurrencias !=0) {
                 for (i = 0; i < 4; i++) {
                     if (suma[i] == maximo) {
                         empates[i] = 1;
@@ -464,10 +469,10 @@ int *uniquePairs(int *array, int longitud, int repeticion) {
             res[0]++;
 
             if (res[1] == 99) {
-                res[1] = num - 1;
+                res[1] = num;
             }
             else {
-                res[2] = num - 1;
+                res[2] = num;
             }
 
         }
@@ -762,7 +767,7 @@ int tengoDuples(int *paresBuf) {
 }
 
 int tengoPares(int *paresBuf) {
-    if((paresBuf[0]!= 99) || paresBuf[1]!= 99 || paresBuf[2] == 2 || paresBuf[2] == 1) {
+    if((paresBuf[0]== 1) || paresBuf[1]== 1 || paresBuf[2] == 2 || paresBuf[2] == 1) {
 
         return 1;
     }

@@ -370,13 +370,13 @@ int main(int argc, char **argv) {
 
             // enviar envite a todos los jugadores
             MPI_Bcast(&envite, 2, MPI_INT, MPI_ROOT, juego_comm);
+            printf("[maestro] PROCESOS SINCRONIZADOS\n");
 
-
-        if ((modo == 'I' || modo == 'i') && siguienteJugador == jugadorHumano && jugadorHumano != jugadorMano) {
+        if ((modo == 'I' || modo == 'i')  && jugadorHumano != jugadorMano) {
 
             int e = 0;
             int humanoTienePares = 0;
-            MPI_Recv(&humanoTienePares, 1, MPI_INT, jugadorMano, 0, juego_comm, MPI_STATUS_IGNORE);
+            MPI_Recv(&humanoTienePares, 1, MPI_INT, jugadorHumano, 0, juego_comm, MPI_STATUS_IGNORE);
             if (humanoTienePares !=0) {
             printf("[maestro] Mano actual del jugador %d\n", jugadorHumano);
             recibirMazo(manoJugadorHumano, jugadorHumano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
@@ -438,7 +438,7 @@ int main(int argc, char **argv) {
 
 
     /*cálculo de manos*/
-    lances[0] = calculaGrande(rbuf);
+    lances[0] = calculaGrande(rbuf, jugadorMano);
     lances[1] = calculaChica(rbufInv);
     lances[2] = calcularPares(paresBuf, jugadorMano);
     lances[3] = calcularJuego(juegoBuf, jugadorMano);
@@ -482,7 +482,6 @@ int main(int argc, char **argv) {
     }
 
 
-    //todo : jugador interactivo
     //todo: vacas y varias partidas
 
     // printMazo(mazo, N_CARTAS_MAZO);
