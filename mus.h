@@ -29,11 +29,13 @@ void barajarMazo(Carta *wMazo);
 
 void cortarMazo(Carta *wMazo, char **paloCorte);
 
+void printCartaById(Carta *wMazo, int id);
+
 int add_mod(int a, int b, int m);
 
-void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm);
+void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas);
 
-void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wCommm, MPI_Status * stat);
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wCommm, int nCartas, MPI_Status *stat);
 
 void repartirCarta(Carta wCarta, int proceso, MPI_Comm wComm);
 
@@ -61,18 +63,40 @@ int cmpfunc(const void *a, const void *b);
 
 int *uniquePairs(int array[], int longitud, int repeticion);
 
-int calcularPares(int paresBuf[]);
+int calcularPares(int paresBuf[], int jugadorMano);
 
 int sumaArray(int a[], int longitud);
 
-int calcularJuego(int juegoBuf[]);
+int calcularJuego(int juegoBuf[], int mano);
+
 int tengoJuego(int suma);
+
 int tengoMedias(int *paresBuf);
+
 int tengoDuples(int *paresBuf);
+
 int tengoPares(int *paresBuf);
+
 int cortarMus(int *valores, int *equivalencias, int *paresBuf);
-void musCorrido(int mus, int *rank, int* jugadorMano, int * turno, int * siguienteJugador, int bufferRcv[], MPI_Comm parent );
+
+void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguienteJugador, int bufferRcv[],
+                MPI_Comm parent);
+
 void marcarDescarte(Carta *wMazo, int sizeMazo, int id);
-int * preparaPares(int equivalencias[], int *pares);
+
+int *preparaPares(int equivalencias[], int *pares);
+
+int calcularEnvite(int *envites, int *enviteAnterior, int jugadorMano, int *piedras);
+
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor);
+
+int queParejaSoy(int rank, int jugadorMano);
+
+int deshacerEmpate(int *conteos, int jugadorMano, int valor);
+
+int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor);
+
+int ordago();
+void clearInputBuffer();
 
 #endif //MUS_MUS_H
