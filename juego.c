@@ -28,21 +28,47 @@ int main(int argc, char **argv) {
     Carta mano1[N_CARTAS_MANO];
     Carta mano2[N_CARTAS_MANO];
     Carta mano3[N_CARTAS_MANO];
+    Carta manoJugadorHumano[N_CARTAS_MANO];
 
     char *caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
                      "Seis", "Siete", "Sota", "Caballo", "Rey"};
 
 
     char *palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
+    char *lancesEtiquetas[]= {"Grande", "Chica", "Pares", "Juego", "Al punto"};
     int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
     int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
     int piedras[N_PAREJAS] = {0, 0};
     int apuestas[N_LANCES+1] = {0, 0, 0, 0, 0};
-
+    int jugadorHumano = 99;
     srand(time(NULL)); /* randomize */
 
     sizeMazo = crearMazo(mazo, caras, palos, valores, equivalencias); /* llena el mazo de cartas */
     sizeDescartadas = 0;
+    int ordago = 0;
+    char modo = 'Z'; //1 automático, 0 manual
+    printf("Introduzca el modo de juego (A:automático, I:interactivo): \n");
+    while (modo != 'A' || modo != 'I' || modo !='a' || modo != 'i') {
+        modo = getchar();
+
+        if (modo == 'A' || modo == 'I' || modo == 'a' || modo == 'i') {
+            break;
+        }
+        else {
+            getchar();
+            printf("Introduzca una A o una I\n");
+        }
+
+
+    }
+
+    printf("Comenzando partida en modo %c\n", modo);
+    if (modo == 'I' || modo == 'i') {
+        //jugadorHumano =   rand() % (N_JUGADORES + 1 - 0) + 0;
+        jugadorHumano = 3;
+        printf("El identificador para el jugador humano es: %d\n", jugadorHumano);
+
+    }
     printf("[maestro] Tamaño del mazo: %d\n", sizeMazo);
     //printMazo(mazo); /*Imprime el mazo*/
     printf("\n");
@@ -73,10 +99,11 @@ int main(int argc, char **argv) {
     int N = 0, M = N_JUGADORES - 1; /* valores del intervalo */
     corte = M + rand() / (RAND_MAX / (N - M + 1) + 1); /* proceso aleatorio de entre los existentes */
     MPI_Bcast(&corte, 1, MPI_INT, MPI_ROOT, juego_comm); /* envío del id de proceso que realizará el corte a todos*/
+    MPI_Bcast(&modo, 1, MPI_INT, MPI_ROOT,juego_comm);
+    MPI_Bcast(&jugadorHumano, 1, MPI_INT, MPI_ROOT, juego_comm); /* envío del id de jugador humano en caso de modo manual*/
 
-    /* envío del mazo al jugador que va a cortar la baraja*/
 
-    enviarMazo(mazo, corte, juego_comm, N_CARTAS_MAZO);
+    enviarMazo(mazo, corte, juego_comm, N_CARTAS_MAZO); /* envío del mazo al jugador que va a cortar la baraja*/
     MPI_Recv(&repartidor, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
     printf("[maestro] El jugador repartidor es: %d\n", repartidor);
 
@@ -106,6 +133,8 @@ int main(int argc, char **argv) {
 
     MPI_Bcast(&sizeMazo, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del tamaño del mazo a resto de procesos
 
+
+
     int siguienteJugador = add_mod(repartidor, 1, 4);
     int noSiguiente = 99;
     jugadorMano = 99;
@@ -115,10 +144,13 @@ int main(int argc, char **argv) {
     int bufferRcv[3] = {99, siguienteJugador, turno};
     int descarte = 99;
     int contador = 0;
+    if (modo == 'I' || modo == 'i' && jugadorHumano == siguienteJugador) {
+        recibirMazo(manoJugadorHumano,jugadorHumano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+    }
     while (jugadorMano == 99) {
         printf("[maestro] TURNO: %d\n", turno);
 
-        if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes == 1)) {
+        if ((turno % 4) == 0 && (turno != 0) && (turnoDescartes == 1)) { //turno de descartes
 
             printf("[maestro] turno %d de descartes\n", turno);
             printf("[maestro] jugador %d descarta\n", siguienteJugador);
@@ -126,9 +158,28 @@ int main(int argc, char **argv) {
             // recibe identificador de carta a descartar
 
             //  while (descarte != 98) {
-
+            int descarteHumano=99;
             for (i = 0; i < N_CARTAS_MANO; i++) {
+
+                if ((modo == 'I' || modo == 'i') && siguienteJugador == jugadorHumano) {
+                    printf("¿Desea descartar %s de %s? (S/N)\n", manoJugadorHumano[i].cara, manoJugadorHumano[i].palo);
+                    char c;
+
+                    scanf(" %c", &c);
+
+                    if (c=='S' || c=='s') {
+                        descarteHumano = 1;
+                    }
+                    else {
+                        descarteHumano = 0;
+                    }
+
+                    //MPI_Send(&descarteHumano, 1, MPI_INT, jugadorHumano, 0, juego_comm);
+
+                }
+                MPI_Bcast(&descarteHumano, 1, MPI_INT, MPI_ROOT, juego_comm);
                 MPI_Recv(&descarte, 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+
 
                 if (descarte != 99 && descarte != 98) {
                     printf("[maestro]: DESCARTE DE %d: %d\n", siguienteJugador, descarte);
@@ -153,18 +204,62 @@ int main(int argc, char **argv) {
             MPI_Bcast(&turnoDescartes, 1, MPI_INT, MPI_ROOT, juego_comm);
 
             //break;
-        } else {
+        } else { // mus corrido
             turnoDescartes = 1;
             MPI_Bcast(&turnoDescartes, 1, MPI_INT, MPI_ROOT, juego_comm);
+            int mus = 99;
+            printf("ANTES DE ENTRADA\n");
+            if ((modo == 'I' || modo == 'i') && siguienteJugador == jugadorHumano) {
+                char c = 'Z';
+
+                printf("¿Hay mus? (S:mus, N:no mus):\n");
+                fflush(stdout);
+                scanf(" %c", &c);
+
+                //c = getchar();
+                getchar();
+                printf("OPCION: %c\n", c);
+                if (c == 'S' || c == 's') {
+                    mus = 0;
+                }
+                else {
+                    mus = 1;
+                }
+                fflush(stdout);
+                fflush(stdin);
+                printf("OPCION: %c\n", c);
+                printf("ENVIANDO MUS %d A JUGADOR %d\n", mus, jugadorHumano);
+                //MPI_Send(&mus, 1, MPI_INT, jugadorHumano, 0, juego_comm);
+
+            }
+            MPI_Bcast(&mus, 1, MPI_INT, MPI_ROOT, juego_comm);
+            MPI_Barrier(MPI_COMM_WORLD);
             MPI_Recv(&bufferRcv[0], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
             MPI_Recv(&bufferRcv[1], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
             MPI_Recv(&bufferRcv[2], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
+            printf("JUGADOR %d MUS %d EN TURNO %d\n", bufferRcv[1], bufferRcv[0], bufferSnd[2]);
             jugadorMano = bufferRcv[0];
-            siguienteJugador = bufferRcv[1];
+            if (jugadorMano != 99) {
+                printf("[maestro] Mus cortado por jugador: %d\n", jugadorMano);
+            }
 
-            turno = bufferRcv[2];
-            bufferSnd[0] = jugadorMano;
+
+            turno = turno++;
+            if (jugadorMano == 99 || jugadorMano == 0 || jugadorMano == 1 || jugadorMano == 2 || jugadorMano == 3) {
+                bufferSnd[0] = jugadorMano;
+            }
+            else {
+                jugadorMano = 99;
+            }
+            if ( bufferRcv[1] == 0 ||  bufferRcv[1] == 1 ||  bufferRcv[1] == 2 ||  bufferRcv[1] == 3) {
+            siguienteJugador = bufferRcv[1];
             bufferSnd[1] = siguienteJugador;
+        }
+        else {
+            siguienteJugador=add_mod(siguienteJugador, 1, 4);
+            bufferSnd[1] = siguienteJugador;
+        }
+
             bufferSnd[2] = turno;
 
             MPI_Bcast(&bufferSnd, 3, MPI_INT, MPI_ROOT, juego_comm);
@@ -251,7 +346,14 @@ int main(int argc, char **argv) {
             // recibir respuesta de todos los jugadores: de la pareja contraria, prima la más alta
             MPI_Gather(conteos, 10, MPI_INT, envites, 2, MPI_INT, MPI_ROOT, juego_comm);
             printf("[maestro] recibe envites\n");
-                //todo if algun envite es ordago, then esto nada
+
+            if (ocurrenciasArray(envites, 8, 99) == 1) {
+                ordago = 1;
+                printf("¡¡¡ÓRDAGO!!!\n");
+                MPI_Bcast(&ordago, 1, MPI_INT, MPI_ROOT, juego_comm);
+                break;
+            }//ordago
+            MPI_Bcast(&ordago, 1, MPI_INT, MPI_ROOT, juego_comm);
          /*   for (i=0; i<8;i++){
                 printf("[maestro] Envite %d\n", envites[i]);
             }*/
@@ -289,6 +391,10 @@ int main(int argc, char **argv) {
     printf("Mejor mano a pares: jugador %d\n", lances[2]);
     printf("Mejor mano a juego: jugador %d\n", lances[3]);
 
+    if (ordago ==1) {
+        printf("Ganador del lance %s y juego: jugador %d\n ", lancesEtiquetas[j], lances[j]);
+    }
+
     for (i = 0; i < N_JUGADORES; i++) {
 
         if (paresBuf[5 * i] != 99) {
@@ -319,7 +425,7 @@ int main(int argc, char **argv) {
 
     }
 
-    //todo: ordagos
+
     //todo : jugador interactivo
     //todo: vacas y varias partidas
 

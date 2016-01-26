@@ -73,7 +73,7 @@ void barajarMazo(Carta *wMazo) {
         wMazo[i] = wMazo[j];
         wMazo[j] = temp;
     } /* fin for */
-    printf("Mazo barajado.\n\n");
+    printf("Mazo barajado.\n");
 
 } /* fin funcion barajar */
 
@@ -83,7 +83,8 @@ void cortarMazo(Carta *wMazo, char **paloCorte) {
 
     int r; /* índice aleatorio para el mazo*/
     int N = 0, M = N_CARTAS_MAZO - 1; /* valores del intervalo */
-    r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
+    r= rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
+    //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
     //printf("\nCarta visible al cortar el mazo: \n");
     // printf("%-8s\t de \t%-8s es \t%d \tcon id \t%d\n \t", wMazo[r].cara,
     //       wMazo[r].palo, wMazo[r].valor, wMazo[r].id);
@@ -787,17 +788,20 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguienteJugador, int bufferRcv[],
                 MPI_Comm parent) {
-
+printf("MUS CORRIDO JUGADOR %d\n", *rank);
     (*turno)++;
     if (mus == 1) {
-        printf("[jugador %d] CORTO MUS!!\n", *rank);
+        //printf("[jugador %d] CORTO MUS!!\n", *rank);
         *jugadorMano = *rank;
+        printf("MANO ANTES DE CORTAR: %d\n", *jugadorMano);
         MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
         MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
         MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
         MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
 //jugar lances: empiezo yo
     } else {
+        *jugadorMano=99;
+        printf("MANO CUANDO NO HAY MUS: %d\n", *jugadorMano);
         MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
         MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
         MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
@@ -1040,4 +1044,13 @@ int ordago(){
     else {
         return 1;
     }
+}
+
+void clearInputBuffer() // works only if the input buffer is not empty
+{
+    char c;
+    do
+    {
+         c = getchar();
+    } while (c != '\n' && c != EOF);
 }
