@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     int N = 0, M = N_JUGADORES - 1; /* valores del intervalo */
     corte = M + rand() / (RAND_MAX / (N - M + 1) + 1); /* proceso aleatorio de entre los existentes */
     MPI_Bcast(&corte, 1, MPI_INT, MPI_ROOT, juego_comm); /* envío del id de proceso que realizará el corte a todos*/
-    MPI_Bcast(&modo, 1, MPI_INT, MPI_ROOT, juego_comm);
+    MPI_Bcast(&modo, 1, MPI_CHAR, MPI_ROOT, juego_comm);
     MPI_Bcast(&jugadorHumano, 1, MPI_INT, MPI_ROOT,
               juego_comm); /* envío del id de jugador humano en caso de modo manual*/
 
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
                     fflush(stdin);
                     MPI_Send(&mus, 1, MPI_INT, jugadorHumano, 0, juego_comm);
                 };
-                MPI_Barrier(MPI_COMM_WORLD);
+
                 MPI_Recv(&bufferRcv[0], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
                 MPI_Recv(&bufferRcv[1], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
                 MPI_Recv(&bufferRcv[2], 1, MPI_INT, siguienteJugador, 0, juego_comm, MPI_STATUS_IGNORE);
@@ -483,7 +483,7 @@ int main(int argc, char **argv) {
         if (ordago == 1) {
             printf("Ganador del lance %s y juego: jugador %d\n ", lancesEtiquetas[j], lances[j]);
         }
-
+/*
         for (i = 0; i < N_JUGADORES; i++) {
 
             if (paresBuf[5 * i] != 99) {
@@ -500,7 +500,7 @@ int main(int argc, char **argv) {
                 printf("[jugador %d] PAREJA DE %s\n", i, caras[paresBuf[5 * i + 3]]);
             }
         }
-
+*/
 
         for (i = 0; i < N_JUGADORES; i++) {
             printf("JUEGO DE JUGADOR %d: %d\n", i, juegoBuf[i]);

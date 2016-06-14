@@ -11,10 +11,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<mpi.h>
-int main(int argc, char** argv) {
+
+int main(int argc, char **argv) {
 
 
-    int rank, size, namelen, version, subversion, psize;
+    int rank, size, namelen, version, subversion, psize, parent_rank;
 
     MPI_Comm parent;
 

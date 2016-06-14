@@ -79,13 +79,13 @@ void barajarMazo(Carta *wMazo) {
 
 /* FUNCION cortarMazo: corta el mazo, esto es, saca una carta aleatoria del mazo */
 
-void cortarMazo(Carta *wMazo, char **paloCorte) {
+void cortarMazo(Carta *wMazo, char *paloCorte) {
 
     int r; /* índice aleatorio para el mazo*/
     r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
-
-    *paloCorte = wMazo[r].palo;
+    paloCorte = (char *) malloc(strlen(wMazo[r].palo) * sizeof(char));
+    strcpy(paloCorte, wMazo[r].palo);
 
 }
 
@@ -114,7 +114,6 @@ int add_mod(int a, int b, int m) {
 }
 
 void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
-
     int j = 0;
     for (j = 0; j < nCartas; j++) {
         MPI_Send(&wMazo[j].id, 1, MPI_INT, proceso, 0, wComm);

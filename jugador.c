@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     char *caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
                      "Seis", "Siete", "Sota", "Caballo", "Rey"};
     int cuentaCartas[N_CARTAS_PALO];
-    char *paloCorte = (char *) malloc(7 * sizeof(char));
+    char *paloCorte;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
 
     MPI_Status stat;
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     MPI_Bcast(&sizeMazo, 1, MPI_INT, 0, parent);
     MPI_Bcast(&sizeDescartadas, 1, MPI_INT, 0, parent);
     MPI_Bcast(&corte, 1, MPI_INT, 0, parent);
-    MPI_Bcast(&modo, 1, MPI_INT, 0, parent);
+    MPI_Bcast(&modo, 1, MPI_CHAR, 0, parent);
     MPI_Bcast(&jugadorHumano, 1, MPI_INT, 0, parent);
 
 
@@ -73,7 +73,12 @@ int main(int argc, char **argv) {
         /* Para ello debe recibir el mazo */
         printf("[jugador %d] Proceso corte recibiendo mazo\n", rank);
         recibirMazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
-        cortarMazo(mazo, &paloCorte);
+        //cortarMazo(mazo, paloCorte);
+        int r; /* índice aleatorio para el mazo*/
+        r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
+        //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
+        paloCorte = (char *) malloc(strlen(mazo[r].palo) * sizeof(char));
+        strcpy(paloCorte, mazo[r].palo);
         printf("[jugador %d] El palo de corte es: %s\n", rank, paloCorte);
         int j = 0;
         for (j = 0; j < N_PALOS; j++) {
@@ -146,7 +151,7 @@ int main(int argc, char **argv) {
             /* Todos los procesos deben conocer cuál es el tamaño actual del mazo */
 
 
-            //MPI_Bcast(&sizeMazo, 1, MPI_INT, repartidor, MPI_COMM_WORLD);
+
             //MPI_Barrier(MPI_COMM_WORLD);
             /* El proceso maestro debe contar con el mazo actualizado */
             MPI_Send(&sizeMazo, 1, MPI_INT, 0, 0, parent);
@@ -171,7 +176,7 @@ int main(int argc, char **argv) {
         MPI_Bcast(&sizeMazo, 1, MPI_INT, 0, parent);
 
 
-        MPI_Barrier(MPI_COMM_WORLD);
+
         //printf("[proceso %d] tamaño del mazo: %d\n", rank, sizeMazo);
 
 
@@ -240,7 +245,7 @@ int main(int argc, char **argv) {
 
                     for (i = 0; i < N_CARTAS_MANO; i++) {
 
-                        //MPI_Bcast(&descarteHumano, 1, MPI_INT, 0, parent);
+
 
                         if ((modo == 'I' || modo == 'i') && (rank == jugadorHumano)) {
 
@@ -260,7 +265,7 @@ int main(int argc, char **argv) {
 
                         }
                             // else if (modo == 'I' || modo == 'i') {
-                            // MPI_Bcast(&descarteHumano, 1, MPI_INT, 0, parent);
+
                             // }
                             //se descarta cualquier carta que no sea un rey
                         else { // automático
@@ -314,16 +319,16 @@ int main(int argc, char **argv) {
                         MPI_Send(&jugadorMano, 1, MPI_INT, 0, 0, parent);
                         MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
                         MPI_Send(&turno, 1, MPI_INT, 0, 0, parent);
-                        MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
+
                         //jugar lances: empiezo yo
                     } else {
                         jugadorMano = 99;
                         MPI_Send(&jugadorMano, 1, MPI_INT, 0, 0, parent);
                         MPI_Send(&siguienteJugador, 1, MPI_INT, 0, 0, parent);
                         MPI_Send(&turno, 1, MPI_INT, 0, 0, parent);
-                        MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
+                        //MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
                     }
-
+                    MPI_Bcast(&bufferRcv, 3, MPI_INT, 0, parent);
                 }
             }
             else { // al jugador no le toca
@@ -341,6 +346,7 @@ int main(int argc, char **argv) {
                     siguienteJugador = bufferRcv[1];
                     turno = bufferRcv[2];
                 }
+
             }
             MPI_Bcast(&temp, 1, MPI_INT, 0, parent);
             siguienteJugador = temp;
@@ -412,8 +418,8 @@ int main(int argc, char **argv) {
                 MPI_Bcast(&envite, 2, MPI_INT, 0, parent);
                 enviteAnterior[0] = envite[0];
                 enviteAnterior[1] = envite[1];
-                //MPI_Gather(enviteMano, 2, MPI_INT, rbuf, 2, MPI_INT, 0, parent);
-                //MPI_Bcast(&enviteContraria, 2, MPI_INT, 0, parent);
+
+
 
             }
             else if (rank != jugadorMano) { //resto de jugadores incluida la mano

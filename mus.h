@@ -27,7 +27,7 @@ void printMazo(Carta *wMazo, int sizeMazo);
 
 void barajarMazo(Carta *wMazo);
 
-void cortarMazo(Carta *wMazo, char **paloCorte);
+void cortarMazo(Carta *wMazo, char *paloCorte);
 
 void printCartaById(Carta *wMazo, int id);
 

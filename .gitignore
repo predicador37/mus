@@ -40,4 +40,8 @@ cmake_install.cmake
 juego
 jugador
 *.pdf
-
+prueba
+*.zip
+def_feb
+mpi2*
+.idea/workspace.xml
