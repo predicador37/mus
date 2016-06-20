@@ -1,31 +1,35 @@
-//
-// Created by predicador on 15/06/16.
-//
+/* C Example */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
 #include <time.h>
-#include "mus.h"
-#include "dbg.h"
+#include "mus_feb.h"
+
 
 #define N_CARTAS_MAZO 40
 #define N_CARTAS_MANO 4
 #define N_JUGADORES 4
-#define N_PALOS 4
-#define DEBUG 1
 
 typedef int bool;
 #define true 1
 #define false 0
 
+struct jugador {
+    Carta *mano[N_CARTAS_MANO];
+    char *palo;
+    bool postre;
+};
 
+typedef struct jugador Jugador;
+
+int cartaActual = 0;
 
 /* FUNCION crearMazo: puebla un array de estructuras Carta con sus valores y palos*/
-int crear_mazo(Carta *mazo, char *strCara[],
+int crearMazo(Carta *mazo, char *strCara[],
               char *strPalo[], int intValor[], int intEquivalencias[]) {
     int i; /* contador */
-    int size_mazo = 0;
+    int sizeMazo = 0;
 
     /* iterar el mazo */
     for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
@@ -36,16 +40,17 @@ int crear_mazo(Carta *mazo, char *strCara[],
         mazo[i].id = i;
         mazo[i].orden = i % 10;
         mazo[i].estado = 0;
-        size_mazo++;
+        sizeMazo++;
+
     } /* fin for */
-    return size_mazo;
+    return sizeMazo;
 
 } /* fin funcion crearMazo */
 
 /* FUNCION printMazo: muestra por pantalla un mazo de cartas */
-void print_mazo(Carta *wMazo, int size_mazo) {
+void printMazo(Carta *wMazo, int sizeMazo) {
     int i;
-    for (i = 0; i <= size_mazo - 1; i++) {
+    for (i = 0; i <= sizeMazo - 1; i++) {
         printf("El valor de %-8s\t de \t%-8s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
                wMazo[i].palo, wMazo[i].valor, wMazo[i].orden, wMazo[i].estado);
         printf("\n");
@@ -55,7 +60,7 @@ void print_mazo(Carta *wMazo, int size_mazo) {
 
 /* FUNCION barajarMazo: baraja las cartas del mazo*/
 
-void barajar_mazo(Carta *wMazo) {
+void barajarMazo(Carta *wMazo) {
     int i;     /* contador */
     int j;     /* variable que almacena un valor aleatorio entre 0 y 39*/
     Carta temp; /* estructura temporal para intercambiar las cartas */
@@ -74,7 +79,7 @@ void barajar_mazo(Carta *wMazo) {
 
 /* FUNCION cortarMazo: corta el mazo, esto es, saca una carta aleatoria del mazo */
 
-void cortar_mazo(Carta *wMazo, char *paloCorte) {
+void cortarMazo(Carta *wMazo, char *paloCorte) {
 
     int r; /* índice aleatorio para el mazo*/
     r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
@@ -84,36 +89,19 @@ void cortar_mazo(Carta *wMazo, char *paloCorte) {
 
 }
 
-void enviar_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
-    int j = 0;
-    for (j = 0; j < nCartas; j++) {
-        MPI_Send(&wMazo[j].id, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(&wMazo[j].valor, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(&wMazo[j].equivalencia, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(&wMazo[j].orden, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(&wMazo[j].estado, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(wMazo[j].palo, 8, MPI_CHAR, proceso, 0, wComm);
-        MPI_Send(wMazo[j].cara, 8, MPI_CHAR, proceso, 0, wComm);
-    }
-}
-
-void recibir_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_Status *stat) {
-
+void printCartaById(Carta *wMazo, int id) {
     int i = 0;
-    for (i = 0; i < nCartas; i++) {
-        wMazo[i].palo = (char *) malloc(8 * sizeof(char));
-        wMazo[i].cara = (char *) malloc(8 * sizeof(char));
-        MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(&wMazo[i].valor, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(&wMazo[i].equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(&wMazo[i].orden, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(&wMazo[i].estado, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(wMazo[i].palo, 8, MPI_CHAR, proceso, 0, wComm, stat);
-        MPI_Recv(wMazo[i].cara, 8, MPI_CHAR, proceso, 0, wComm, stat);
+    for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
+        if (wMazo[i].id == id) {
+            printf("El valor de %-8s\t de \t%-8s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
+                   wMazo[i].palo, wMazo[i].valor, wMazo[i].orden, wMazo[i].estado);
+            printf("\n");
+        }
     }
 }
 
-/* suma modular */
+/* fin funcion cortarMazo */
+
 int add_mod(int a, int b, int m) {
     if (0 == b) return a;
 
@@ -125,7 +113,37 @@ int add_mod(int a, int b, int m) {
         return m - b + a;
 }
 
-void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
+void enviarMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
+    int j = 0;
+    for (j = 0; j < nCartas; j++) {
+        MPI_Send(&wMazo[j].id, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].valor, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].equivalencia, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].orden, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].estado, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(wMazo[j].palo, 7, MPI_CHAR, proceso, 0, wComm);
+        MPI_Send(wMazo[j].cara, 8, MPI_CHAR, proceso, 0, wComm);
+    }
+}
+
+
+void recibirMazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_Status *stat) {
+
+    int i = 0;
+    for (i = 0; i < nCartas; i++) {
+        wMazo[i].palo = (char *) malloc(5 * sizeof(char));
+        wMazo[i].cara = (char *) malloc(8 * sizeof(char));
+        MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].valor, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].orden, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].estado, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(wMazo[i].palo, 7, MPI_CHAR, proceso, 0, wComm, stat);
+        MPI_Recv(wMazo[i].cara, 8, MPI_CHAR, proceso, 0, wComm, stat);
+    }
+}
+
+void repartirCarta(Carta wCarta, int proceso, MPI_Comm wComm) {
     MPI_Send(&wCarta.id, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm);
@@ -136,7 +154,7 @@ void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
 
 }
 
-Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status stat) {
+Carta recibirCarta(int proceso, MPI_Comm wComm, MPI_Status stat) {
     Carta wCarta;
     wCarta.palo = (char *) malloc(5 * sizeof(char));
     wCarta.cara = (char *) malloc(8 * sizeof(char));
@@ -149,95 +167,6 @@ Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status stat) {
     MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
     wCarta.estado = 1;
     return wCarta;
-}
-
-void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * const palos[], MPI_Status stat) {
-
-
-        recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
-        debug("Mazo recibido");
-        int r; /* índice aleatorio para el mazo*/
-        r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
-        palo_corte = (char *) malloc(8 * sizeof(char));
-        strcpy(palo_corte, mazo[r].palo);
-        debug("Palo copiado: %s", palo_corte);
-        int j = 0;
-        for (j = 0; j < N_PALOS; j++) {
-            if (strcmp(palo_corte, palos[j]) == 0) {
-                debug("Palos comparados");
-                /* corresponde repartir primero al primer jugador de su derecha si sale oros;
-                 * al segundo si sale copas; al tercero si sale espadas y al mismo que cortó si sale bastos*/
-
-                repartidor = add_mod(corte, j + 1, 4);
-                debug("Repartidor calculado");
-
-                /* Envío del id del repartidor al proceso maestro */
-                MPI_Send(&repartidor, 1, MPI_INT, 0, 0, parent);
-                debug("Repartidor enviado");
-            }
-        }
-        enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); //se devuelve el mazo al maestro
-    }
-
-void repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas,  Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat){
-
-    recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
-    debug("Mazo recibido");
-    /* A continuación tiene lugar el reparto de cartas secuencial*/
-    /* Por este requisito no se ha utilizado scatter*/
-    /* La e/s se redirige al proceso maestro */
-
-    int i = 0;
-    int j = 0;
-    int k = 0;
-    int buffer_reparto[3];
-
-    int siguiente_jugador = repartidor;
-    debug("Siguiente jugador inicial: %d", siguiente_jugador);
-    for (i = 0; i < N_CARTAS_MANO; i++) {
-        for (j = 0; j < N_JUGADORES; j++) { /* En total se reparten 16 cartas */
-
-            siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
-            buffer_reparto[0] = i; //por qué número de carta de la mano (total de 4) se va repartiendo
-            buffer_reparto[1] = siguiente_jugador; // a qué jugador se reparte
-
-            if (siguiente_jugador != repartidor) {
-                repartir_carta(mazo[k], siguiente_jugador, MPI_COMM_WORLD);
-                mazo[k].estado = 1; // la carta pasa a estado repartida
-                MPI_Send(&buffer_reparto, 2, MPI_INT, 0, 0, parent);
-
-            }
-            else {
-                /* Para repartirse a sí mismo no tiene sentido utilizar MPI */
-                MPI_Send(&buffer_reparto, 2, MPI_INT, 0, 0, parent);
-                mazo[k].estado = 1;// la carta pasa a estado repartida
-                mano_cartas[i] = mazo[k];
-                buffer_reparto[0] =  i; //por qué número de carta de la mano (total de 4) se va repartiendo
-                buffer_reparto[1] = rank; // a qué jugador se reparte: en este caso, a uno mismo (repartidor)
-                buffer_reparto[2] = mano_cartas[i].valor; // qué valor tiene la carta repartida
-                MPI_Send(&buffer_reparto, 3, MPI_INT, 0, 0, parent);
-            }
-            size_mazo--; /* es necesario almacenar el tamaño del mazo después de repartir */
-            size_descartadas++;
-            k++; /* un contador auxiliar para recuperar cartas del mazo */
-        }
-    }
-
-
-}
-
-void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status stat){
-    int i = 0;
-    int buffer_reparto[3];
-
-    for (i = 0; i < N_CARTAS_MANO; i++) {
-
-        mano_cartas[i] = recibir_carta(repartidor, MPI_COMM_WORLD, stat);
-        buffer_reparto[0] = rank;
-        buffer_reparto[1] = i;
-        buffer_reparto[2] = mano_cartas[i].valor;
-        MPI_Send(&buffer_reparto, 3, MPI_INT, 0, 0, parent);
-    }
 }
 
 int cuentaCartasMano(Carta *wMano, char *cara) {
@@ -771,40 +700,6 @@ int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor) {
     return 99;
 }
 
-void *preparaPares(int equivalencias[], int *pares) {
-/* PARES */
-// pares[5]; /*primera posición: duplesIguales, 1 entero*/
-/*segunda posición: medias, 1 entero */
-/*tercera posición: duples parejas y pareja, 3 enteros */
-
-    int duplesIguales = 99; //99 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
-    int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
-
-
-    int *parejas = (int *) malloc(3 * sizeof(int));
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 4);
-
-    if (parejas[0] > 0) {
-        duplesIguales = parejas[1];
-
-    }
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
-    if (parejas[0] > 0) {
-        medias = parejas[1];
-
-    }
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
-
-    pares[0] = duplesIguales;
-    pares[1] = medias;
-    pares[2] = parejas[0];
-    pares[3] = parejas[1];
-    pares[4] = parejas[2];
-}
-
 int tengoJuego(int suma) {
     int juegosGanadores[8] = {31, 32, 40, 37, 36, 35, 34, 33};
     if (ocurrenciasArray(juegosGanadores, 8, suma) == 1) {
@@ -847,6 +742,7 @@ int tengoPares(int *paresBuf) {
 
 int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
+
 /*
  if (contrario a 5 puntos de ganar) cortar mus */
     int juego = sumaArray(valores, N_CARTAS_MANO);
@@ -860,4 +756,286 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
     }
 
 
+}
+
+void musCorrido(int mus, int *rank, int *jugadorMano, int *turno, int *siguienteJugador, int bufferRcv[],
+                MPI_Comm parent) {
+    (*turno)++;
+    if (mus == 1) {
+        //printf("[jugador %d] CORTO MUS!!\n", *rank);
+        *jugadorMano = *rank;
+        MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
+        MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
+//jugar lances: empiezo yo
+    } else {
+        *jugadorMano = 99;
+        MPI_Send(jugadorMano, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(siguienteJugador, 1, MPI_INT, 0, 0, parent);
+        MPI_Send(turno, 1, MPI_INT, 0, 0, parent);
+        MPI_Bcast(bufferRcv, 3, MPI_INT, 0, parent);
+    }
+}
+
+void marcarDescarte(Carta *wMazo, int sizeMazo, int id) {
+    int i;
+    for (i = 0; i <= sizeMazo - 1; i++) {
+        if (wMazo[i].id == id) {
+            wMazo[i].estado = 2;
+        }
+    }
+}
+
+void *preparaPares(int equivalencias[], int *pares) {
+/* PARES */
+// pares[5]; /*primera posición: duplesIguales, 1 entero*/
+/*segunda posición: medias, 1 entero */
+/*tercera posición: duples parejas y pareja, 3 enteros */
+
+    int duplesIguales = 99; //99 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
+    int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
+
+
+    int *parejas = (int *) malloc(3 * sizeof(int));
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 4);
+
+    if (parejas[0] > 0) {
+        duplesIguales = parejas[1];
+
+    }
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
+    if (parejas[0] > 0) {
+        medias = parejas[1];
+
+    }
+
+    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
+
+    pares[0] = duplesIguales;
+    pares[1] = medias;
+    pares[2] = parejas[0];
+    pares[3] = parejas[1];
+    pares[4] = parejas[2];
+}
+
+//devuelve apuestas del lance
+int calcularEnvite(int *envites, int *enviteAnterior, int jugadorMano, int *piedras) {
+
+    int envitesPostre[4];
+    int envitesMano[4];
+    int envitePostre[2];
+    int soloEnvitesPostre[2];
+    int soloEnvitesMano[2];
+    int enviteMano[2];
+
+    envitesPostre[0] = envites[add_mod(jugadorMano, 1, 4) * 2];
+    envitesPostre[1] = envites[add_mod(jugadorMano, 1, 4) * 2 + 1];
+    envitesPostre[2] = envites[add_mod(jugadorMano, 3, 4) * 2];
+    envitesPostre[3] = envites[add_mod(jugadorMano, 3, 4) * 2 + 1];
+
+    envitesMano[0] = envites[(jugadorMano) * 2];
+    envitesMano[1] = envites[(jugadorMano) * 2 + 1];
+    envitesMano[2] = envites[add_mod(jugadorMano, 2, 4) * 2];
+    envitesMano[3] = envites[add_mod(jugadorMano, 2, 4) * 2 + 1];
+
+    soloEnvitesPostre[0] = envitesPostre[0];
+    soloEnvitesPostre[1] = envitesPostre[2];
+
+    int maximoPostre = maximoArray(soloEnvitesPostre, 2);
+    envitePostre[0] = envitesPostre[buscaIndice(soloEnvitesPostre, 2, maximoPostre) * 2];
+    envitePostre[1] = envitesPostre[buscaIndice(soloEnvitesPostre, 2, maximoPostre) * 2 + 1];
+
+    soloEnvitesMano[0] = envitesMano[0];
+    soloEnvitesMano[1] = envitesMano[2];
+    int maximoMano = maximoArray(soloEnvitesMano, 2);
+    enviteMano[0] = envitesMano[buscaIndice(soloEnvitesMano, 2, maximoMano) * 2];
+    enviteMano[1] = envitesMano[buscaIndice(soloEnvitesMano, 2, maximoMano) * 2 + 1];
+
+    if (envites[jugadorMano * 2] != 0) { //la mano ha envidado
+
+        if (enviteAnterior[0] > envitePostre[0]) { // pareja postre no iguala la apuesta
+
+            piedras[1]++; // la pareja mano gana una piedra
+            printf("[maestro]: mano gana una piedra, en total:%d\n", piedras[1]);
+            return 0;
+        }
+        if (enviteAnterior[0] == envitePostre[0]) { //pareja postre iguala mano
+            printf("HAY APUESTA\n");
+            return enviteAnterior[0]; //se devuelve la cantidad apostada, 2 o 5 en caso de esta logica
+        }
+        if (enviteAnterior[0] < envitePostre[0]) { //jugador mano no iguala la apuesta
+            if (enviteMano[0] > envitePostre[0]) {
+                // pareja postre no iguala la apuesta
+                piedras[1]++; //uno por el no
+                piedras[1] += envitePostre[0]; // lo que tuviera envidado la pareja postre
+                return 0; //no hay apuestas
+            }
+            else if (enviteMano[0] == envitePostre[0]) {
+                // pareja mano iguala la apuesta
+                return envitePostre[0];
+            }
+            else if (enviteMano[0] < envitePostre[0]) {
+                piedras[0]++;
+                return 0;
+            }
+
+        }
+
+    }
+    else if (envites[jugadorMano * 2] == 0) { //la mano no ha envidado)
+        printf("MANO NO ENVIDA\n");
+        printf("ENVITE POSTRE: %d\n", envitePostre[0]);
+        if (envitePostre[0] != 0) { // pareja postre si ha envidado
+            printf("POSTRE HA ENVIDADO\n");
+            if (envitePostre[0] > enviteMano[0]) { // pareja mano no acepta envite
+
+                piedras[0]++; //por el no
+                printf("POSTRE SE LLEVA PIEDRA, en total: %d\n", piedras[0]);
+                return 0;
+            }
+            else if (envitePostre[0] == enviteMano[0]) { // pareja mano acepta la apuesta
+                return envitePostre[0];
+            }
+            else if (envitePostre[0] < enviteMano[1]) { // pareja mano sube apuesta y postre no la iguala
+                printf("MANO SE LLEVA APUESTA DESPUES DE RAJARSE POSTRE\n");
+                piedras[1]++;
+                piedras[1] += envitePostre[0];
+                return 0;
+            }
+        }
+        else if ((envitePostre[0] == 0) && (enviteMano[0] != 0)) { //envida pareja de la mano y no se la aceptan
+            piedras[1]++;
+            return 0;
+        }
+        else if ((envitePostre[0] == 0) && (enviteMano[0] == 0)) { //nadie envida
+            // no hay piedras ni apuestas
+            printf("[maestro] NO HAY PIEDRAS NI APUESTAS\n");
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
+
+    if (ordago() == 1) { // ordago!
+        return 99;
+    }
+
+    else if (lance == 0) { // a grande
+        int reyes = ocurrenciasArray(equivalencias, longitud, 10);
+        if (reyes >= 3) {
+            return 5;
+        }
+        else if ((reyes == 2) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 0;
+        }
+    }
+    else if (lance == 1) { // a chica
+        int ases = ocurrenciasArray(equivalencias, longitud, 1);
+        if (ases >= 3) {
+            return 5;
+        }
+        else if ((ases == 2) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 0;
+        }
+    }
+    else if (lance == 2) { // a pares
+        int reyes = ocurrenciasArray(equivalencias, longitud, 10);
+        if (reyes >= 3) { //duples o medias de reyes
+            return 5;
+        }
+        else if ((reyes == 2) && (apuestaVigor <= 2)) { // pareja de reyes
+            return 2;
+        }
+        else { // pareja de otra cosa
+            return 0;
+        }
+
+    }
+    else if (lance == 3) { // a juego
+        int suma = sumaArray(equivalencias, 4);
+        if (suma == 31) {
+            return 5;
+        }
+        else if ((suma == 32) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 0;
+        }
+
+    }
+
+    else if (lance == 4) { // al punto
+        int suma = sumaArray(equivalencias, 4);
+        if (suma >= 27) {
+            return 5;
+        }
+        else if ((suma >= 24) && (suma < 27) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 0;
+        }
+
+    }
+    else {
+        return 0;
+    }
+    return 0;
+}
+
+int queParejaSoy(int rank, int jugadorMano) { //1 mano, 0 postre
+    if (rank == jugadorMano) {
+        return 1;
+    }
+    else if (add_mod(jugadorMano, 1, 4) == rank) {
+        return 0;
+    }
+    else if (add_mod(jugadorMano, 2, 4) == rank) {
+        return 1;
+    }
+    else if (add_mod(jugadorMano, 3, 4) == rank) {
+        return 0;
+    }
+    else return 99;
+}
+
+int enQueParejaEstoy(int rank) {
+    if ((rank == 0) || (rank == 2)) {
+        return 1;
+    }
+    else {
+        return 2;
+    }
+}
+
+
+int ordago() {
+    srand(time(0));
+    double r = (double) rand() / (double) RAND_MAX;
+    if (r < 0.98) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+void clearInputBuffer() // works only if the input buffer is not empty
+{
+    char c;
+    do {
+        c = getchar();
+    } while (c != '\n' && c != EOF);
 }
