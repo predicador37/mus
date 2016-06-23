@@ -216,19 +216,12 @@ int main(int argc, char **argv) {
 
 
         }
-
-
-
-
-
-
-
-
-
-
+        if (mus == 1) {
+            break;
+        }
         }
 
-
+    debug("[jugador %d] FINALIZADO", rank);
     MPI_Comm_disconnect(&parent);
     MPI_Finalize();
     return 0;

@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
 
 
 
-
+    debug("[maestro] FINALIZADO");
     MPI_Comm_disconnect(&juego_comm);
     MPI_Finalize();
     return 0;
