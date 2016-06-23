@@ -46,7 +46,7 @@ int crear_mazo(Carta *mazo, char *strCara[],
 void print_mazo(Carta *wMazo, int size_mazo) {
     int i;
     for (i = 0; i <= size_mazo - 1; i++) {
-        printf("El valor de %-8s\t de \t%-8s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
+        printf("El valor de %-8s\t de \t%s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
                wMazo[i].palo, wMazo[i].valor, wMazo[i].orden, wMazo[i].estado);
         printf("\n");
     }
@@ -79,7 +79,7 @@ void cortar_mazo(Carta *wMazo, char *paloCorte) {
     int r; /* índice aleatorio para el mazo*/
     r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
-    paloCorte = (char *) malloc(strlen(wMazo[r].palo) * sizeof(char));
+    paloCorte = (char *) malloc(8 * sizeof(char));
     strcpy(paloCorte, wMazo[r].palo);
 
 }
@@ -131,22 +131,22 @@ void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
     MPI_Send(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm);
-    MPI_Send(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm);
+    MPI_Send(wCarta.palo, 8, MPI_CHAR, proceso, 0, wComm);
     MPI_Send(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm);
 
 }
 
-Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status stat) {
+Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status *stat) {
     Carta wCarta;
-    wCarta.palo = (char *) malloc(5 * sizeof(char));
+    wCarta.palo = (char *) malloc(8 * sizeof(char));
     wCarta.cara = (char *) malloc(8 * sizeof(char));
-    MPI_Recv(&wCarta.id, 1, MPI_INT, proceso, 0, wComm, &stat);
-    MPI_Recv(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm, &stat);
-    MPI_Recv(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm, &stat);
-    MPI_Recv(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm, &stat);
-    MPI_Recv(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm, &stat);
-    MPI_Recv(wCarta.palo, 7, MPI_CHAR, proceso, 0, wComm, &stat);
-    MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, &stat);
+    MPI_Recv(&wCarta.id, 1, MPI_INT, proceso, 0, wComm, stat);
+    MPI_Recv(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm, stat);
+    MPI_Recv(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
+    MPI_Recv(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm, stat);
+    MPI_Recv(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm, stat);
+    MPI_Recv(wCarta.palo, 8, MPI_CHAR, proceso, 0, wComm, stat);
+    MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, stat);
     wCarta.estado = 1;
     return wCarta;
 }
@@ -158,7 +158,8 @@ void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta m
         debug("Mazo recibido");
         int r; /* índice aleatorio para el mazo*/
         r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
-        palo_corte = (char *) malloc(8 * sizeof(char));
+
+        palo_corte = (char *)  malloc(8 * sizeof(char));
         strcpy(palo_corte, mazo[r].palo);
         debug("Palo copiado: %s", palo_corte);
         int j = 0;
@@ -226,7 +227,7 @@ void repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_desca
 
 }
 
-void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status stat){
+void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status *stat){
     int i = 0;
     int buffer_reparto[3];
 
@@ -860,4 +861,13 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
     }
 
 
+}
+
+void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
+    int i;
+    for (i = 0; i <= sizeMazo - 1; i++) {
+        if (wMazo[i].id == id) {
+            wMazo[i].estado = 2;
+        }
+    }
 }

@@ -34,13 +34,13 @@ void recibir_mazo(Carta *wMazo, int proceso, MPI_Comm wCommm, int nCartas, MPI_S
 
 void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm);
 
-Carta recibir_carta(int proceso, MPI_Comm wCommm, MPI_Status stat);
+Carta recibir_carta(int proceso, MPI_Comm wCommm, MPI_Status *stat);
 
 void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * const palos[], MPI_Status stat);
 
 void repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas, Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat);
 
-void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status stat);
+void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status *stat);
 
 int cuentaCartasMano(Carta *wMano, char *cara);
 
@@ -81,5 +81,7 @@ int tengoDuples(int *paresBuf);
 int tengoPares(int *paresBuf);
 
 int cortarMus(int *valores, int *equivalencias, int *paresBuf);
+
+void marcar_descarte(Carta *wMazo, int sizeMazo, int id);
 
 #endif //MUS_MUS_H
