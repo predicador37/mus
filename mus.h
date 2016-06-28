@@ -18,8 +18,8 @@ struct carta {
 /* fin struct carta */
 typedef struct carta Carta;
 
-int crear_mazo(Carta *mazo, char *strCara[],
-              char *strPalo[], int intValor[], int intEquivalencias[]);
+int crear_mazo(Carta *mazo, const char * const strCara[],
+              const char * const strPalo[], int intValor[], int intEquivalencias[]);
 void print_mazo(Carta *wMazo, int sizeMazo);
 
 void barajar_mazo(Carta *wMazo);
@@ -38,11 +38,11 @@ Carta recibir_carta(int proceso, MPI_Comm wCommm, MPI_Status *stat);
 
 void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * const palos[], MPI_Status stat);
 
-void repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas, Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat);
+int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas, Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat);
 
 void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status *stat);
 
-int cuentaCartasMano(Carta *wMano, char *cara);
+int cuentaCartasMano(Carta *wMano, const char * const cara);
 
 int maximoArray(int array[], int longitud);
 

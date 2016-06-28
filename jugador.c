@@ -16,7 +16,7 @@
 #define N_PALOS 4
 #define N_JUGADORES 4
 #define N_LANCES 4
-#define DEBUG 1
+#define DEBUG 0
 
 int main(int argc, char **argv) {
     /*
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     }
     MPI_Recv(&token, 1, MPI_INT, 0, 0, parent, &stat);
     MPI_Send(&rank, 1, MPI_INT, 0, 0, parent);
-
+    MPI_Barrier(MPI_COMM_WORLD);
     /*
      * DETERMINACIÓN DE PROCESO REPARTIDOR PARA MUS CORRIDO
      */
@@ -71,12 +71,12 @@ int main(int argc, char **argv) {
         determinar_repartidor(corte, repartidor, palo_corte, mazo, parent, palos, stat);
     }
     MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent); //recepción del repartidor desde el proceso maestro
-
+    MPI_Barrier(MPI_COMM_WORLD);
     /*
      * REPARTO DE CARTAS PARA MUS CORRIDO
      */
     if (rank == repartidor) {
-        repartidor_reparte(rank, repartidor, size_mazo, size_descartadas, mazo, mano_cartas, parent, stat);
+        size_mazo = repartidor_reparte(rank, repartidor, size_mazo, size_descartadas, mazo, mano_cartas, parent, stat);
         /* El proceso maestro debe contar con el mazo actualizado */
         MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent);
         enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
 
     }//se termina el reparto
-
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&size_mazo, 1, MPI_INT, 0, parent); //recepción del tamaño después de repartir
 
 
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     while (mus == 0) {
         debug("jugador %d esperando token...", rank);
         MPI_Recv(&token, 1, MPI_INT, 0, 0, parent, &stat);
-        debug("Token=%d recibido por jugador %d", token, rank);
+        //debug("Token=%d recibido por jugador %d", token, rank);
         switch (token) {
 
             case 1: //evaluar mano y decidir si mus o no mus
@@ -198,6 +198,7 @@ int main(int argc, char **argv) {
                     debug("Repartidor: %d recibe descarte", rank);
                     if (descarte != 99 && descarte != 98) {
                         marcar_descarte(mazo, N_CARTAS_MAZO, descarte);
+                        //TODO y si el mazo se queda sin cartas....
                         repartir_carta(mazo[N_CARTAS_MAZO - size_mazo], 0, parent);
                         debug("Repartidor: %d reparte carta", rank);
                         mazo[N_CARTAS_MAZO - size_mazo].estado = 1;
@@ -212,17 +213,21 @@ int main(int argc, char **argv) {
 
                     i++;
                 }
+                MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
                 break;
 
 
         }
-        if (mus == 1) {
-            break;
-        }
+      //  if (mus == 1) {
+       //     break;
+        //}
         }
 
-    debug("[jugador %d] FINALIZADO", rank);
-    MPI_Comm_disconnect(&parent);
+
+    //debug("[jugador %d] FINALIZADO", rank);
+
+    //MPI_Comm_disconnect(&parent);
+    MPI_Barrier(parent);
     MPI_Finalize();
     return 0;
 }

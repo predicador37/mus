@@ -14,6 +14,7 @@
 #define N_JUGADORES 4
 #define N_PALOS 4
 #define DEBUG 1
+#define CHAR_BUFFER 10
 
 typedef int bool;
 #define true 1
@@ -22,8 +23,8 @@ typedef int bool;
 
 
 /* FUNCION crearMazo: puebla un array de estructuras Carta con sus valores y palos*/
-int crear_mazo(Carta *mazo, char *strCara[],
-              char *strPalo[], int intValor[], int intEquivalencias[]) {
+int crear_mazo(Carta *mazo, const char * const strCara[],
+              const char * const strPalo[], int intValor[], int intEquivalencias[]) {
     int i; /* contador */
     int size_mazo = 0;
 
@@ -79,7 +80,7 @@ void cortar_mazo(Carta *wMazo, char *paloCorte) {
     int r; /* índice aleatorio para el mazo*/
     r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
-    paloCorte = (char *) malloc(8 * sizeof(char));
+    paloCorte = (char *) malloc(CHAR_BUFFER * sizeof(char));
     strcpy(paloCorte, wMazo[r].palo);
 
 }
@@ -101,8 +102,8 @@ void recibir_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_St
 
     int i = 0;
     for (i = 0; i < nCartas; i++) {
-        wMazo[i].palo = (char *) malloc(8 * sizeof(char));
-        wMazo[i].cara = (char *) malloc(8 * sizeof(char));
+        wMazo[i].palo = (char *) malloc(CHAR_BUFFER * sizeof(char));
+        wMazo[i].cara = (char *) malloc(CHAR_BUFFER * sizeof(char));
         MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);
         MPI_Recv(&wMazo[i].valor, 1, MPI_INT, proceso, 0, wComm, stat);
         MPI_Recv(&wMazo[i].equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
@@ -138,8 +139,8 @@ void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
 
 Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status *stat) {
     Carta wCarta;
-    wCarta.palo = (char *) malloc(8 * sizeof(char));
-    wCarta.cara = (char *) malloc(8 * sizeof(char));
+    wCarta.palo = (char *) malloc(CHAR_BUFFER * sizeof(char));
+    wCarta.cara = (char *) malloc(CHAR_BUFFER * sizeof(char));
     MPI_Recv(&wCarta.id, 1, MPI_INT, proceso, 0, wComm, stat);
     MPI_Recv(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm, stat);
     MPI_Recv(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
@@ -159,13 +160,13 @@ void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta m
         int r; /* índice aleatorio para el mazo*/
         r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
 
-        palo_corte = (char *)  malloc(8 * sizeof(char));
+        palo_corte = (char *)  malloc(CHAR_BUFFER * sizeof(char));
         strcpy(palo_corte, mazo[r].palo);
-        debug("Palo copiado: %s", palo_corte);
+        debug("Palo copiado: %s con longitud %d caracteres", palo_corte, strlen(palo_corte));
         int j = 0;
         for (j = 0; j < N_PALOS; j++) {
             if (strcmp(palo_corte, palos[j]) == 0) {
-                debug("Palos comparados");
+                debug("Palos comparados: encontrada coincidencia");
                 /* corresponde repartir primero al primer jugador de su derecha si sale oros;
                  * al segundo si sale copas; al tercero si sale espadas y al mismo que cortó si sale bastos*/
 
@@ -180,7 +181,7 @@ void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta m
         enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); //se devuelve el mazo al maestro
     }
 
-void repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas,  Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat){
+int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas,  Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat){
 
     recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
     debug("Mazo recibido");
@@ -223,7 +224,7 @@ void repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_desca
             k++; /* un contador auxiliar para recuperar cartas del mazo */
         }
     }
-
+    return size_mazo;
 
 }
 
@@ -241,7 +242,7 @@ void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_C
     }
 }
 
-int cuentaCartasMano(Carta *wMano, char *cara) {
+int cuentaCartasMano(Carta *wMano, const char * const cara) {
     int i = 0;
     int cuenta = 0;
     for (i = 0; i < N_CARTAS_MANO; i++) {
