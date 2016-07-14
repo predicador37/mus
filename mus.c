@@ -14,26 +14,43 @@
 #define N_JUGADORES 4
 #define N_PALOS 4
 #define DEBUG 1
-#define CHAR_BUFFER 10
+#define CHAR_BUFFER 8
 
 typedef int bool;
 #define true 1
 #define false 0
 
+const char * caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
+                        "Seis", "Siete", "Sota", "Caballo", "Rey"};
+const char * palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
+const char * lances_etiquetas[] = {"Grande", "Chica", "Pares", "Juego", "Al punto"};
+int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
+int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
+
+int rand_lim(int limit) {
+/* return a random number between 0 and limit inclusive.
+ */
+
+    int divisor = RAND_MAX/(limit+1);
+    int retval;
+
+    do {
+        retval = rand() / divisor;
+    } while (retval > limit);
+
+    return retval;
+}
 
 
 /* FUNCION crearMazo: puebla un array de estructuras Carta con sus valores y palos*/
-int crear_mazo(Carta *mazo, const char * const strCara[],
-              const char * const strPalo[], int intValor[], int intEquivalencias[]) {
+int crear_mazo(Carta *mazo) {
     int i; /* contador */
     int size_mazo = 0;
 
     /* iterar el mazo */
     for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
-        mazo[i].cara = strCara[i % 10];
-        mazo[i].palo = strPalo[i / 10];
-        mazo[i].valor = intValor[i % 10];
-        mazo[i].equivalencia = intEquivalencias[i % 10];
+        mazo[i].cara = i % 10;
+        mazo[i].palo = i / 10;
         mazo[i].id = i;
         mazo[i].orden = i % 10;
         mazo[i].estado = 0;
@@ -43,12 +60,14 @@ int crear_mazo(Carta *mazo, const char * const strCara[],
 
 } /* fin funcion crearMazo */
 
+
+
 /* FUNCION printMazo: muestra por pantalla un mazo de cartas */
 void print_mazo(Carta *wMazo, int size_mazo) {
     int i;
     for (i = 0; i <= size_mazo - 1; i++) {
-        printf("El valor de %-8s\t de \t%s es \t%d \tcon orden \t%d y estado %d\n \t", wMazo[i].cara,
-               wMazo[i].palo, wMazo[i].valor, wMazo[i].orden, wMazo[i].estado);
+        printf("El valor de %-8s\t de \t%s es \t%d \tcon orden \t%d y estado %d\n \t", caras[wMazo[i].cara],
+               palos[wMazo[i].palo], valores[wMazo[i].cara], wMazo[i].orden, wMazo[i].estado);
         printf("\n");
     }
     printf("Fin del contenido del mazo/mano.\n");
@@ -75,42 +94,39 @@ void barajar_mazo(Carta *wMazo) {
 
 /* FUNCION cortarMazo: corta el mazo, esto es, saca una carta aleatoria del mazo */
 
-void cortar_mazo(Carta *wMazo, char *paloCorte) {
+/*void cortar_mazo(Carta *wMazo, char *paloCorte) {
 
-    int r; /* índice aleatorio para el mazo*/
+    int r; *//* índice aleatorio para el mazo*//*
     r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
     //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
     paloCorte = (char *) malloc(CHAR_BUFFER * sizeof(char));
     strcpy(paloCorte, wMazo[r].palo);
 
-}
+}*/
 
 void enviar_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
-    int j = 0;
+
+    int j;
     for (j = 0; j < nCartas; j++) {
+
         MPI_Send(&wMazo[j].id, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(&wMazo[j].valor, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(&wMazo[j].equivalencia, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(&wMazo[j].orden, 1, MPI_INT, proceso, 0, wComm);
         MPI_Send(&wMazo[j].estado, 1, MPI_INT, proceso, 0, wComm);
-        MPI_Send(wMazo[j].palo, 8, MPI_CHAR, proceso, 0, wComm);
-        MPI_Send(wMazo[j].cara, 8, MPI_CHAR, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].palo, 1, MPI_INT, proceso, 0, wComm);
+        MPI_Send(&wMazo[j].cara, 1, MPI_INT, proceso, 0, wComm);
     }
 }
 
 void recibir_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_Status *stat) {
 
-    int i = 0;
+    int i;
     for (i = 0; i < nCartas; i++) {
-        wMazo[i].palo = (char *) malloc(CHAR_BUFFER * sizeof(char));
-        wMazo[i].cara = (char *) malloc(CHAR_BUFFER * sizeof(char));
+
         MPI_Recv(&wMazo[i].id, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(&wMazo[i].valor, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(&wMazo[i].equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
         MPI_Recv(&wMazo[i].orden, 1, MPI_INT, proceso, 0, wComm, stat);
         MPI_Recv(&wMazo[i].estado, 1, MPI_INT, proceso, 0, wComm, stat);
-        MPI_Recv(wMazo[i].palo, 8, MPI_CHAR, proceso, 0, wComm, stat);
-        MPI_Recv(wMazo[i].cara, 8, MPI_CHAR, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].palo, 1, MPI_INT, proceso, 0, wComm, stat);
+        MPI_Recv(&wMazo[i].cara, 1, MPI_INT, proceso, 0, wComm, stat);
     }
 }
 
@@ -127,58 +143,31 @@ int add_mod(int a, int b, int m) {
 }
 
 void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
+
     MPI_Send(&wCarta.id, 1, MPI_INT, proceso, 0, wComm);
-    MPI_Send(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm);
-    MPI_Send(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm);
     MPI_Send(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm);
-    MPI_Send(wCarta.palo, 8, MPI_CHAR, proceso, 0, wComm);
-    MPI_Send(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm);
+    MPI_Send(&wCarta.palo, 1, MPI_INT, proceso, 0, wComm);
+    MPI_Send(&wCarta.cara, 1, MPI_INT, proceso, 0, wComm);
 
 }
 
 Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status *stat) {
     Carta wCarta;
-    wCarta.palo = (char *) malloc(CHAR_BUFFER * sizeof(char));
-    wCarta.cara = (char *) malloc(CHAR_BUFFER * sizeof(char));
+
     MPI_Recv(&wCarta.id, 1, MPI_INT, proceso, 0, wComm, stat);
-    MPI_Recv(&wCarta.valor, 1, MPI_INT, proceso, 0, wComm, stat);
-    MPI_Recv(&wCarta.equivalencia, 1, MPI_INT, proceso, 0, wComm, stat);
     MPI_Recv(&wCarta.orden, 1, MPI_INT, proceso, 0, wComm, stat);
     MPI_Recv(&wCarta.estado, 1, MPI_INT, proceso, 0, wComm, stat);
-    MPI_Recv(wCarta.palo, 8, MPI_CHAR, proceso, 0, wComm, stat);
-    MPI_Recv(wCarta.cara, 8, MPI_CHAR, proceso, 0, wComm, stat);
+    MPI_Recv(&wCarta.palo, 1, MPI_INT, proceso, 0, wComm, stat);
+    MPI_Recv(&wCarta.cara, 1, MPI_INT, proceso, 0, wComm, stat);
     wCarta.estado = 1;
     return wCarta;
 }
 
-void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * const palos[], MPI_Status stat) {
+void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * palos[], MPI_Status stat) {
 
 
-        recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
-        debug("Mazo recibido");
-        int r; /* índice aleatorio para el mazo*/
-        r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
 
-        palo_corte = (char *)  malloc(CHAR_BUFFER * sizeof(char));
-        strcpy(palo_corte, mazo[r].palo);
-        debug("Palo copiado: %s con longitud %d caracteres", palo_corte, strlen(palo_corte));
-        int j = 0;
-        for (j = 0; j < N_PALOS; j++) {
-            if (strcmp(palo_corte, palos[j]) == 0) {
-                debug("Palos comparados: encontrada coincidencia");
-                /* corresponde repartir primero al primer jugador de su derecha si sale oros;
-                 * al segundo si sale copas; al tercero si sale espadas y al mismo que cortó si sale bastos*/
-
-                repartidor = add_mod(corte, j + 1, 4);
-                debug("Repartidor calculado");
-
-                /* Envío del id del repartidor al proceso maestro */
-                MPI_Send(&repartidor, 1, MPI_INT, 0, 0, parent);
-                debug("Repartidor enviado");
-            }
-        }
-        enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); //se devuelve el mazo al maestro
     }
 
 int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas,  Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat){
@@ -216,7 +205,7 @@ int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descar
                 mano_cartas[i] = mazo[k];
                 buffer_reparto[0] =  i; //por qué número de carta de la mano (total de 4) se va repartiendo
                 buffer_reparto[1] = rank; // a qué jugador se reparte: en este caso, a uno mismo (repartidor)
-                buffer_reparto[2] = mano_cartas[i].valor; // qué valor tiene la carta repartida
+                buffer_reparto[2] = valores[mano_cartas[i].cara]; // qué valor tiene la carta repartida
                 MPI_Send(&buffer_reparto, 3, MPI_INT, 0, 0, parent);
             }
             size_mazo--; /* es necesario almacenar el tamaño del mazo después de repartir */
@@ -237,16 +226,16 @@ void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_C
         mano_cartas[i] = recibir_carta(repartidor, MPI_COMM_WORLD, stat);
         buffer_reparto[0] = rank;
         buffer_reparto[1] = i;
-        buffer_reparto[2] = mano_cartas[i].valor;
+        buffer_reparto[2] = valores[mano_cartas[i].cara];
         MPI_Send(&buffer_reparto, 3, MPI_INT, 0, 0, parent);
     }
 }
 
-int cuentaCartasMano(Carta *wMano, const char * const cara) {
+int cuentaCartasMano(Carta *wMano, int cara) {
     int i = 0;
     int cuenta = 0;
     for (i = 0; i < N_CARTAS_MANO; i++) {
-        if (strcmp(wMano[i].cara, cara) == 0) {
+        if (wMano[i].cara == cara) {
             cuenta++;
         }
     }
@@ -479,14 +468,14 @@ int cmpfunc(const void *a, const void *b) {
 }
 /* Encuentra parejas únicas en un array de longitud. Está preparado para una mano */
 /* Devuelve array con 3 elementos: el número de parejas y las cartas asociadas */
-int *uniquePairs(int *array, int longitud, int repeticion) {
+void unique_pairs(int *array, int longitud, int repeticion, int parejas[]) {
     qsort(array, longitud, sizeof(int), cmpfunc);
     // now we have: [1, 1, 1, 4, 4, 5, 5, 7, 7] //
     int k = 0;
     for (k = 0; k < longitud; k++) {
     }
 
-    int res[3] = {0, 99, 99}; //99 es valor fuera de rango para una carta
+   // int res[3] = {0, 99, 99}; //99 es valor fuera de rango para una carta
     int i = 0;
 
     while (i < longitud) {
@@ -503,19 +492,19 @@ int *uniquePairs(int *array, int longitud, int repeticion) {
 
         // if we spotted number just 2 times, increment result
         if (c == repeticion) {
-            res[0]++;
+            parejas[0]++;
 
-            if (res[1] == 99) {
-                res[1] = num;
+            if (parejas[1] == 99) {
+                parejas[1] = num;
             }
             else {
-                res[2] = num;
+                parejas[2] = num;
             }
 
         }
     }
 
-    return res;
+    //return res;
 }
 
 int calcularPares(int paresBuf[], int jugadorMano) {
@@ -783,22 +772,22 @@ void *preparaPares(int equivalencias[], int *pares) {
     int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
 
 
-    int *parejas = (int *) malloc(3 * sizeof(int));
-
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 4);
+    //int *parejas = (int *) malloc(3 * sizeof(int));
+    int parejas[3] = {0, 99, 99}; //99 es valor fuera de rango para una carta
+    unique_pairs(equivalencias, N_CARTAS_MANO, 4, parejas);
 
     if (parejas[0] > 0) {
         duplesIguales = parejas[1];
 
     }
 
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 3);
+    unique_pairs(equivalencias, N_CARTAS_MANO, 3, parejas);
     if (parejas[0] > 0) {
         medias = parejas[1];
 
     }
 
-    parejas = uniquePairs(equivalencias, N_CARTAS_MANO, 2);
+     unique_pairs(equivalencias, N_CARTAS_MANO, 2, parejas);
 
     pares[0] = duplesIguales;
     pares[1] = medias;
@@ -811,6 +800,7 @@ int tengoJuego(int suma) {
     int juegosGanadores[8] = {31, 32, 40, 37, 36, 35, 34, 33};
     if (ocurrenciasArray(juegosGanadores, 8, suma) == 1) {
         //hay juego
+        debug("Tengo juego");
         return 1;
     }
     else {
@@ -820,6 +810,7 @@ int tengoJuego(int suma) {
 
 int tengoMedias(int *paresBuf) {
     if (paresBuf[1] != 99) {
+        debug("Tengo medias");
         return 1;
     }
     else {
@@ -830,6 +821,7 @@ int tengoMedias(int *paresBuf) {
 int tengoDuples(int *paresBuf) {
 
     if (paresBuf[0] != 99 || paresBuf[2] == 2) {
+        debug("Tengo duples");
         return 1;
     }
     else {
@@ -839,7 +831,7 @@ int tengoDuples(int *paresBuf) {
 
 int tengoPares(int *paresBuf) {
     if ((paresBuf[0] == 1) || paresBuf[1] == 1 || paresBuf[2] == 2 || paresBuf[2] == 1) {
-
+        debug("Tengo pares");
         return 1;
     }
     else {

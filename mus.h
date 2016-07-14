@@ -7,19 +7,19 @@
 
 struct carta {
 
-    char *cara;
-    char *palo;
+    int cara;
+    int palo;
     int id;
     int orden;
-    int valor;
-    int equivalencia;
     int estado; // 0: en mazo, 1: en mano, 2: descartada
 };
 /* fin struct carta */
 typedef struct carta Carta;
 
-int crear_mazo(Carta *mazo, const char * const strCara[],
-              const char * const strPalo[], int intValor[], int intEquivalencias[]);
+int rand_lim(int limit);
+
+int crear_mazo(Carta *mazo);
+
 void print_mazo(Carta *wMazo, int sizeMazo);
 
 void barajar_mazo(Carta *wMazo);
@@ -36,13 +36,13 @@ void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm);
 
 Carta recibir_carta(int proceso, MPI_Comm wCommm, MPI_Status *stat);
 
-void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * const palos[], MPI_Status stat);
+void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * palos[], MPI_Status stat);
 
 int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas, Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat);
 
 void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status *stat);
 
-int cuentaCartasMano(Carta *wMano, const char * const cara);
+int cuentaCartasMano(Carta *wMano, int  cara);
 
 int maximoArray(int array[], int longitud);
 
@@ -62,7 +62,7 @@ int calculaChica(int rbufInv[]);
 
 int cmpfunc(const void *a, const void *b);
 
-int *uniquePairs(int array[], int longitud, int repeticion);
+void unique_airs(int array[], int longitud, int repeticion,  int parejas[]);
 
 int calcularPares(int paresBuf[], int jugadorMano);
 

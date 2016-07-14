@@ -1,0 +1,233 @@
+[maestro] Iniciado proceso maestro 0 de 1 en kaitain ejecutando MPI 2.1
+[maestro] Generando 4 procesos ejecutando ./jugador
+[maestro] Ejecutado proceso maestro con identificador 0 de un total de 1
+[jugador 0] Jugador 0: Listo para jugar!
+[jugador 1] Jugador 1: Listo para jugar!
+[jugador 2] Jugador 2: Listo para jugar!
+[jugador 3] Jugador 3: Listo para jugar!
+[maestro] Tamaño del mazo: 40
+Mazo barajado.
+El valor de Cuatro  	 de 	Oros es 	4 	con orden 	3 y estado 0
+ 	
+El valor de Siete   	 de 	Espadas es 	7 	con orden 	6 y estado 0
+ 	
+El valor de As      	 de 	Oros es 	1 	con orden 	0 y estado 0
+ 	
+El valor de As      	 de 	Espadas es 	1 	con orden 	0 y estado 0
+ 	
+El valor de Tres    	 de 	Oros es 	10 	con orden 	2 y estado 0
+ 	
+El valor de Sota    	 de 	Oros es 	10 	con orden 	7 y estado 0
+ 	
+El valor de Cuatro  	 de 	Bastos es 	4 	con orden 	3 y estado 0
+ 	
+El valor de Seis    	 de 	Oros es 	6 	con orden 	5 y estado 0
+ 	
+El valor de Dos     	 de 	Copas es 	1 	con orden 	1 y estado 0
+ 	
+El valor de Dos     	 de 	Espadas es 	1 	con orden 	1 y estado 0
+ 	
+El valor de Caballo 	 de 	Espadas es 	10 	con orden 	8 y estado 0
+ 	
+El valor de Sota    	 de 	Copas es 	10 	con orden 	7 y estado 0
+ 	
+El valor de Rey     	 de 	Oros es 	10 	con orden 	9 y estado 0
+ 	
+El valor de Tres    	 de 	Espadas es 	10 	con orden 	2 y estado 0
+ 	
+El valor de Siete   	 de 	Bastos es 	7 	con orden 	6 y estado 0
+ 	
+El valor de Cinco   	 de 	Espadas es 	5 	con orden 	4 y estado 0
+ 	
+El valor de Rey     	 de 	Bastos es 	10 	con orden 	9 y estado 0
+ 	
+El valor de As      	 de 	Bastos es 	1 	con orden 	0 y estado 0
+ 	
+El valor de Siete   	 de 	Copas es 	7 	con orden 	6 y estado 0
+ 	
+El valor de Caballo 	 de 	Bastos es 	10 	con orden 	8 y estado 0
+ 	
+El valor de Caballo 	 de 	Oros es 	10 	con orden 	8 y estado 0
+ 	
+El valor de Sota    	 de 	Espadas es 	10 	con orden 	7 y estado 0
+ 	
+El valor de Cuatro  	 de 	Copas es 	4 	con orden 	3 y estado 0
+ 	
+El valor de Tres    	 de 	Bastos es 	10 	con orden 	2 y estado 0
+ 	
+El valor de Sota    	 de 	Bastos es 	10 	con orden 	7 y estado 0
+ 	
+El valor de Tres    	 de 	Copas es 	10 	con orden 	2 y estado 0
+ 	
+El valor de Rey     	 de 	Copas es 	10 	con orden 	9 y estado 0
+ 	
+El valor de As      	 de 	Copas es 	1 	con orden 	0 y estado 0
+ 	
+El valor de Seis    	 de 	Espadas es 	6 	con orden 	5 y estado 0
+ 	
+El valor de Cinco   	 de 	Copas es 	5 	con orden 	4 y estado 0
+ 	
+El valor de Seis    	 de 	Bastos es 	6 	con orden 	5 y estado 0
+ 	
+El valor de Rey     	 de 	Espadas es 	10 	con orden 	9 y estado 0
+ 	
+El valor de Seis    	 de 	Copas es 	6 	con orden 	5 y estado 0
+ 	
+El valor de Cinco   	 de 	Bastos es 	5 	con orden 	4 y estado 0
+ 	
+El valor de Cinco   	 de 	Oros es 	5 	con orden 	4 y estado 0
+ 	
+El valor de Siete   	 de 	Oros es 	7 	con orden 	6 y estado 0
+ 	
+El valor de Caballo 	 de 	Copas es 	10 	con orden 	8 y estado 0
+ 	
+El valor de Dos     	 de 	Oros es 	1 	con orden 	1 y estado 0
+ 	
+El valor de Cuatro  	 de 	Espadas es 	4 	con orden 	3 y estado 0
+ 	
+El valor de Dos     	 de 	Bastos es 	1 	con orden 	1 y estado 0
+ 	
+Fin del contenido del mazo/mano.
+[maestro] El jugador repartidor es: 0
+Mazo barajado.
+[repartidor 0] Repartida carta 0 al jugador 1
+[jugador 0] Jugador 0 recibe carta 1 
+[repartidor 0] Repartida carta 0 al jugador 2
+[jugador 0] Jugador 0 recibe carta 2 
+[repartidor 0] Repartida carta 0 al jugador 3
+[jugador 0] Jugador 0 recibe carta 3 
+[repartidor 0] Repartida carta 0 al jugador 0
+[jugador 0] Jugador 0 recibe carta 0 
+[repartidor 0] Repartida carta 1 al jugador 1
+[jugador 1] Jugador 1 recibe carta 1 
+[repartidor 0] Repartida carta 1 al jugador 2
+[jugador 1] Jugador 1 recibe carta 2 
+[repartidor 0] Repartida carta 1 al jugador 3
+[jugador 1] Jugador 1 recibe carta 3 
+[repartidor 0] Repartida carta 1 al jugador 0
+[jugador 0] Jugador 0 recibe carta 1 
+[repartidor 0] Repartida carta 2 al jugador 1
+[jugador 2] Jugador 2 recibe carta 1 
+[repartidor 0] Repartida carta 2 al jugador 2
+[jugador 2] Jugador 2 recibe carta 2 
+[repartidor 0] Repartida carta 2 al jugador 3
+[jugador 2] Jugador 2 recibe carta 3 
+[repartidor 0] Repartida carta 2 al jugador 0
+[jugador 0] Jugador 0 recibe carta 2 
+[repartidor 0] Repartida carta 3 al jugador 1
+[jugador 3] Jugador 3 recibe carta 1 
+[repartidor 0] Repartida carta 3 al jugador 2
+[jugador 3] Jugador 3 recibe carta 2 
+[repartidor 0] Repartida carta 3 al jugador 3
+[jugador 3] Jugador 3 recibe carta 3 
+[repartidor 0] Repartida carta 3 al jugador 0
+[jugador 0] Jugador 0 recibe carta 3 
+[maestro] tamaño del mazo: 24
+El valor de Cuatro  	 de 	Espadas es 	4 	con orden 	3 y estado 1
+ 	
+El valor de Tres    	 de 	Copas es 	10 	con orden 	2 y estado 1
+ 	
+El valor de Rey     	 de 	Oros es 	10 	con orden 	9 y estado 1
+ 	
+El valor de As      	 de 	Copas es 	1 	con orden 	0 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Tres    	 de 	Espadas es 	10 	con orden 	2 y estado 1
+ 	
+El valor de Cuatro  	 de 	Bastos es 	4 	con orden 	3 y estado 1
+ 	
+El valor de Seis    	 de 	Espadas es 	6 	con orden 	5 y estado 1
+ 	
+El valor de As      	 de 	Bastos es 	1 	con orden 	0 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Seis    	 de 	Bastos es 	6 	con orden 	5 y estado 1
+ 	
+El valor de Sota    	 de 	Copas es 	10 	con orden 	7 y estado 1
+ 	
+El valor de Seis    	 de 	Copas es 	6 	con orden 	5 y estado 1
+ 	
+El valor de Dos     	 de 	Copas es 	1 	con orden 	1 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Cuatro  	 de 	Oros es 	4 	con orden 	3 y estado 1
+ 	
+El valor de Cinco   	 de 	Copas es 	5 	con orden 	4 y estado 1
+ 	
+El valor de Sota    	 de 	Oros es 	10 	con orden 	7 y estado 1
+ 	
+El valor de Rey     	 de 	Copas es 	10 	con orden 	9 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Tres    	 de 	Espadas es 	10 	con orden 	2 y estado 1
+ 	
+El valor de Seis    	 de 	Oros es 	6 	con orden 	5 y estado 1
+ 	
+El valor de Siete   	 de 	Copas es 	7 	con orden 	6 y estado 1
+ 	
+El valor de As      	 de 	Espadas es 	1 	con orden 	0 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Caballo 	 de 	Bastos es 	10 	con orden 	8 y estado 1
+ 	
+El valor de Siete   	 de 	Bastos es 	7 	con orden 	6 y estado 1
+ 	
+El valor de Cinco   	 de 	Bastos es 	5 	con orden 	4 y estado 1
+ 	
+El valor de Sota    	 de 	Bastos es 	10 	con orden 	7 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Dos     	 de 	Oros es 	1 	con orden 	1 y estado 1
+ 	
+El valor de Siete   	 de 	Oros es 	7 	con orden 	6 y estado 1
+ 	
+El valor de Caballo 	 de 	Copas es 	10 	con orden 	8 y estado 1
+ 	
+El valor de Rey     	 de 	Copas es 	10 	con orden 	9 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Cuatro  	 de 	Espadas es 	4 	con orden 	3 y estado 1
+ 	
+El valor de Tres    	 de 	Copas es 	10 	con orden 	2 y estado 1
+ 	
+El valor de Rey     	 de 	Oros es 	10 	con orden 	9 y estado 1
+ 	
+El valor de Cinco   	 de 	Oros es 	5 	con orden 	4 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Seis    	 de 	Oros es 	6 	con orden 	5 y estado 1
+ 	
+El valor de Siete   	 de 	Copas es 	7 	con orden 	6 y estado 1
+ 	
+El valor de As      	 de 	Espadas es 	1 	con orden 	0 y estado 1
+ 	
+El valor de Caballo 	 de 	Bastos es 	10 	con orden 	8 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Siete   	 de 	Bastos es 	7 	con orden 	6 y estado 1
+ 	
+El valor de Cinco   	 de 	Bastos es 	5 	con orden 	4 y estado 1
+ 	
+El valor de Sota    	 de 	Bastos es 	10 	con orden 	7 y estado 1
+ 	
+El valor de Rey     	 de 	Copas es 	10 	con orden 	9 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Dos     	 de 	Oros es 	1 	con orden 	1 y estado 1
+ 	
+El valor de Tres    	 de 	Copas es 	10 	con orden 	2 y estado 1
+ 	
+El valor de Rey     	 de 	Oros es 	10 	con orden 	9 y estado 1
+ 	
+El valor de Siete   	 de 	Oros es 	7 	con orden 	6 y estado 1
+ 	
+Fin del contenido del mazo/mano.
+El valor de Tres    	 de 	Espadas es 	10 	con orden 	2 y estado 1
+ 	
+El valor de Seis    	 de 	Oros es 	6 	con orden 	5 y estado 1
+ 	
+El valor de Siete   	 de 	Copas es 	7 	con orden 	6 y estado 1
+ 	
+El valor de Rey     	 de 	Bastos es 	10 	con orden 	9 y estado 1
+ 	
+Fin del contenido del mazo/mano.

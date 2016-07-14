@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <time.h>
-#include <zconf.h>
 #include "mus.h"
 #include "dbg.h"
 
@@ -20,22 +19,26 @@
 #define DEBUG 1
 
 
+extern const char * caras[];
+extern const char * palos[];
+extern const char * lancesEtiquetas[];
+extern int valores[];
+extern int equivalencias[];
+
+
+
 int main(int argc, char **argv) {
     /*
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
-    int rank, size, version, subversion, namelen, universe_size, size_mazo, proceso, corte, repartidor, postre, mano,
-            siguiente_jugador, mus, token, descarte, repartidor_descartes;
+    int rank, size, version, subversion, namelen, universe_size, size_mazo, size_mano, proceso, corte, repartidor, postre, mano,
+            ultimo, siguiente_jugador, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
+    int cartas_a_descartar[N_CARTAS_MANO];
     MPI_Comm juego_comm;
     MPI_Status stat;
-    Carta mazo[N_CARTAS_MAZO], mano_jugador[N_CARTAS_MANO], descartada;
-    const char *const caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
-                                 "Seis", "Siete", "Sota", "Caballo", "Rey"};
-    const char *const palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
-    const char *const lancesEtiquetas[] = {"Grande", "Chica", "Pares", "Juego", "Al punto"};
-    int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
-    int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
+   Carta mazo[N_CARTAS_MAZO], mano_jugador[N_CARTAS_MANO], descartada;
+
     srand(time(NULL)); /* randomize */
     /*
      * INICIALIZACIÓN DE MPI Y CREACIÓN DE PROCESOS JUGADORES
@@ -54,7 +57,8 @@ int main(int argc, char **argv) {
 
     /* Fijar el total de procesos a ejecutar incluyendo el maestro */
     universe_size = 5;
-    strcpy(worker_program, "./jugador");
+
+    strcpy(worker_program, "./Debug/jugador");
     printf("[maestro] Generando %d procesos ejecutando %s\n", universe_size - 1, worker_program);
     MPI_Comm_spawn(worker_program, MPI_ARGV_NULL, universe_size - 1, MPI_INFO_NULL, 0, MPI_COMM_SELF, &juego_comm,
                    MPI_ERRCODES_IGNORE);
@@ -66,29 +70,40 @@ int main(int argc, char **argv) {
         MPI_Recv(&proceso, 1, MPI_INT, i, 0, juego_comm, MPI_STATUS_IGNORE);
         printf("[jugador %d] Jugador %d: Listo para jugar!\n", proceso, proceso);
     }
+
+
     /*
      * INICIALIZACIÓN DEL MAZO
      */
-    size_mazo = crear_mazo(mazo, caras, palos, valores, equivalencias); /* llena el mazo de cartas */
+
+
+    size_mazo = crear_mazo(mazo); // llena el mazo de cartas
+
     printf("[maestro] Tamaño del mazo: %d\n", size_mazo);
-    barajar_mazo(mazo); /*Baraja el mazo*/
+
+    barajar_mazo(mazo); //Baraja el mazo
     print_mazo(mazo, N_CARTAS_MAZO);
+
     /*
      * DETERMINACIÓN DE JUGADOR QUE CORTARÁ MAZO
      */
-    int N = 0, M = N_JUGADORES - 1; /* valores del intervalo para el corte */
-    corte = M + rand() /
-                (RAND_MAX / (N - M + 1) + 1); /* proceso aleatorio de entre los existentes para determinar el corte */
+    //int N = 0, M = N_JUGADORES - 1; // valores del intervalo para el corte
+    //corte = M + rand() /
+    //            (RAND_MAX / (N - M + 1) + 1); // proceso aleatorio de entre los existentes para determinar el corte
+
+    corte = rand_lim(N_JUGADORES-1);
     debug("El jugador que cortará es: %d\n", corte);
     MPI_Bcast(&corte, 1, MPI_INT, MPI_ROOT,
-              juego_comm); /* envío del id de proceso que realizará el corte a todos los jugadores*/
+              juego_comm); // envío del id de proceso que realizará el corte a todos los jugadores
     debug("Corte broadcasted: %d\n", corte);
-    MPI_Bcast(&size_mazo, 1, MPI_INT, MPI_ROOT, juego_comm);/*Envío del tamaño del mazo */
+    MPI_Bcast(&size_mazo, 1, MPI_INT, MPI_ROOT, juego_comm);//Envío del tamaño del mazo*/
 
     /*
      * RECEPCIÓN DEL JUGADOR REPARTIDOR POR PARTE DEL CORTE
      */
-    enviar_mazo(mazo, corte, juego_comm, N_CARTAS_MAZO); /* envío del mazo al jugador que va a cortar la baraja*/
+
+    enviar_mazo(mazo, corte, juego_comm, N_CARTAS_MAZO); // envío del mazo al jugador que va a cortar la baraja
+
     debug("Mazo enviado");
     MPI_Recv(&repartidor, 1, MPI_INT, corte, 0, juego_comm, MPI_STATUS_IGNORE);
     printf("[maestro] El jugador repartidor es: %d\n", repartidor);
@@ -96,21 +111,24 @@ int main(int argc, char **argv) {
                  MPI_STATUS_IGNORE); //se recibe de nuevo el mazo del jugador que ha cortado
     debug("Mazo recibido");
     MPI_Bcast(&repartidor, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del repartidor a todos los procesos
+
     /*
      * REPARTO DE CARTAS PARA MUS CORRIDO
      */
-    /* envío del mazo al jugador repartidor */
-    barajar_mazo(mazo); /*Baraja el mazo*/
+
+    // envío del mazo al jugador repartidor
+    barajar_mazo(mazo); //Baraja el mazo
     enviar_mazo(mazo, repartidor, juego_comm, N_CARTAS_MAZO);
     debug("Mazo enviado");
-    /* e/s auxiliar reparto de cartas */
+    // e/s auxiliar reparto de cartas
     for (i = 0; i <= (N_CARTAS_MANO * N_JUGADORES - 1); i++) {
         int buffer[3];
         MPI_Recv(&buffer, 3, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
         printf("[repartidor %d] Repartida carta %d al jugador %d\n", repartidor, buffer[0], buffer[1]);
         int siguiente = buffer[1];
+        int carta = buffer[0];
         MPI_Recv(&buffer, 3, MPI_INT, siguiente, 0, juego_comm, MPI_STATUS_IGNORE);
-        printf("[jugador %d] Jugador %d recibe carta %d \n", buffer[1], buffer[1], buffer[0]);
+        printf("[jugador %d] Jugador %d recibe carta %d \n",siguiente, siguiente, carta);
     }
     /* Recepción de mazo una vez repartido*/
     MPI_Recv(&size_mazo, 1, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
@@ -129,7 +147,7 @@ int main(int argc, char **argv) {
 //token = 3 : descartar
 //token = 4 : repartir
     siguiente_jugador = repartidor;
-    int turno = 0;
+    turno = 0;
     // Se envía el mazo al jugador a la derecha del repartidor
     while (mus == 0) {
     turno++;
@@ -138,6 +156,7 @@ int main(int argc, char **argv) {
         token = 1;
                 MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                 recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                printf("[maestro] Mano del jugador %d\n", siguiente_jugador);
                 print_mazo(mano_jugador, N_CARTAS_MANO);
                 debug("Envío de mazo a jugador %d", siguiente_jugador);
                 enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
@@ -147,20 +166,22 @@ int main(int argc, char **argv) {
 
     if (mus == 1) { // corta el mus
         // En caso de no querer mus, ese jugador es mano y el anterior postre, al que habrá que pasar el mazo
-        debug("[jugador %d] Corta mus", siguiente_jugador);
+        printf("[jugador %d] Corta mus", siguiente_jugador);
         mano = siguiente_jugador;
         //int ultimo = add_mod(siguiente_jugador, 4, 4);
-        int ultimo = siguiente_jugador;
+        ultimo = siguiente_jugador;
         siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
-        while(siguiente_jugador != ultimo) {
+       // while(siguiente_jugador != ultimo) {
+        for (i=0; i< N_JUGADORES-1;i++) {
             debug("siguiente jugador en enviar token 2: %d", siguiente_jugador);
             token = 2;
             MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
         }
+        break;
     }
     else { // hay mus
-        debug("[jugador %d] Pide mus", siguiente_jugador);
+        printf("[jugador %d] Pide mus\n", siguiente_jugador);
         if (turno % 4 != 0){
             //En caso de querer mus, devuelve el mazo al maestro que a su vez lo pasará al jugador siguiente
 
@@ -168,7 +189,7 @@ int main(int argc, char **argv) {
 
         }
         else {
-            debug("FIN DE RONDA SIN CORTAR MUS");
+            printf("FIN DE RONDA SIN CORTAR MUS\n");
 
             // Si pasa una ronda completa sin cortar mus, el mazo pasa al jugador de la derecha del último que repartió
             recibir_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
@@ -192,16 +213,27 @@ int main(int argc, char **argv) {
                     token = 3; // este jugador será el que haga descartes y pida cartas
                     MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                 }
-            for ( j = 0; j < N_CARTAS_MANO; j++) {
-                MPI_Recv(&descarte, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
-                debug("Recibido descarte de jugador %d", siguiente_jugador);
-                MPI_Send(&descarte, 1, MPI_INT, repartidor_descartes, 0, juego_comm);
-                if (descarte != 99 && descarte != 98) {
+
+              printf("[maestro] Jugador %d, ¿cuántas cartas quieres?\n", siguiente_jugador);
+                //recibir cuantas cartas quiere
+                MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+                printf("[jugador %d] Quiero %d cartas\n", siguiente_jugador, n_cartas_a_descartar);
+                //recibir las cartas descartadas
+                MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+                // envío de número de cartas a descartar a repartidor
+                MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, repartidor_descartes, 0, juego_comm);
+
+                // envío de array con ids de cartas a descartar a repartidor
+
+                MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, repartidor_descartes, 0, juego_comm);
+                for ( j = 0; j < n_cartas_a_descartar; j++) {
+
+
                     descartada = recibir_carta(repartidor_descartes, juego_comm, MPI_STATUS_IGNORE);
                     repartir_carta(descartada, siguiente_jugador, juego_comm);
-                }
+
             }
-                debug("[maestro] Fin del reparto de cartas");
+                debug("[maestro] Fin del reparto de cartas\n");
                 i++;
                 debug("Iteración de jugador número %d", i);
             } //fin while descartes
@@ -222,13 +254,16 @@ int main(int argc, char **argv) {
     // CHICA
     // PARES
     // JUEGO
-    debug("TAMAÑO DEL MAZO DESPUÉS DE DESCARTES: %d", size_mazo);
+   // debug("TAMAÑO DEL MAZO DESPUÉS DE DESCARTES: %d", size_mazo);
     //resultado: comparar cartas de una pareja despecto de la otra
 
 
-    debug("[maestro] FINALIZADO");
+    debug("[maestro] FINALIZADO!");
+    /*free(mazo->palo);
+    free(mazo->cara);*/
+
     //MPI_Comm_disconnect(&juego_comm);
-    MPI_Barrier(juego_comm);
+    //MPI_Barrier(juego_comm);
     MPI_Finalize();
     return 0;
 }
