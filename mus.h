@@ -42,11 +42,11 @@ int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descar
 
 void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status *stat);
 
-int cuentaCartasMano(Carta *wMano, int  cara);
+int cuenta_cartas_mano(Carta *wMano, int  cara);
 
-int maximoArray(int array[], int longitud);
+int maximo_array(int array[], int longitud);
 
-int maximoArrayExcluyendo(int array[], int longitud, int excluido);
+int maximo_array_excluyendo(int array[], int longitud, int excluido);
 
 int ocurrenciasArray(int array[], int longitud, int numero);
 
@@ -83,5 +83,15 @@ int tengoPares(int *paresBuf);
 int cortarMus(int *valores, int *equivalencias, int *paresBuf);
 
 void marcar_descarte(Carta *wMazo, int sizeMazo, int id);
+
+int ordago();
+
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor);
+
+int busca_indice(int a[], int longitud, int numero);
+
+int que_pareja_soy(int rank, int jugadorMano);
+
+int misma_pareja(int rank1, int rank2);
 
 #endif //MUS_MUS_H

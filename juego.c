@@ -32,9 +32,15 @@ int main(int argc, char **argv) {
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
     int rank, size, version, subversion, namelen, universe_size, size_mazo, size_mano, proceso, corte, repartidor, postre, mano,
-            ultimo, siguiente_jugador, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar;
+            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
     int cartas_a_descartar[N_CARTAS_MANO];
+    //Array de 4 posiciones para los envites, una para cada jugador
+    //0: no ha hablado
+    //1: paso
+    //2: envido (2 piedras, apuesta mínima)
+    //3-99: envido N piedras
+    int envites_jugadores[N_JUGADORES] = {0,0,0,0};
     MPI_Comm juego_comm;
     MPI_Status stat;
    Carta mazo[N_CARTAS_MAZO], mano_jugador[N_CARTAS_MANO], descartada;
@@ -166,7 +172,7 @@ int main(int argc, char **argv) {
 
     if (mus == 1) { // corta el mus
         // En caso de no querer mus, ese jugador es mano y el anterior postre, al que habrá que pasar el mazo
-        printf("[jugador %d] Corta mus", siguiente_jugador);
+        printf("[jugador %d] Corta mus\n", siguiente_jugador);
         mano = siguiente_jugador;
         //int ultimo = add_mod(siguiente_jugador, 4, 4);
         ultimo = siguiente_jugador;
@@ -243,14 +249,117 @@ int main(int argc, char **argv) {
     } //fin else cuando jugador pide mus
 } // fin while mus corrido (se pide mus)
     //TODO: comprobar estados de las cartas del mazo devuelto
+printf("[maestro] Enviando mano...\n");
+//Se comunica a todos los jugadores quien es la mano
+    MPI_Bcast(&mano, 1, MPI_INT, MPI_ROOT, juego_comm);
 
+printf("[maestro] Manos con las que se juega la partida: \n");
+    siguiente_jugador=mano;
+    for(i=0;i<4;i++){
+        recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+        printf("[maestro] Mano del jugador %d\n", siguiente_jugador);
+        print_mazo(mano_jugador, N_CARTAS_MANO);
+        siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
+    }
 
     /*
      * FASE DE LANCES
      */
 
     // cada ronda cuatro lances
+
+    //token = 1 : evaluar + decidir envite
+    //token = 2 : esperar a ver qué dicen los otros
+    //token = 3 : apuesta igualada
+
+
+
+
     // GRANDE
+
+
+
+     printf("[maestro] INICIANDO LANCES...\n");
+
+    i=0;
+    token=1;
+    envite=0;
+    siguiente_jugador=mano;
+    // para cada jugador:
+    while(i<4) {
+        //enviar token a jugador, empezando por la mano
+        token=1;
+        MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
+        debug("[maestro] Token %d enviado...", i);
+
+        //recibir envite/paso de jugador
+        MPI_Recv(&envite, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+        debug("[maestro] RECIBIDO ENVITE %d", envite);
+        switch (envite) {
+            case 1:
+                printf("[jugador %d] Paso\n", siguiente_jugador);
+                break;
+            case 2:
+                printf("[jugador %d] Envido\n", siguiente_jugador);
+                break;
+            default:
+                printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
+                break;
+        }
+        envites_jugadores[siguiente_jugador] = envite;
+        int j;
+        jugador_espera = siguiente_jugador;
+        for (j=0; j< N_JUGADORES-1;j++) {
+            jugador_espera = add_mod(jugador_espera, 1, 4);
+            token = 2;
+            MPI_Send(&token, 1, MPI_INT, jugador_espera, 0, juego_comm);
+
+        }
+        //publicar envites al resto de jugadores
+
+        MPI_Bcast(envites_jugadores, 4, MPI_INT, MPI_ROOT, juego_comm);
+        siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
+        i++;
+    }
+    int k;
+
+        printf("[maestro] Array de envites: %d, %d, %d, %d\n",  envites_jugadores[0], envites_jugadores[1],
+               envites_jugadores[2], envites_jugadores[3]);
+
+
+    //evaluar envites de las parejas
+    //mientras apuesta no esté terminada
+        //determinar pareja a la que han subido la apuesta
+        //enviar token a jugador 1 de pareja a la que han subido la apuesta
+        //recibir envite/paso de jugador
+        //enviar token a jugador 2 de pareja a la que han subido la apuesta
+        //recibir envite/paso de jugador
+        //evaluar nuevo envite de la pareja y actualizar envites
+
+   // recibir envite/paso de la mano
+    // puiblicar envite al resto de jugadores
+    //while apuesta no cerrada
+      //si mano ha pasado
+         //si parejaPostre no ha hablado
+            //recibir envite de jugador siguiente a mano
+        // si parejaPostre ha hablado
+            // break
+      //si mano no ha pasado
+        //recibir envites de parejaPostre
+        //confeccionar envite de parejaPostre (apuesta más alta de los dos)
+        //publicar envite al resto de jugadores
+        // si envite de parejaPostre iguala/pasa
+            //break
+        // si envite de parejaPostre mayor
+            //recibir envite/paso de la mano
+            //publicar envite al resto de jugadores
+
+
+
+    //recibir envite/paso
+    //publicar envites al resto de jugadores
+    //jugador siguiente
+
     // CHICA
     // PARES
     // JUEGO

@@ -29,10 +29,16 @@ int main(int argc, char **argv) {
     /*
      * DECLARACIÓN DE VARIABLES
      */
-    int rank, size, namelen, version, subversion, psize, token, corte, palo_corte, repartidor, postre, mano, size_mazo, size_mano, size_descartadas, siguiente_jugador, mus, descarte, n_cartas_a_descartar;
+    int rank, size, namelen, version, subversion, psize, token, corte, palo_corte, repartidor, postre, mano, size_mazo, size_mano, size_descartadas, siguiente_jugador, mus, descarte, n_cartas_a_descartar, apuesta_en_vigor, jugador_apuesta_en_vigor, envite;
 
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
-    int cuentaCartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO];
+    int cuentaCartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO], equivalencias_jugador[N_CARTAS_MANO];;
+    //Array de 4 posiciones para los envites, una para cada jugador
+    //0: no ha hablado
+    //1: paso
+    //2: envido (2 piedras, apuesta mínima)
+    //3-99: envido N piedras
+    int envites_jugadores[N_JUGADORES] = {0,0,0,0};
     Carta mazo[N_CARTAS_MAZO];
     Carta mano_cartas[N_CARTAS_MANO];
     //char * palo_corte = NULL;
@@ -148,7 +154,7 @@ int main(int argc, char **argv) {
                 int juego = 0;
                 int invertido[N_CARTAS_PALO];
                 int pares[5];
-                int equivalencias_jugador[N_CARTAS_MANO];
+
 
 
                 for (i = 0; i < N_CARTAS_MANO; i++) {
@@ -164,7 +170,7 @@ int main(int argc, char **argv) {
                 int cuenta = 0;
 
                 for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
-                    cuenta = cuentaCartasMano(mano_cartas,i);
+                    cuenta = cuenta_cartas_mano(mano_cartas,i);
 
                     cuentaCartas[N_CARTAS_PALO - i - 1] = cuenta;
 
@@ -231,7 +237,7 @@ int main(int argc, char **argv) {
                 while(i<4) {
 
                     if (i==3) { //soy el repartidor
-                        
+
                         n_cartas_a_descartar=0;
                         for (j = 0; j < N_CARTAS_MANO; j++) {
                             if (equivalencias[mano_cartas[j].cara] != 10) {
@@ -290,13 +296,51 @@ int main(int argc, char **argv) {
         //}
         }
 
+//Se recibe del maestro quien es el jugador mano
+    MPI_Bcast(&mano, 1, MPI_INT, 0, parent);
+    enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
+    /*
+   * FASE DE LANCES
+   */
+
+    //Array de 4 posiciones para los envites, una para cada jugador
+    //0: no ha hablado
+    //1: paso
+    //2: envido (2 piedras, apuesta mínima)
+    //3-99: envido N piedras
+
+    //lance termina si:
+        // 4 jugadores están en paso
+        // 3 jugadores están en paso y 1 en 2-99
+        // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
+    int i = 0;
+    while(i<4) {
+        debug("jugador %d esperando token...", rank);
+        token = 0;
+        MPI_Recv(&token, 1, MPI_INT, 0, 0, parent, &stat);
+        debug("Token=%d recibido por jugador %d", token, rank);
+
+        switch (token) {
+            case 1: //decidir envite
+                apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
+                jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
+                envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor);
+                MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
+                break;
+            case 2: //esperar a ver qué dicen los otros
+                break;
+            case 3:
+                break;
+        }
+        MPI_Bcast(envites_jugadores, 4, MPI_INT, 0, parent);
+        i++;
+
+    }
+
+
 
     //debug("[jugador %d] FINALIZADO", rank);
-   /* free(mazo->palo);
-    free(mazo->cara);
-    free(palo_corte);
-    free(mano_cartas->palo);
-    free(mano_cartas->cara);*/
+
 
     //MPI_Comm_disconnect(&parent);
 

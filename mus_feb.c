@@ -989,9 +989,6 @@ int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
         }
 
     }
-    else {
-        return 0;
-    }
     return 0;
 }
 

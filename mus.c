@@ -231,7 +231,7 @@ void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_C
     }
 }
 
-int cuentaCartasMano(Carta *wMano, int cara) {
+int cuenta_cartas_mano(Carta *wMano, int cara) {
     int i = 0;
     int cuenta = 0;
     for (i = 0; i < N_CARTAS_MANO; i++) {
@@ -242,7 +242,7 @@ int cuentaCartasMano(Carta *wMano, int cara) {
     return cuenta;
 }
 
-int maximoArray(int array[], int longitud) {
+int maximo_array(int array[], int longitud) {
     int i = 0;
     int max = array[0];
 
@@ -254,7 +254,7 @@ int maximoArray(int array[], int longitud) {
     return max;
 }
 
-int maximoArrayExcluyendo(int array[], int longitud, int excluido) {
+int maximo_array_excluyendo(int array[], int longitud, int excluido) {
     int i = 0;
     int max = array[0];
 
@@ -320,7 +320,7 @@ int calculaGrande(int rbuf[], int jugadorMano) {
             suma[1] = rbuf[10] + rbuf[17];
             suma[2] = rbuf[20] + rbuf[27];
             suma[3] = rbuf[30] + rbuf[37];
-            int maximo = maximoArray(suma, 4);
+            int maximo = maximo_array(suma, 4);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene más reyes
                 ganador = buscaIndice(suma, 4, maximo);
@@ -341,7 +341,7 @@ int calculaGrande(int rbuf[], int jugadorMano) {
             suma[1] = rbuf[k + 10] * empates[1];
             suma[2] = rbuf[k + 20] * empates[2];
             suma[3] = rbuf[k + 30] * empates[3];
-            int maximo = maximoArray(suma, 4);
+            int maximo = maximo_array(suma, 4);
             if (maximo != 0) {
                 int ocurrencias = ocurrenciasArray(suma, 4, maximo);
                 if (ocurrencias == 1 && empates[buscaIndice(suma, 4, maximo)] == 1) {
@@ -370,7 +370,7 @@ int calculaGrande(int rbuf[], int jugadorMano) {
             suma[1] = rbuf[18] + rbuf[19];
             suma[2] = rbuf[28] + rbuf[29];
             suma[3] = rbuf[38] + rbuf[39];
-            int maximo = maximoArray(suma, 4);
+            int maximo = maximo_array(suma, 4);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene mejores cartas
                 ganador = buscaIndice(suma, 4, maximo);
@@ -402,7 +402,7 @@ int calculaChica(int rbufInv[]) {
             suma[1] = rbufInv[10] + rbufInv[11];
             suma[2] = rbufInv[20] + rbufInv[21];
             suma[3] = rbufInv[30] + rbufInv[31];
-            int maximo = maximoArray(suma, 4);
+            int maximo = maximo_array(suma, 4);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene más Ases
                 ganador = buscaIndice(suma, 4, maximo);
@@ -423,7 +423,7 @@ int calculaChica(int rbufInv[]) {
             suma[1] = rbufInv[k + 10] * empates[1];
             suma[2] = rbufInv[k + 20] * empates[2];
             suma[3] = rbufInv[k + 30] * empates[3];
-            int maximo = maximoArray(suma, 4);
+            int maximo = maximo_array(suma, 4);
             if (maximo != 0) {
                 int ocurrencias = ocurrenciasArray(suma, 4, maximo);
                 if (ocurrencias == 1 && empates[buscaIndice(suma, 4, maximo)] == 1) {
@@ -452,7 +452,7 @@ int calculaChica(int rbufInv[]) {
             suma[1] = rbufInv[19] + rbufInv[12];
             suma[2] = rbufInv[29] + rbufInv[22];
             suma[3] = rbufInv[39] + rbufInv[32];
-            int maximo = maximoArray(suma, 4);
+            int maximo = maximo_array(suma, 4);
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene más Ases
                 ganador = buscaIndice(suma, 4, maximo);
@@ -532,7 +532,7 @@ int calcularPares(int paresBuf[], int jugadorMano) {
 
     else { // hay empates
         int maximo = 99;
-        maximo = maximoArrayExcluyendo(jugadores, 4, 99);
+        maximo = maximo_array_excluyendo(jugadores, 4, 99);
         int ocurrencias = ocurrenciasArray(jugadores, 4, maximo);
         if (ocurrencias == 1) { //el jugador gana porque el duples es mayor
             ganador = buscaIndice(jugadores, 4, maximo);
@@ -564,7 +564,7 @@ int calcularPares(int paresBuf[], int jugadorMano) {
                 }
 
             }
-            int maximo = maximoArray(valoresPares, 4);
+            int maximo = maximo_array(valoresPares, 4);
             ocurrencias = ocurrenciasArray(valoresPares, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene cartas más altas
                 ganador = buscaIndice(valoresPares, 4, maximo);
@@ -579,7 +579,7 @@ int calcularPares(int paresBuf[], int jugadorMano) {
                     }
 
                 }
-                int maximo = maximoArray(valoresPares, 4);
+                int maximo = maximo_array(valoresPares, 4);
                 ocurrencias = ocurrenciasArray(valoresPares, 4, maximo);
                 if (ocurrencias == 1) { //el jugador gana porque tiene cartas más altas
                     ganador = buscaIndice(valoresPares, 4, maximo);
@@ -603,7 +603,7 @@ int calcularPares(int paresBuf[], int jugadorMano) {
             ganador = buscarIndiceNumeroNoIgual(jugadores, 4, 99);
         }
         else if (ocurrencias != 4) { // hay empates
-            int maximo = maximoArrayExcluyendo(jugadores, 4, 99);
+            int maximo = maximo_array_excluyendo(jugadores, 4, 99);
             int ocurrencias = ocurrenciasArray(jugadores, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque las medias son de mejores cartas
                 ganador = buscaIndice(jugadores, 4, maximo);
@@ -638,7 +638,7 @@ int calcularPares(int paresBuf[], int jugadorMano) {
                 }
 
             }
-            int maximo = maximoArray(valoresPares, 4);
+            int maximo = maximo_array(valoresPares, 4);
             ocurrencias = ocurrenciasArray(valoresPares, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene cartas más altas
                 ganador = buscaIndice(valoresPares, 4, maximo);
@@ -862,5 +862,121 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
         if (wMazo[i].id == id) {
             wMazo[i].estado = 2;
         }
+    }
+}
+//TODO: funcion ordago es una chufa. Hacer algo decente...
+int ordago() {
+    srand(time(0));
+    double r = (double) rand() / (double) RAND_MAX;
+    if (r < 0.98) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
+
+    if (ordago() == 1) { // ordago!
+        return 99;
+    }
+
+    else if (lance == 0) { // a grande
+        int reyes = ocurrenciasArray(equivalencias, longitud, 10);
+        if (reyes >= 3) {
+            return 5;
+        }
+        else if ((reyes == 2) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 1;
+        }
+    }
+    else if (lance == 1) { // a chica
+        int ases = ocurrenciasArray(equivalencias, longitud, 1);
+        if (ases >= 3) {
+            return 5;
+        }
+        else if ((ases == 2) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 1;
+        }
+    }
+    else if (lance == 2) { // a pares
+        int reyes = ocurrenciasArray(equivalencias, longitud, 10);
+        if (reyes >= 3) { //duples o medias de reyes
+            return 5;
+        }
+        else if ((reyes == 2) && (apuestaVigor <= 2)) { // pareja de reyes
+            return 2;
+        }
+        else { // pareja de otra cosa
+            return 1;
+        }
+
+    }
+    else if (lance == 3) { // a juego
+        int suma = sumaArray(equivalencias, 4);
+        if (suma == 31) {
+            return 5;
+        }
+        else if ((suma == 32) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 1;
+        }
+
+    }
+
+    else if (lance == 4) { // al punto
+        int suma = sumaArray(equivalencias, 4);
+        if (suma >= 27) {
+            return 5;
+        }
+        else if ((suma >= 24) && (suma < 27) && (apuestaVigor <= 2)) {
+            return 2;
+        }
+        else {
+            return 0;
+        }
+
+    }
+    return 0;
+}
+
+int busca_indice(int a[], int longitud, int numero) {
+    int index = 0;
+
+    while (index < longitud && a[index] != numero) ++index;
+
+    return (index == longitud ? -1 : index);
+}
+
+int que_pareja_soy(int rank, int jugadorMano) { //1 mano, 0 postre
+    if (rank == jugadorMano) {
+        return 1;
+    }
+    else if (add_mod(jugadorMano, 1, 4) == rank) {
+        return 0;
+    }
+    else if (add_mod(jugadorMano, 2, 4) == rank) {
+        return 1;
+    }
+    else if (add_mod(jugadorMano, 3, 4) == rank) {
+        return 0;
+    }
+    else return 99;
+}
+int misma_pareja(int rank1, int rank2) {
+    if (add_mod(rank1, 2, 4) == rank2 || rank1 == rank2 ) {
+        return 1;
+    }
+    else {
+        return 0;
     }
 }
