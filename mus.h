@@ -94,4 +94,12 @@ int que_pareja_soy(int rank, int jugadorMano);
 
 int misma_pareja(int rank1, int rank2);
 
+int contar_ocurrencias(int envites_jugadores[], int longitud, int valor);
+
+int apuesta_terminada(int envites_jugadores[], int longitud);
+
+int max(int a, int b);
+
+void print_envite(int envite, int siguiente_jugador);
+
 #endif //MUS_MUS_H

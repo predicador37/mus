@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
         // 3 jugadores están en paso y 1 en 2-99
         // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
     int i = 0;
-    while(i<4) {
+    while(i<N_JUGADORES) { // 4 turnos
         debug("jugador %d esperando token...", rank);
         token = 0;
         MPI_Recv(&token, 1, MPI_INT, 0, 0, parent, &stat);
@@ -338,6 +338,18 @@ int main(int argc, char **argv) {
     }
 
 
+    token = 0;
+    while (token != 2) {
+        token = 0;
+        MPI_Recv(&token, 1, MPI_INT, 0, 0, parent, &stat);
+        if (token == 1) { //subir, igualar o pasar
+            apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
+            jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
+            envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor);
+            MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
+        }
+
+    }
 
     //debug("[jugador %d] FINALIZADO", rank);
 

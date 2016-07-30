@@ -286,7 +286,7 @@ printf("[maestro] Manos con las que se juega la partida: \n");
     envite=0;
     siguiente_jugador=mano;
     // para cada jugador:
-    while(i<4) {
+    while(i<N_JUGADORES) {
         //enviar token a jugador, empezando por la mano
         token=1;
         MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
@@ -294,18 +294,7 @@ printf("[maestro] Manos con las que se juega la partida: \n");
 
         //recibir envite/paso de jugador
         MPI_Recv(&envite, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
-        debug("[maestro] RECIBIDO ENVITE %d", envite);
-        switch (envite) {
-            case 1:
-                printf("[jugador %d] Paso\n", siguiente_jugador);
-                break;
-            case 2:
-                printf("[jugador %d] Envido\n", siguiente_jugador);
-                break;
-            default:
-                printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
-                break;
-        }
+        print_envite(envite, siguiente_jugador);
         envites_jugadores[siguiente_jugador] = envite;
         int j;
         jugador_espera = siguiente_jugador;
@@ -329,36 +318,43 @@ printf("[maestro] Manos con las que se juega la partida: \n");
 
     //evaluar envites de las parejas
     //mientras apuesta no esté terminada
+
+    //TODO: para probar esto hay que usar modo interactivo, porque con la lógica actual nunca se dará esta situación
+    while (apuesta_terminada(envites_jugadores, N_JUGADORES) == 0) {
+        printf("HAY APUESTA!\n");
         //determinar pareja a la que han subido la apuesta
+            //1. determinar jugador (índice) con la máxima apuesta
+        int maximo = maximo_array(envites_jugadores, N_JUGADORES);
+        int jugador_maxima_apuesta = buscaIndice(envites_jugadores, 4, maximo);
+            //2. determinar a qué pareja pertenece ese jugador
+        int pareja_sube_apuesta = que_pareja_soy(jugador_maxima_apuesta, mano);
+            //3. determinar la pareja contraria
+        int pareja_apuesta_subida = add_mod(pareja_sube_apuesta, 1, 1);
+        int jugador_1_pareja_subida = add_mod(jugador_maxima_apuesta, 1, 4);
+        int jugador_2_pareja_subida = add_mod(jugador_maxima_apuesta, 3, 4);
         //enviar token a jugador 1 de pareja a la que han subido la apuesta
+        token=1;
+        MPI_Send(&token, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm);
         //recibir envite/paso de jugador
+        MPI_Recv(&envite, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm, MPI_STATUS_IGNORE);
+        print_envite(envite, jugador_1_pareja_subida);
         //enviar token a jugador 2 de pareja a la que han subido la apuesta
+        MPI_Send(&token, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm);
         //recibir envite/paso de jugador
+        MPI_Recv(&envite, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm, MPI_STATUS_IGNORE);
+        print_envite(envite, jugador_2_pareja_subida);
         //evaluar nuevo envite de la pareja y actualizar envites
 
-   // recibir envite/paso de la mano
-    // puiblicar envite al resto de jugadores
-    //while apuesta no cerrada
-      //si mano ha pasado
-         //si parejaPostre no ha hablado
-            //recibir envite de jugador siguiente a mano
-        // si parejaPostre ha hablado
-            // break
-      //si mano no ha pasado
-        //recibir envites de parejaPostre
-        //confeccionar envite de parejaPostre (apuesta más alta de los dos)
-        //publicar envite al resto de jugadores
-        // si envite de parejaPostre iguala/pasa
-            //break
-        // si envite de parejaPostre mayor
-            //recibir envite/paso de la mano
-            //publicar envite al resto de jugadores
+    }
 
+    //TODO esto bloquea...
+    int j;
+    siguiente_jugador = 0;
+    for (j=0; j< N_JUGADORES;j++) {
+        token = 2;
+        MPI_Send(&token, 1, MPI_INT, j, 0, juego_comm);
 
-
-    //recibir envite/paso
-    //publicar envites al resto de jugadores
-    //jugador siguiente
+    }
 
     // CHICA
     // PARES
@@ -367,7 +363,7 @@ printf("[maestro] Manos con las que se juega la partida: \n");
     //resultado: comparar cartas de una pareja despecto de la otra
 
 
-    debug("[maestro] FINALIZADO!");
+   printf("[maestro] FINALIZADO!\n");
     /*free(mazo->palo);
     free(mazo->cara);*/
 

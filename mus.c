@@ -980,3 +980,56 @@ int misma_pareja(int rank1, int rank2) {
         return 0;
     }
 }
+
+int contar_ocurrencias(int envites_jugadores[], int longitud, int valor) {
+    int i, count=0;
+    for (i=0; i<longitud; i++)
+    {
+        if (envites_jugadores[i] == valor)
+        {
+            ++count; /* encontrado valor */
+        }
+    }
+    return(count);
+}
+
+int max(int a, int b) {
+    if (a >= b) return a;
+    else return b;
+}
+
+int apuesta_terminada(int envites_jugadores[], int longitud) {
+
+    //lance termina si:
+    // 4 jugadores están en paso
+    // 3 jugadores están en paso y 1 en 2-99
+    // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
+
+    //0: no ha hablado
+    //1: paso
+    //2: envido (2 piedras, apuesta mínima)
+    //3-99: envido N piedras
+
+    if (contar_ocurrencias(envites_jugadores, longitud, 1) >= 3 || max(envites_jugadores[0], envites_jugadores[2]) == max(envites_jugadores[1], envites_jugadores[3])) {
+        return 1; //4 o 3 en paso o apuesta igualada, apuesta terminada
+    }
+    else {
+        return 0; //tal y como se ha desarrollado la lógica anterior del programa es imposible cualquier otro caso aquí
+    }
+
+
+}
+
+void print_envite(int envite, int siguiente_jugador) {
+    switch (envite) {
+        case 1:
+            printf("[jugador %d] Paso\n", siguiente_jugador);
+            break;
+        case 2:
+            printf("[jugador %d] Envido\n", siguiente_jugador);
+            break;
+        default:
+            printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
+            break;
+    }
+}
