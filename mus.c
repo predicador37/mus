@@ -808,6 +808,18 @@ int tengoJuego(int suma) {
     }
 }
 
+int tengo_juego_decente(int suma) {
+    int juegosGanadores[3] = {31, 32, 40};
+    if (ocurrenciasArray(juegosGanadores, 3, suma) == 1) {
+        //hay juego
+        debug("Tengo juego decente");
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 int tengoMedias(int *paresBuf) {
     if (paresBuf[1] != 99) {
         debug("Tengo medias");
@@ -845,7 +857,7 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
  if (contrario a 5 puntos de ganar) cortar mus */
     int juego = sumaArray(valores, N_CARTAS_MANO);
     if ((juego == 31) || (tengoDuples(paresBuf) == 1) || (tengoMedias(paresBuf) == 1) ||
-        (tengoPares(paresBuf) && tengoJuego(juego))) {
+        (tengoPares(paresBuf) && tengo_juego_decente(juego))) {
         return 1;
     }
 
@@ -876,7 +888,7 @@ int ordago() {
     }
 }
 
-int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
+int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor) {
 
     if (ordago() == 1) { // ordago!
         return 99;
@@ -884,14 +896,18 @@ int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
 
     else if (lance == 0) { // a grande
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
-        if (reyes >= 3) {
+        debug("NÚMERO DE OCURRENCIAS DE REYES: %d\n", reyes);
+        if ((reyes >= 3) && (apuesta_vigor < 2)) { // si no hay apuestas, empieza fuerte
             return 5;
         }
-        else if ((reyes == 2) && (apuestaVigor <= 2)) {
-            return 2;
+        else if ((reyes>=3) && (apuesta_vigor>=2)){
+            return (apuesta_vigor) ; //TODO: si soy pareja mano, subir; si no, igualar
+        }
+        else if ((reyes == 2) && (apuesta_vigor <= 2)) {
+            return 2; //con un envite y dos reyes, igualamos
         }
         else {
-            return 1;
+            return 1; //si no tengo cartas, paso
         }
     }
     else if (lance == 1) { // a chica
@@ -899,7 +915,7 @@ int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
         if (ases >= 3) {
             return 5;
         }
-        else if ((ases == 2) && (apuestaVigor <= 2)) {
+        else if ((ases == 2) && (apuesta_vigor <= 2)) {
             return 2;
         }
         else {
@@ -911,7 +927,7 @@ int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
         if (reyes >= 3) { //duples o medias de reyes
             return 5;
         }
-        else if ((reyes == 2) && (apuestaVigor <= 2)) { // pareja de reyes
+        else if ((reyes == 2) && (apuesta_vigor <= 2)) { // pareja de reyes
             return 2;
         }
         else { // pareja de otra cosa
@@ -924,7 +940,7 @@ int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
         if (suma == 31) {
             return 5;
         }
-        else if ((suma == 32) && (apuestaVigor <= 2)) {
+        else if ((suma == 32) && (apuesta_vigor <= 2)) {
             return 2;
         }
         else {
@@ -938,7 +954,7 @@ int envido(int *equivalencias, int longitud, int lance, int apuestaVigor) {
         if (suma >= 27) {
             return 5;
         }
-        else if ((suma >= 24) && (suma < 27) && (apuestaVigor <= 2)) {
+        else if ((suma >= 24) && (suma < 27) && (apuesta_vigor <= 2)) {
             return 2;
         }
         else {
@@ -1003,14 +1019,15 @@ int apuesta_terminada(int envites_jugadores[], int longitud) {
     //lance termina si:
     // 4 jugadores están en paso
     // 3 jugadores están en paso y 1 en 2-99
+    // 2 jugadores están en paso, son de la misma pareja y 1 en 2-99
     // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
-
+    //TODO ver qué pasa si las únicas apuestas están en la misma pareja...
     //0: no ha hablado
     //1: paso
     //2: envido (2 piedras, apuesta mínima)
     //3-99: envido N piedras
 
-    if (contar_ocurrencias(envites_jugadores, longitud, 1) >= 3 || max(envites_jugadores[0], envites_jugadores[2]) == max(envites_jugadores[1], envites_jugadores[3])) {
+    if ((contar_ocurrencias(envites_jugadores, longitud, 1) >= 3 ) || (max(envites_jugadores[0], envites_jugadores[2]) == max(envites_jugadores[1], envites_jugadores[3])) || envites_misma_pareja(envites_jugadores)) {
         return 1; //4 o 3 en paso o apuesta igualada, apuesta terminada
     }
     else {
@@ -1031,5 +1048,36 @@ void print_envite(int envite, int siguiente_jugador) {
         default:
             printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
             break;
+    }
+}
+
+int clean_stdin(){
+    while (getchar()!='\n') {
+        return 1;
+    }
+}
+
+int pareja_pasa(int envites_jugadores[]) {
+    if (((envites_jugadores[0] == 1) && (envites_jugadores[2] == 1))) {
+        return 0; //pareja 0
+    }
+
+    else if (((envites_jugadores[1]==1) && (envites_jugadores[3] ==1))) {
+        return 1; //pareja 1
+    }
+    else {
+        return 2; //ninguna pasa
+    }
+}
+
+
+
+int envites_misma_pareja(int envites_jugadores[]) {
+
+    if (((pareja_pasa(envites_jugadores)==0) && (envites_jugadores[1] > 1) && (envites_jugadores[3]>1)) || ((pareja_pasa(envites_jugadores)==1) && (envites_jugadores[0] > 1) && (envites_jugadores[2]>1))) {
+        return 1;
+    }
+    else {
+        return 0;
     }
 }

@@ -74,6 +74,8 @@ void *preparaPares(int equivalencias[], int *pares);
 
 int tengoJuego(int suma);
 
+int tengo_juego_decente(int suma);
+
 int tengoMedias(int *paresBuf);
 
 int tengoDuples(int *paresBuf);
@@ -101,5 +103,11 @@ int apuesta_terminada(int envites_jugadores[], int longitud);
 int max(int a, int b);
 
 void print_envite(int envite, int siguiente_jugador);
+
+int clean_stdin();
+
+int pareja_pasa(int envites_jugadores[]);
+
+int envites_misma_pareja(int envites_jugadores[]);
 
 #endif //MUS_MUS_H

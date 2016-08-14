@@ -116,7 +116,8 @@ int main(int argc, char **argv) {
         printf("El identificador para el jugador humano es: %d\n", jugadorHumano);
 
     }
-    printf("[maestro] Tamaño del mazo: %d\n", sizeMazo);
+    printf("[maestro] Tamaño del mazo"
+                   " %d\n", sizeMazo);
     //printMazo(mazo); /*Imprime el mazo*/
     printf("\n");
     barajarMazo(mazo); /*Baraja el mazo*/

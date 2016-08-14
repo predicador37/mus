@@ -17,11 +17,12 @@
 #define N_PAREJAS 2
 #define N_LANCES 4
 #define DEBUG 1
+#define MODO_JUEGO 1
 
 
 extern const char * caras[];
 extern const char * palos[];
-extern const char * lancesEtiquetas[];
+extern const char * lances_etiquetas[];
 extern int valores[];
 extern int equivalencias[];
 
@@ -31,9 +32,9 @@ int main(int argc, char **argv) {
     /*
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
-    int rank, size, version, subversion, namelen, universe_size, size_mazo, size_mano, proceso, corte, repartidor, postre, mano,
+    int rank, size, version, subversion, namelen, universe_size, size_mazo, size_mano, proceso, jugador_humano, corte, repartidor, postre, mano,
             ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite;
-    char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
+    char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100], c;
     int cartas_a_descartar[N_CARTAS_MANO];
     //Array de 4 posiciones para los envites, una para cada jugador
     //0: no ha hablado
@@ -77,6 +78,12 @@ int main(int argc, char **argv) {
         printf("[jugador %d] Jugador %d: Listo para jugar!\n", proceso, proceso);
     }
 
+    if (MODO_JUEGO==1) {
+        //jugador_humano = rand() % (N_JUGADORES + 1 - 0) + 0;
+        jugador_humano = 3;
+        printf("El identificador para el jugador humano es: %d\n", jugador_humano);
+
+    }
 
     /*
      * INICIALIZACIÓN DEL MAZO
@@ -287,13 +294,28 @@ printf("[maestro] Manos con las que se juega la partida: \n");
     siguiente_jugador=mano;
     // para cada jugador:
     while(i<N_JUGADORES) {
-        //enviar token a jugador, empezando por la mano
-        token=1;
-        MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
-        debug("[maestro] Token %d enviado...", i);
+
 
         //recibir envite/paso de jugador
-        MPI_Recv(&envite, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+
+        // si modo interactivo y el siguiente jugador es humano
+        if ((MODO_JUEGO == 1) && (siguiente_jugador == jugador_humano)) {
+            token=3;
+            MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
+            do {
+                printf("Introduzca envite a %s: (0:no, 2: sí, >2: más)\n", lances_etiquetas[0]);
+            }
+            while (((scanf("%d%c", &envite, &c) != 2 || c!= '\n') && clean_stdin()));
+
+        }
+        else {
+            //enviar token a jugador, empezando por la mano
+            token=1;
+            MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
+            debug("[maestro] Token %d enviado...", i);
+            // para jugadores automáticos, se recibe desde los procesos jugadores
+            MPI_Recv(&envite, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+        }
         print_envite(envite, siguiente_jugador);
         envites_jugadores[siguiente_jugador] = envite;
         int j;
@@ -325,6 +347,7 @@ printf("[maestro] Manos con las que se juega la partida: \n");
         //determinar pareja a la que han subido la apuesta
             //1. determinar jugador (índice) con la máxima apuesta
         int maximo = maximo_array(envites_jugadores, N_JUGADORES);
+        debug("MÁXIMA APUESTA: %d", maximo);
         int jugador_maxima_apuesta = buscaIndice(envites_jugadores, 4, maximo);
             //2. determinar a qué pareja pertenece ese jugador
         int pareja_sube_apuesta = que_pareja_soy(jugador_maxima_apuesta, mano);
@@ -333,18 +356,52 @@ printf("[maestro] Manos con las que se juega la partida: \n");
         int jugador_1_pareja_subida = add_mod(jugador_maxima_apuesta, 1, 4);
         int jugador_2_pareja_subida = add_mod(jugador_maxima_apuesta, 3, 4);
         //enviar token a jugador 1 de pareja a la que han subido la apuesta
-        token=1;
-        MPI_Send(&token, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm);
-        //recibir envite/paso de jugador
-        MPI_Recv(&envite, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm, MPI_STATUS_IGNORE);
-        print_envite(envite, jugador_1_pareja_subida);
-        //enviar token a jugador 2 de pareja a la que han subido la apuesta
-        MPI_Send(&token, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm);
-        //recibir envite/paso de jugador
-        MPI_Recv(&envite, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm, MPI_STATUS_IGNORE);
-        print_envite(envite, jugador_2_pareja_subida);
-        //evaluar nuevo envite de la pareja y actualizar envites
+        if ((MODO_JUEGO == 1) && (jugador_1_pareja_subida == jugador_humano)) {
+            token=3;
+            MPI_Send(&token, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm);
+            do {
+                printf("Introduzca envite a %s: (0:no, 2: sí, >2: más)\n", lances_etiquetas[0]);
+            }
+            while (((scanf("%d%c", &envite, &c) != 2 || c!= '\n') && clean_stdin()));
 
+        }
+
+        else {
+            token = 1;
+            MPI_Send(&token, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm);
+            //recibir envite/paso de jugador
+            MPI_Recv(&envite, 1, MPI_INT, jugador_1_pareja_subida, 0, juego_comm, MPI_STATUS_IGNORE);
+        }
+            print_envite(envite, jugador_1_pareja_subida);
+        envites_jugadores[jugador_1_pareja_subida] = envite;
+        //enviar token a jugador 2 de pareja a la que han subido la apuesta
+        if ((MODO_JUEGO == 1) && (jugador_2_pareja_subida == jugador_humano)) {
+            token=3;
+            MPI_Send(&token, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm);
+            do {
+                printf("Introduzca envite a %s: (0:no, 2: sí, >2: más)\n", lances_etiquetas[0]);
+            }
+            while (((scanf("%d%c", &envite, &c) != 2 || c!= '\n') && clean_stdin()));
+
+        }
+        else {
+            MPI_Send(&token, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm);
+            //recibir envite/paso de jugador
+            MPI_Recv(&envite, 1, MPI_INT, jugador_2_pareja_subida, 0, juego_comm, MPI_STATUS_IGNORE);
+        }
+            print_envite(envite, jugador_2_pareja_subida);
+        envites_jugadores[jugador_2_pareja_subida] = envite;
+        //evaluar nuevo envite de la pareja y actualizar envites
+        int j;
+        siguiente_jugador = 0;
+        for (j=0; j< N_JUGADORES;j++) {
+            token = 3;
+            MPI_Send(&token, 1, MPI_INT, j, 0, juego_comm);
+
+        }
+        MPI_Bcast(envites_jugadores, 4, MPI_INT, MPI_ROOT, juego_comm);
+        printf("[maestro] Array de envites: %d, %d, %d, %d\n",  envites_jugadores[0], envites_jugadores[1],
+               envites_jugadores[2], envites_jugadores[3]);
     }
 
     //TODO esto bloquea...

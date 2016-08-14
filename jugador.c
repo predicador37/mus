@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     int rank, size, namelen, version, subversion, psize, token, corte, palo_corte, repartidor, postre, mano, size_mazo, size_mano, size_descartadas, siguiente_jugador, mus, descarte, n_cartas_a_descartar, apuesta_en_vigor, jugador_apuesta_en_vigor, envite;
 
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
-    int cuentaCartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO], equivalencias_jugador[N_CARTAS_MANO];;
+    int cuentaCartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO], equivalencias_jugador[N_CARTAS_MANO];
     //Array de 4 posiciones para los envites, una para cada jugador
     //0: no ha hablado
     //1: paso
@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
                 break;
             case 2: //esperar a ver qué dicen los otros
                 break;
-            case 3:
+            case 3: // soy el jugador humano. Control por proceso maestro.
                 break;
         }
         MPI_Bcast(envites_jugadores, 4, MPI_INT, 0, parent);
@@ -347,6 +347,9 @@ int main(int argc, char **argv) {
             jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
             envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor);
             MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
+        }
+        else if (token == 3) {
+            MPI_Bcast(envites_jugadores, 4, MPI_INT, 0, parent);
         }
 
     }
