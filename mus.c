@@ -888,7 +888,7 @@ int ordago() {
     }
 }
 
-int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor) {
+int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank) {
 
     if (ordago() == 1) { // ordago!
         return 99;
@@ -901,7 +901,12 @@ int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor) {
             return 5;
         }
         else if ((reyes>=3) && (apuesta_vigor>=2)){
-            return (apuesta_vigor) ; //TODO: si soy pareja mano, subir; si no, igualar
+            if (que_pareja_soy(rank, jugador_mano) == 1) {
+                return(apuesta_vigor + 1);
+            }
+            else {
+                return (apuesta_vigor); //si soy pareja mano, subir; si no, igualar
+            }
         }
         else if ((reyes == 2) && (apuesta_vigor <= 2)) {
             return 2; //con un envite y dos reyes, igualamos

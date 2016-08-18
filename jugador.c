@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
             case 1: //decidir envite
                 apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
                 jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-                envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor);
+                envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
                 MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
                 break;
             case 2: //esperar a ver qué dicen los otros
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
         if (token == 1) { //subir, igualar o pasar
             apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
             jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-            envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor);
+            envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
             MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
         }
         else if (token == 3) {

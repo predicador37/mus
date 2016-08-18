@@ -88,7 +88,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id);
 
 int ordago();
 
-int envido(int *equivalencias, int longitud, int lance, int apuestaVigor);
+int envido(int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank);
 
 int busca_indice(int a[], int longitud, int numero);
 
