@@ -32,13 +32,14 @@ int main(int argc, char **argv) {
     int rank, size, namelen, version, subversion, psize, token, corte, palo_corte, repartidor, postre, mano, size_mazo, size_mano, size_descartadas, siguiente_jugador, mus, descarte, n_cartas_a_descartar, apuesta_en_vigor, jugador_apuesta_en_vigor, envite;
 
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
-    int cuentaCartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO], equivalencias_jugador[N_CARTAS_MANO];
+    int cuenta_cartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO], equivalencias_jugador[N_CARTAS_MANO];
     //Array de 4 posiciones para los envites, una para cada jugador
     //0: no ha hablado
     //1: paso
     //2: envido (2 piedras, apuesta mínima)
     //3-99: envido N piedras
     int envites_jugadores[N_JUGADORES] = {0,0,0,0};
+    int  rbuf[50]; //buffer de recepcion para evaluar jugadas
     Carta mazo[N_CARTAS_MAZO];
     Carta mano_cartas[N_CARTAS_MANO];
     //char * palo_corte = NULL;
@@ -172,13 +173,13 @@ int main(int argc, char **argv) {
                 for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
                     cuenta = cuenta_cartas_mano(mano_cartas,i);
 
-                    cuentaCartas[N_CARTAS_PALO - i - 1] = cuenta;
+                    cuenta_cartas[N_CARTAS_PALO - i - 1] = cuenta;
 
                 }
 
                 // chica
 
-                invertirArray(cuentaCartas, invertido, N_CARTAS_PALO);
+                invertirArray(cuenta_cartas, invertido, N_CARTAS_PALO);
 
                 // pares
 
@@ -322,6 +323,7 @@ int main(int argc, char **argv) {
 
         switch (token) {
             case 1: //decidir envite
+                MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
                 apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
                 jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
                 envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
@@ -353,6 +355,9 @@ int main(int argc, char **argv) {
         }
 
     }
+
+    /* Envío de datos al maestro para que evalúe*/
+    MPI_Gather(cuenta_cartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
 
     //debug("[jugador %d] FINALIZADO", rank);
 

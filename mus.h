@@ -100,14 +100,20 @@ int contar_ocurrencias(int envites_jugadores[], int longitud, int valor);
 
 int apuesta_terminada(int envites_jugadores[], int longitud);
 
+int hay_apuesta(int envites_jugadores[], int longitud);
+
 int max(int a, int b);
 
-void print_envite(int envite, int siguiente_jugador);
+int min(int a, int b);
+
+void print_envite(int envite, int siguiente_jugador, int hay_apuesta);
 
 int clean_stdin();
 
 int pareja_pasa(int envites_jugadores[]);
 
 int envites_misma_pareja(int envites_jugadores[]);
+
+int envite_pareja(int pareja, int mano, int envites[]);
 
 #endif //MUS_MUS_H

@@ -762,6 +762,7 @@ int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor) {
     return 99;
 }
 
+/* Prepara  un array con el tipo de pares que tiene un jugador */
 void *preparaPares(int equivalencias[], int *pares) {
 /* PARES */
 // pares[5]; /*primera posición: duplesIguales, 1 entero*/
@@ -796,6 +797,7 @@ void *preparaPares(int equivalencias[], int *pares) {
     pares[4] = parejas[2];
 }
 
+/*Determina si un jugador tiene juego, aunque no sea decente*/
 int tengoJuego(int suma) {
     int juegosGanadores[8] = {31, 32, 40, 37, 36, 35, 34, 33};
     if (ocurrenciasArray(juegosGanadores, 8, suma) == 1) {
@@ -808,6 +810,7 @@ int tengoJuego(int suma) {
     }
 }
 
+/*Determina si un jugador tiene juego decente, entendido este como 31, 32 o 40*/
 int tengo_juego_decente(int suma) {
     int juegosGanadores[3] = {31, 32, 40};
     if (ocurrenciasArray(juegosGanadores, 3, suma) == 1) {
@@ -819,7 +822,7 @@ int tengo_juego_decente(int suma) {
         return 0;
     }
 }
-
+/* Determina si un jugador tiene medias */
 int tengoMedias(int *paresBuf) {
     if (paresBuf[1] != 99) {
         debug("Tengo medias");
@@ -829,7 +832,7 @@ int tengoMedias(int *paresBuf) {
         return 0;
     }
 }
-
+/* Determina si un jugador tiene duples */
 int tengoDuples(int *paresBuf) {
 
     if (paresBuf[0] != 99 || paresBuf[2] == 2) {
@@ -841,6 +844,7 @@ int tengoDuples(int *paresBuf) {
     }
 }
 
+/* Determina si un jugador tiene pares */
 int tengoPares(int *paresBuf) {
     if ((paresBuf[0] == 1) || paresBuf[1] == 1 || paresBuf[2] == 2 || paresBuf[2] == 1) {
         debug("Tengo pares");
@@ -851,6 +855,7 @@ int tengoPares(int *paresBuf) {
     }
 }
 
+/* Determina si un jugador corta el mus en base a sus cartas */
 int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 /*
@@ -868,6 +873,7 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 }
 
+/* Marca una carta en estado descartado */
 void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
     int i;
     for (i = 0; i <= sizeMazo - 1; i++) {
@@ -888,6 +894,7 @@ int ordago() {
     }
 }
 
+/* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor y la pareja en la que se encuentra*/
 int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank) {
 
     if (ordago() == 1) { // ordago!
@@ -970,6 +977,7 @@ int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor, int j
     return 0;
 }
 
+/* Devuelve el índice o posición de un valor dado en un array de enteros */
 int busca_indice(int a[], int longitud, int numero) {
     int index = 0;
 
@@ -978,6 +986,7 @@ int busca_indice(int a[], int longitud, int numero) {
     return (index == longitud ? -1 : index);
 }
 
+/* Determina en qué pareja se encuentra un jugador: mano o postre */
 int que_pareja_soy(int rank, int jugadorMano) { //1 mano, 0 postre
     if (rank == jugadorMano) {
         return 1;
@@ -993,6 +1002,8 @@ int que_pareja_soy(int rank, int jugadorMano) { //1 mano, 0 postre
     }
     else return 99;
 }
+
+/* Determina si dos jugadores pertenecen a la misma pareja */
 int misma_pareja(int rank1, int rank2) {
     if (add_mod(rank1, 2, 4) == rank2 || rank1 == rank2 ) {
         return 1;
@@ -1002,6 +1013,7 @@ int misma_pareja(int rank1, int rank2) {
     }
 }
 
+/* Cuenta las ocurrencias de un entero determinado en un array  */
 int contar_ocurrencias(int envites_jugadores[], int longitud, int valor) {
     int i, count=0;
     for (i=0; i<longitud; i++)
@@ -1014,11 +1026,29 @@ int contar_ocurrencias(int envites_jugadores[], int longitud, int valor) {
     return(count);
 }
 
+/* Devuelve el máximo de dos enteros*/
 int max(int a, int b) {
     if (a >= b) return a;
     else return b;
 }
 
+/* Devuelve el mínimo de dos enteros*/
+int min(int a, int b) {
+    if (a <= b) return a;
+    else return b;
+}
+
+/* Determina si algún jugador ha envidado */
+int hay_apuesta(int envites_jugadores[], int longitud) {
+    if (maximo_array(envites_jugadores, longitud) > 1) {
+        return 1; // alguien ha envidado con 2 o más
+    }
+    else {
+        return 0; // o no han envidado o han pasado, por lo que no hay envites
+    }
+}
+
+/* Determina si una apuesta ha acabado o se debe seguir apostando */
 int apuesta_terminada(int envites_jugadores[], int longitud) {
 
     //lance termina si:
@@ -1042,26 +1072,46 @@ int apuesta_terminada(int envites_jugadores[], int longitud) {
 
 }
 
-void print_envite(int envite, int siguiente_jugador) {
-    switch (envite) {
-        case 1:
-            printf("[jugador %d] Paso\n", siguiente_jugador);
-            break;
-        case 2:
-            printf("[jugador %d] Envido\n", siguiente_jugador);
-            break;
-        default:
-            printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
-            break;
+/* Muestra el envite del jugador por la pantalla en jerga de mus */
+void print_envite(int envite, int siguiente_jugador, int hay_apuesta) {
+    if (hay_apuesta == 0) {
+        switch (envite) {
+            case 1:
+                printf("[jugador %d] Paso\n", siguiente_jugador);
+                break;
+            case 2:
+                printf("[jugador %d] Envido\n", siguiente_jugador);
+                break;
+            default:
+                printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
+                break;
+        }
+    }
+    else {
+        switch (envite) {
+            case 1:
+                printf("[jugador %d] No\n", siguiente_jugador);
+                break;
+            case 2:
+                printf("[jugador %d] Envido más\n", siguiente_jugador);
+                break;
+            default:
+                printf("[jugador %d] Envido %d más\n", siguiente_jugador, envite);
+                break;
+        }
     }
 }
 
+
+/* Limpia la salida estándar para la lectura de entrada por parte del usuario */
 int clean_stdin(){
     while (getchar()!='\n') {
         return 1;
     }
 }
 
+
+/* Determina si los dos jugadores de una pareja pasan */
 int pareja_pasa(int envites_jugadores[]) {
     if (((envites_jugadores[0] == 1) && (envites_jugadores[2] == 1))) {
         return 0; //pareja 0
@@ -1076,13 +1126,23 @@ int pareja_pasa(int envites_jugadores[]) {
 }
 
 
-
+/* Determina si los envites provienen de jugadores de la misma pareja */
 int envites_misma_pareja(int envites_jugadores[]) {
 
-    if (((pareja_pasa(envites_jugadores)==0) && (envites_jugadores[1] > 1) && (envites_jugadores[3]>1)) || ((pareja_pasa(envites_jugadores)==1) && (envites_jugadores[0] > 1) && (envites_jugadores[2]>1))) {
+    if (((pareja_pasa(envites_jugadores) == 0) && (envites_jugadores[1] > 1) && (envites_jugadores[3] > 1)) ||
+        ((pareja_pasa(envites_jugadores) == 1) && (envites_jugadores[0] > 1) && (envites_jugadores[2] > 1))) {
         return 1;
-    }
-    else {
+    } else {
         return 0;
+    }
+}
+/* Calcula el envite de una pareja */
+    int envite_pareja(int pareja, int mano, int envites[]) {
+
+        if (pareja == 1) { //1 mano
+        return max(envites[mano], envites[add_mod(mano, 2, 4)]);
+    }
+    else { // 0 postre
+            return max(envites[add_mod(mano, 1, 4)], envites[add_mod(mano, 3, 4)]);
     }
 }
