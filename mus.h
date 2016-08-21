@@ -88,7 +88,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id);
 
 int ordago();
 
-int envido(int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank);
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank);
 
 int busca_indice(int a[], int longitud, int numero);
 
@@ -106,7 +106,7 @@ int max(int a, int b);
 
 int min(int a, int b);
 
-void print_envite(int envite, int siguiente_jugador, int hay_apuesta);
+void print_envite(int envite, int siguiente_jugador, int hay_apuesta,  int envite_N);
 
 int clean_stdin();
 
@@ -115,5 +115,9 @@ int pareja_pasa(int envites_jugadores[]);
 int envites_misma_pareja(int envites_jugadores[]);
 
 int envite_pareja(int pareja, int mano, int envites[]);
+
+int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor);
+
+int esta_valor_en_array(int val, int *arr, int size);
 
 #endif //MUS_MUS_H

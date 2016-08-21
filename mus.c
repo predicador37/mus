@@ -24,6 +24,7 @@ const char * caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
                         "Seis", "Siete", "Sota", "Caballo", "Rey"};
 const char * palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
 const char * lances_etiquetas[] = {"Grande", "Chica", "Pares", "Juego", "Al punto"};
+const char * parejas[] = {"Postre", "Mano"};
 int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
 int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
 
@@ -895,33 +896,40 @@ int ordago() {
 }
 
 /* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor y la pareja en la que se encuentra*/
-int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank) {
-
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank) {
+/*
     if (ordago() == 1) { // ordago!
         return 99;
     }
-
-    else if (lance == 0) { // a grande
+*/
+     if (lance == 0) { // a grande
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
-        debug("NÚMERO DE OCURRENCIAS DE REYES: %d\n", reyes);
+        printf("NÚMERO DE OCURRENCIAS DE REYES: %d\n", reyes);
         if ((reyes >= 3) && (apuesta_vigor < 2)) { // si no hay apuestas, empieza fuerte
-            return 5;
+            envites[0] = 3;
+            envites[1] = 5;
         }
         else if ((reyes>=3) && (apuesta_vigor>=2)){
             if (que_pareja_soy(rank, jugador_mano) == 1) {
-                return(apuesta_vigor + 1);
+                envites[0] = 3;
+                envites[1] = 1;
             }
             else {
-                return (apuesta_vigor); //si soy pareja mano, subir; si no, igualar
+                envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                envites[1] = 0;
             }
         }
         else if ((reyes == 2) && (apuesta_vigor <= 2)) {
-            return 2; //con un envite y dos reyes, igualamos
+            //con un envite y dos reyes, igualamos
+            envites[0] = 2;
+            envites[1] = 0;
         }
         else {
-            return 1; //si no tengo cartas, paso
+            envites[0]=1; //si no tengo cartas, paso
+            envites[1]=0;
         }
     }
+        /*
     else if (lance == 1) { // a chica
         int ases = ocurrenciasArray(equivalencias, longitud, 1);
         if (ases >= 3) {
@@ -974,7 +982,7 @@ int envido(int *equivalencias, int longitud, int lance, int apuesta_vigor, int j
         }
 
     }
-    return 0;
+    return 0;*/
 }
 
 /* Devuelve el índice o posición de un valor dado en un array de enteros */
@@ -1073,7 +1081,7 @@ int apuesta_terminada(int envites_jugadores[], int longitud) {
 }
 
 /* Muestra el envite del jugador por la pantalla en jerga de mus */
-void print_envite(int envite, int siguiente_jugador, int hay_apuesta) {
+void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite_N) {
     if (hay_apuesta == 0) {
         switch (envite) {
             case 1:
@@ -1083,7 +1091,7 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta) {
                 printf("[jugador %d] Envido\n", siguiente_jugador);
                 break;
             default:
-                printf("[jugador %d] Envido %d\n", siguiente_jugador, envite);
+                printf("[jugador %d] Envido %d\n", siguiente_jugador, envite_N);
                 break;
         }
     }
@@ -1093,10 +1101,10 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta) {
                 printf("[jugador %d] No\n", siguiente_jugador);
                 break;
             case 2:
-                printf("[jugador %d] Envido más\n", siguiente_jugador);
+                printf("[jugador %d] Lo quiero\n", siguiente_jugador);
                 break;
             default:
-                printf("[jugador %d] Envido %d más\n", siguiente_jugador, envite);
+                printf("[jugador %d] Envido %d más\n", siguiente_jugador, envite_N);
                 break;
         }
     }
@@ -1145,4 +1153,38 @@ int envites_misma_pareja(int envites_jugadores[]) {
     else { // 0 postre
             return max(envites[add_mod(mano, 1, 4)], envites[add_mod(mano, 3, 4)]);
     }
+}
+
+int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor) {
+
+    if ((hay_apuesta(envites, N_JUGADORES) == 0) && (envite_N == 0)) {
+        // si no hay apuesta en vigor y envite_N == 0, el envite es envite
+        return envite;
+    }
+    else if ((hay_apuesta(envites, N_JUGADORES) == 0) && (envite_N != 0)) {
+        // si no hay apuesta en vigor y envite_N != 0, el envite es envite_N
+        return envite_N;
+    }
+    else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N != 0)) {
+        // si hay apuesta en vigor y envite_N != 0, el envite es: apuesta_vigor + envite_N
+        return (envite_vigor + envite_N);
+    }
+    else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N == 0) && (envite == 2)) {
+        //si hay apuesta en vigor y envite_N ==0 y envite = 1, el envite es: apuesta_vigor
+       return envite_vigor;
+    }
+    else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N == 0) && (envite == 1)) {
+        // si hay apuesta en vigor y envite_N == 0 y envite = 0, el envite es: 1
+        return 1; //no lo quiero
+    }
+
+}
+
+int esta_valor_en_array(int val, int *arr, int size){
+    int i;
+    for (i=0; i < size; i++) {
+        if (arr[i] == val)
+            return 1;
+    }
+    return 0;
 }

@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
     //2: envido (2 piedras, apuesta mínima)
     //3-99: envido N piedras
     int envites_jugadores[N_JUGADORES] = {0,0,0,0};
+    int envites[2]={0,0};
     int  rbuf[50]; //buffer de recepcion para evaluar jugadas
     Carta mazo[N_CARTAS_MAZO];
     Carta mano_cartas[N_CARTAS_MANO];
@@ -129,6 +130,46 @@ int main(int argc, char **argv) {
     MPI_Bcast(&size_mazo, 1, MPI_INT, 0, parent); //recepción del tamaño después de repartir
 
 
+    /* EVALUACION PREVIA DE CARTAS */
+
+    int i = 0;
+    int juego = 0;
+    int invertido[N_CARTAS_PALO];
+    int pares[5];
+
+
+
+    for (i = 0; i < N_CARTAS_MANO; i++) {
+        equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
+    }
+
+    int valores_jugador[N_CARTAS_MANO];
+    for (i = 0; i < N_CARTAS_MANO; i++) {
+        valores_jugador[i] = valores[mano_cartas[i].cara];
+    }
+
+    //Grande
+    int cuenta = 0;
+
+    for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
+        cuenta = cuenta_cartas_mano(mano_cartas,i);
+
+        cuenta_cartas[N_CARTAS_PALO - i - 1] = cuenta;
+        printf("CUENTA para carta %d: %d\n", i, cuenta);
+    }
+
+    // chica
+
+    invertirArray(cuenta_cartas, invertido, N_CARTAS_PALO);
+
+    // pares
+
+    preparaPares(equivalencias_jugador, pares);
+
+    // juego
+
+    juego = sumaArray(valores_jugador, N_CARTAS_MANO);
+
 
     mus = 0;
     token = 0;
@@ -151,43 +192,7 @@ int main(int argc, char **argv) {
                 // Si recibe del maestro es porque le toca
                 recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
                 // hay que decidir si mus o no mus
-                int i = 0;
-                int juego = 0;
-                int invertido[N_CARTAS_PALO];
-                int pares[5];
 
-
-
-                for (i = 0; i < N_CARTAS_MANO; i++) {
-                    equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
-                }
-
-                int valores_jugador[N_CARTAS_MANO];
-                for (i = 0; i < N_CARTAS_MANO; i++) {
-                    valores_jugador[i] = valores[mano_cartas[i].cara];
-                }
-
-                //Grande
-                int cuenta = 0;
-
-                for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
-                    cuenta = cuenta_cartas_mano(mano_cartas,i);
-
-                    cuenta_cartas[N_CARTAS_PALO - i - 1] = cuenta;
-
-                }
-
-                // chica
-
-                invertirArray(cuenta_cartas, invertido, N_CARTAS_PALO);
-
-                // pares
-
-                preparaPares(equivalencias_jugador, pares);
-
-                // juego
-
-                juego = sumaArray(valores_jugador, N_CARTAS_MANO);
 
                 mus = cortarMus(valores_jugador, equivalencias_jugador, pares);
                 MPI_Send(&mus, 1, MPI_INT, 0, 0, parent);
@@ -277,6 +282,9 @@ int main(int argc, char **argv) {
                         debug("Repartidor: %d reparte carta", rank);
                         mazo[N_CARTAS_MAZO - size_mazo].estado = 1;
                         size_mazo--;
+                        if (size_mazo == 0){
+                            printf("ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
+                        }
                         if (i==3) { // repartidor se reparte a sí mismo
                             mano_cartas[i] = recibir_carta(0, parent, &stat);
                             valores_jugador[i] = valores[mano_cartas[i].cara];
@@ -314,7 +322,7 @@ int main(int argc, char **argv) {
         // 4 jugadores están en paso
         // 3 jugadores están en paso y 1 en 2-99
         // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
-    int i = 0;
+    i = 0;
     while(i<N_JUGADORES) { // 4 turnos
         debug("jugador %d esperando token...", rank);
         token = 0;
@@ -326,8 +334,9 @@ int main(int argc, char **argv) {
                 MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
                 apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
                 jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-                envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
-                MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
+                //TODO: no subir envite a misma pareja
+                envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
+                MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                 break;
             case 2: //esperar a ver qué dicen los otros
                 break;
@@ -347,8 +356,8 @@ int main(int argc, char **argv) {
         if (token == 1) { //subir, igualar o pasar
             apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
             jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-            envite = envido(equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
-            MPI_Send(&envite, 1, MPI_INT, 0, 0, parent);
+            envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
+            MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
         }
         else if (token == 3) {
             MPI_Bcast(envites_jugadores, 4, MPI_INT, 0, parent);
@@ -357,6 +366,7 @@ int main(int argc, char **argv) {
     }
 
     /* Envío de datos al maestro para que evalúe*/
+
     MPI_Gather(cuenta_cartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
 
     //debug("[jugador %d] FINALIZADO", rank);
