@@ -17,7 +17,7 @@
 #define N_PAREJAS 2
 #define N_LANCES 4
 #define DEBUG 1
-#define MODO_JUEGO 0
+#define MODO_JUEGO 1
 
 
 extern const char * caras[];
@@ -333,10 +333,10 @@ printf("[maestro] Manos con las que se juega la partida: \n");
             MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             do {
                 if(hay_apuesta(envites_grande, N_JUGADORES) == 0) {
-                    printf("Introduzca envite a %s: (1:paso, 2: envido, 3: envido N)\n", lances_etiquetas[0]);
+                    printf("[jugador %d] Introduzca envite a %s: (1:paso, 2: envido, 3: envido N)\n", siguiente_jugador, lances_etiquetas[0]);
                 }
                 else {
-                    printf("Introduzca envite a %s: (1:no, 2: lo quiero, 3: envido N más)\n", lances_etiquetas[0]);
+                    printf("[jugador %d] Introduzca envite a %s: (1:no, 2: lo quiero, 3: envido N más)\n", siguiente_jugador, lances_etiquetas[0]);
                 }
             }
             while (((scanf("%d%c", &envite, &c) != 2 || c!= '\n') && clean_stdin()) || esta_valor_en_array(envite, entradas_posibles, 3) == 0);
