@@ -22,6 +22,8 @@ int crear_mazo(Carta *mazo);
 
 void print_mazo(Carta *wMazo, int sizeMazo);
 
+void print_vector_estados(Carta *wMazo, int size_mazo);
+
 void barajar_mazo(Carta *wMazo);
 
 void cortar_mazo(Carta *wMazo, char *paloCorte);
@@ -120,6 +122,8 @@ int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor);
 
 int esta_valor_en_array(int val, int *arr, int size);
 
-void poner_descartadas_en_mazo(Carta *wMazo);
+int poner_descartadas_en_mazo(Carta *wMazo);
+
+int contar_cartas_en_manos(Carta *wMazo);
 
 #endif //MUS_MUS_H

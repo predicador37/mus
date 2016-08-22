@@ -177,7 +177,9 @@ int main(int argc, char **argv) {
                 recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
                 printf("[maestro] Mano del jugador %d\n", siguiente_jugador);
                 print_mazo(mano_jugador, N_CARTAS_MANO);
+                printf("Cursor size_mazo: %d\n", size_mazo);
                 debug("Envío de mazo a jugador %d", siguiente_jugador);
+                print_vector_estados(mazo, N_CARTAS_MAZO);
                 enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
                 // El jugador decide si quiere mus
 
@@ -219,6 +221,7 @@ int main(int argc, char **argv) {
             debug("Envío de token=%d a jugador %d", token, siguiente_jugador);
             MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             debug("Envío de mazo a jugador %d", siguiente_jugador);
+            MPI_Send(&size_mazo, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
             i=0;
             int j;
@@ -254,7 +257,7 @@ int main(int argc, char **argv) {
 
                     descartada = recibir_carta(repartidor_descartes, juego_comm, MPI_STATUS_IGNORE);
                     repartir_carta(descartada, siguiente_jugador, juego_comm);
-                    size_mazo--;/*
+                    /*size_mazo--;
                     if (size_mazo == 0) {
                         recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
                         print_mazo(mazo, N_CARTAS_MAZO);
@@ -268,7 +271,12 @@ int main(int argc, char **argv) {
             } //fin while descartes
             MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
             recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
-            print_mazo(mazo, N_CARTAS_MAZO);
+           // printf("VECTOR DE ESTADOS: \n");
+           // print_vector_estados(mazo, N_CARTAS_MAZO);
+           // printf("Cursor size_mazo: %d\n", size_mazo);
+           // printf ( "Press [Enter] to continue . . ." );
+            //fflush ( stdout );
+            //getchar();
         } // fin else cuando no se corta el mus y acaba la ronda
     } //fin else cuando jugador pide mus
 } // fin while mus corrido (se pide mus)

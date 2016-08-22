@@ -74,6 +74,19 @@ void print_mazo(Carta *wMazo, int size_mazo) {
     printf("Fin del contenido del mazo/mano.\n");
 }
 
+void print_vector_estados(Carta *wMazo, int size_mazo) {
+    int i;
+    for (i = 0; i <=
+            size_mazo - 1; i++) {
+        printf("%d::%d ", i, wMazo[i].id);
+    }
+    printf("\n");
+    for (i = 0; i <= size_mazo - 1; i++) {
+        printf("%d::%d ", i, wMazo[i].estado);
+    }
+    printf("\n");
+}
+
 /* FUNCION barajarMazo: baraja las cartas del mazo*/
 
 void barajar_mazo(Carta *wMazo) {
@@ -93,13 +106,27 @@ void barajar_mazo(Carta *wMazo) {
 
 } /* fin funcion barajar */
 
-void poner_descartadas_en_mazo(Carta *wMazo) {
+int poner_descartadas_en_mazo(Carta *wMazo) {
     int i;
+    int contador = 0;
     for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
        if (wMazo[i].estado == 2) {
            wMazo[i].estado = 0;
+           contador++;
        }
     }
+    return contador;
+}
+
+int contar_cartas_en_manos(Carta *wMazo) {
+    int i;
+    int contador = 0;
+    for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
+        if ((wMazo[i].estado != 0) && (wMazo[i].estado != 2)) {
+            contador++;
+        }
+    }
+    return contador;
 }
 
 /* FUNCION cortarMazo: corta el mazo, esto es, saca una carta aleatoria del mazo */
@@ -1198,3 +1225,4 @@ int esta_valor_en_array(int val, int *arr, int size){
     }
     return 0;
 }
+
