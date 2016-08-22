@@ -232,6 +232,9 @@ int main(int argc, char **argv) {
                     token = 3; // este jugador será el que haga descartes y pida cartas
                     MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                 }
+                else {
+                    printf("[maestro] LE TOCA AL REPARTIDOR\n");
+                }
 
               printf("[maestro] Jugador %d, ¿cuántas cartas quieres?\n", siguiente_jugador);
                 //recibir cuantas cartas quiere
@@ -243,21 +246,29 @@ int main(int argc, char **argv) {
                 MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, repartidor_descartes, 0, juego_comm);
 
                 // envío de array con ids de cartas a descartar a repartidor
-
                 MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, repartidor_descartes, 0, juego_comm);
+                MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
+
                 for ( j = 0; j < n_cartas_a_descartar; j++) {
 
 
                     descartada = recibir_carta(repartidor_descartes, juego_comm, MPI_STATUS_IGNORE);
                     repartir_carta(descartada, siguiente_jugador, juego_comm);
+                    size_mazo--;/*
+                    if (size_mazo == 0) {
+                        recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
+                        print_mazo(mazo, N_CARTAS_MAZO);
+                        size_mazo=N_CARTAS_MAZO;
+                    }*/
 
             }
                 debug("[maestro] Fin del reparto de cartas\n");
                 i++;
-                debug("Iteración de jugador número %d", i);
+
             } //fin while descartes
             MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
-
+            recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
+            print_mazo(mazo, N_CARTAS_MAZO);
         } // fin else cuando no se corta el mus y acaba la ronda
     } //fin else cuando jugador pide mus
 } // fin while mus corrido (se pide mus)
@@ -291,10 +302,10 @@ printf("[maestro] Manos con las que se juega la partida: \n");
     // GRANDE
 
 
-
+    print_mazo(mazo, N_CARTAS_MAZO);
      printf("[maestro] INICIANDO LANCES...\n");
     //TODO: GUARDAR APUESTA ANTERIOR PARA CONTEO DE PIEDRAS
-    //TODO: CAMBIAR ENTRADA PARA PEDIR N MÁS
+
     i=0;
     token=1;
 
@@ -351,7 +362,6 @@ printf("[maestro] Manos con las que se juega la partida: \n");
         }
 
 
-        //TODO 18/08/2016 continuar desde aquí
         print_envite(envite, siguiente_jugador, hay_apuesta(envites_grande, N_JUGADORES), envite_N);
 
         printf("¿HAY APUESTA?: %d\n", hay_apuesta(envites_grande, N_JUGADORES));
@@ -504,6 +514,7 @@ printf("[maestro] Manos con las que se juega la partida: \n");
     }
 
     /*cálculo de manos*/
+
     ganador[0] = calculaGrande(rbuf, mano);
     printf("Mejor mano a grande: jugador %d\n", ganador[0]);
     printf("Mejor pareja a grande: %s\n", parejas[que_pareja_soy(ganador[0], mano)]);

@@ -120,4 +120,6 @@ int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor);
 
 int esta_valor_en_array(int val, int *arr, int size);
 
+void poner_descartadas_en_mazo(Carta *wMazo);
+
 #endif //MUS_MUS_H

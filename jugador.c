@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
         cuenta = cuenta_cartas_mano(mano_cartas,i);
 
         cuenta_cartas[N_CARTAS_PALO - i - 1] = cuenta;
-        printf("CUENTA para carta %d: %d\n", i, cuenta);
+
     }
 
     // chica
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
                 while(i<4) {
 
                     if (i==3) { //soy el repartidor
-
+                        printf("[jugador %d] SOY EL REPARTIDOR\n", rank);
                         n_cartas_a_descartar=0;
                         for (j = 0; j < N_CARTAS_MANO; j++) {
                             if (equivalencias[mano_cartas[j].cara] != 10) {
@@ -254,7 +254,7 @@ int main(int argc, char **argv) {
                             }
 
                         }
-
+                        printf("REPARTIDOR DESCARTA %d CARTAS \n", n_cartas_a_descartar);
                         MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent); //cuantas cartas quiero
 
                         //llegados a este punto siempre va a haber descartes
@@ -268,34 +268,59 @@ int main(int argc, char **argv) {
                     MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent, &stat);
                 // repartidor recibe de maestro qué cartas se va a descartar el jugador
                     MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent, &stat);
-
+                    MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
 
 
                 for (j = 0; j < n_cartas_a_descartar; j++) {
+                    marcar_descarte(mazo, N_CARTAS_MAZO, cartas_a_descartar[j]); //primero se tiran las cartas
+                }
+                    for (j = 0; j < n_cartas_a_descartar; j++) { //luego se reparten N
 
+                //y si el mazo se queda sin cartas....
 
+                        while (mazo[N_CARTAS_MAZO - size_mazo].estado != 0) {
+                            size_mazo--; //ojo al repartir con el mazo virtual; las que no están en estado 0 no están en el mazo
+                            printf("CARTA YA REPARTIDA; PASANDO...\n");
+                            if (size_mazo == 0){
+                                printf("[285] ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
+                                debug("[286] ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
+                                poner_descartadas_en_mazo(mazo);
+                                barajar_mazo(mazo); //Baraja el mazo
 
+                                size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
+                                //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
+                            }
+                        }
+                    if (mazo[N_CARTAS_MAZO - size_mazo].estado == 0) {
 
-                        marcar_descarte(mazo, N_CARTAS_MAZO, cartas_a_descartar[j]);
-                        //TODO y si el mazo se queda sin cartas....
+                        mazo[N_CARTAS_MAZO - size_mazo].estado = 3; //TODO: BUCLE INFINITO; TODAS LAS CARTAS SE PONEN A ESTADO 1
                         repartir_carta(mazo[N_CARTAS_MAZO - size_mazo], 0, parent);
                         debug("Repartidor: %d reparte carta", rank);
-                        mazo[N_CARTAS_MAZO - size_mazo].estado = 1;
                         size_mazo--;
                         if (size_mazo == 0){
-                            printf("ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
+                            printf("[301] ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
+                            debug("[302] ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
+                            poner_descartadas_en_mazo(mazo);
+                            barajar_mazo(mazo); //Baraja el mazo
+                            size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
+                            //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                         }
+                    }
+
                         if (i==3) { // repartidor se reparte a sí mismo
                             mano_cartas[i] = recibir_carta(0, parent, &stat);
                             valores_jugador[i] = valores[mano_cartas[i].cara];
                             equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
                         }
+                        printf("Press any key to continue\n");
+                        getchar();
 
                 }
 
                     i++;
                 }
                 MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
+                enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                 break;
 
 

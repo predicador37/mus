@@ -54,7 +54,7 @@ int crear_mazo(Carta *mazo) {
         mazo[i].palo = i / 10;
         mazo[i].id = i;
         mazo[i].orden = i % 10;
-        mazo[i].estado = 0;
+        mazo[i].estado = 0; //0: en mazo, 1: repartida, 2: descartada
         size_mazo++;
     } /* fin for */
     return size_mazo;
@@ -67,8 +67,8 @@ int crear_mazo(Carta *mazo) {
 void print_mazo(Carta *wMazo, int size_mazo) {
     int i;
     for (i = 0; i <= size_mazo - 1; i++) {
-        printf("El valor de %-8s\t de \t%s es \t%d \tcon orden \t%d y estado %d\n \t", caras[wMazo[i].cara],
-               palos[wMazo[i].palo], valores[wMazo[i].cara], wMazo[i].orden, wMazo[i].estado);
+        printf("El valor de %-8s\t de \t%s es \t%d \tcon id \t%d y estado %d\n \t", caras[wMazo[i].cara],
+               palos[wMazo[i].palo], valores[wMazo[i].cara], wMazo[i].id, wMazo[i].estado);
         printf("\n");
     }
     printf("Fin del contenido del mazo/mano.\n");
@@ -92,6 +92,15 @@ void barajar_mazo(Carta *wMazo) {
     printf("Mazo barajado.\n");
 
 } /* fin funcion barajar */
+
+void poner_descartadas_en_mazo(Carta *wMazo) {
+    int i;
+    for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
+       if (wMazo[i].estado == 2) {
+           wMazo[i].estado = 0;
+       }
+    }
+}
 
 /* FUNCION cortarMazo: corta el mazo, esto es, saca una carta aleatoria del mazo */
 
@@ -194,8 +203,8 @@ int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descar
             buffer_reparto[1] = siguiente_jugador; // a qué jugador se reparte
 
             if (siguiente_jugador != repartidor) {
-                repartir_carta(mazo[k], siguiente_jugador, MPI_COMM_WORLD);
                 mazo[k].estado = 1; // la carta pasa a estado repartida
+                repartir_carta(mazo[k], siguiente_jugador, MPI_COMM_WORLD);
                 MPI_Send(&buffer_reparto, 2, MPI_INT, 0, 0, parent);
 
             }
@@ -880,6 +889,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
     for (i = 0; i <= sizeMazo - 1; i++) {
         if (wMazo[i].id == id) {
             wMazo[i].estado = 2;
+            printf("CARTA CON ID %d ha sido marcada con estado 2\n", id);
         }
     }
 }
