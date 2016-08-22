@@ -280,7 +280,6 @@ int main(int argc, char **argv) {
                     printf("CARTAS EN MANOS: %d\n", contar_cartas_en_manos(mazo));
                 for (j = 0; j < n_cartas_a_descartar; j++) {
                     marcar_descarte(mazo, N_CARTAS_MAZO, cartas_a_descartar[j]); //primero se tiran las cartas
-                    print_vector_estados(mazo, N_CARTAS_MAZO);
                     printf("CARTAS EN MANOS: %d\n", contar_cartas_en_manos(mazo));
                 }
                     for (j = 0; j < n_cartas_a_descartar; j++) { //luego se reparten N
@@ -307,8 +306,6 @@ int main(int argc, char **argv) {
                         repartir_carta(mazo[N_CARTAS_MAZO - size_mazo], 0, parent);
                         debug("Repartidor: %d reparte carta", rank);
                         size_mazo--;
-                        printf("Cursor size_mazo: %d\n", size_mazo);
-                        print_vector_estados(mazo, N_CARTAS_MAZO);
                         printf("CARTAS EN MANOS: %d\n", contar_cartas_en_manos(mazo));
 
                         if (size_mazo == 0){
@@ -316,7 +313,6 @@ int main(int argc, char **argv) {
                             debug("[302] ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
                             int vuelta_al_mazo =  poner_descartadas_en_mazo(mazo);
                             printf("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
-                            print_vector_estados(mazo, N_CARTAS_MAZO);
                             barajar_mazo(mazo); //Baraja el mazo
                             size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                             //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
@@ -328,7 +324,7 @@ int main(int argc, char **argv) {
                              int k;
                                for (k = 0; k < N_CARTAS_MANO; k++) {
                                     if (mano_cartas[k].id == cartas_a_descartar[j]) {
-                                        printf("CARTA A PISAR con id %d\n", cartas_a_descartar[j]);
+                                        printf("Carta a reemplazar con id %d\n", cartas_a_descartar[j]);
                                         mano_cartas[k] = recibir_carta(0, parent, &stat);
                                         valores_jugador[k] = valores[mano_cartas[j].cara];
                                         equivalencias_jugador[k] = equivalencias[mano_cartas[j].cara];
@@ -396,20 +392,28 @@ int main(int argc, char **argv) {
 
     }
 
-
+    MPI_Barrier(parent);
     token = 0;
     while (token != 2) {
-        token = 0;
+
         MPI_Recv(&token, 1, MPI_INT, 0, 0, parent, &stat);
-        if (token == 1) { //subir, igualar o pasar
-            apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
-            jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-            envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
-            MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+
+        switch (token) {
+            case 1:
+                apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
+                jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
+                envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
+                MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+                break;
+            case 2:
+                break;
+
+            case 3:
+                MPI_Bcast(envites_jugadores, 4, MPI_INT, 0, parent);
+                break;
+
         }
-        else if (token == 3) {
-            MPI_Bcast(envites_jugadores, 4, MPI_INT, 0, parent);
-        }
+
 
     }
 
