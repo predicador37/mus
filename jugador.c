@@ -29,10 +29,10 @@ int main(int argc, char **argv) {
     /*
      * DECLARACIÓN DE VARIABLES
      */
-    int rank, size, namelen, version, subversion, psize, token, corte, palo_corte, repartidor, postre, mano, size_mazo, size_mano, size_descartadas, siguiente_jugador, mus, descarte, n_cartas_a_descartar, apuesta_en_vigor, jugador_apuesta_en_vigor, envite;
+    int rank, size, namelen, version, subversion, psize, modo_juego, token, corte, palo_corte, repartidor, postre, mano, jugador_humano, size_mazo, size_mano, size_descartadas, siguiente_jugador, mus, descarte, n_cartas_a_descartar, apuesta_en_vigor, jugador_apuesta_en_vigor, envite;
 
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100];
-    int cuenta_cartas[N_CARTAS_PALO], cartas_a_descartar[N_CARTAS_MANO], equivalencias_jugador[N_CARTAS_MANO];
+    int cuenta_cartas[N_CARTAS_PALO], equivalencias_jugador[N_CARTAS_MANO];
     //Array de 4 posiciones para los envites, una para cada jugador
     //0: no ha hablado
     //1: paso
@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     //3-99: envido N piedras
     int envites_jugadores[N_JUGADORES] = {0,0,0,0};
     int envites[2]={0,0};
+    int cartas_a_descartar[N_CARTAS_MANO] = {99,99,99,99};
     int  rbuf[50]; //buffer de recepcion para evaluar jugadas
     Carta mazo[N_CARTAS_MAZO];
     Carta mano_cartas[N_CARTAS_MANO];
@@ -85,6 +86,8 @@ int main(int argc, char **argv) {
 
   MPI_Bcast(&corte, 1, MPI_INT, 0, parent);
   MPI_Bcast(&size_mazo, 1, MPI_INT, 0, parent);
+    MPI_Bcast(&modo_juego, 1, MPI_INT, 0, parent);
+  MPI_Bcast(&jugador_humano, 1, MPI_INT, 0, parent);
 
     if (rank == corte) {
 
@@ -194,8 +197,17 @@ int main(int argc, char **argv) {
                 // hay que decidir si mus o no mus
 
 
-                mus = cortarMus(valores_jugador, equivalencias_jugador, pares);
-                MPI_Send(&mus, 1, MPI_INT, 0, 0, parent);
+                debug("[jugador %d] modo juego = %d, rank = %d", rank, modo_juego, rank);
+                if ((modo_juego == 1) && (rank == jugador_humano)) {//jugador humano
+                    MPI_Recv(&mus, 1, MPI_INT, 0, 0, parent, &stat);
+                    debug("[jugador %d] JUGADOR HUMANO RECIBE MUS INTRODUCIDO: %d\n", rank, mus);
+
+                }
+                else { //modo automático
+                    mus = cortarMus(valores_jugador, equivalencias_jugador, pares);
+                    MPI_Send(&mus, 1, MPI_INT, 0, 0, parent);
+
+                }
                 if (mus == 0) {
                     enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                 }
@@ -207,31 +219,38 @@ int main(int argc, char **argv) {
                 break;
             case 3: //jugador envía descartes a repartidor a través de maestro
 
-                // identificar cuántas cartas se van a descartar
-                // identificar qué cartas se van a descartar
-                n_cartas_a_descartar=0;
-                for (i = 0; i < N_CARTAS_MANO; i++) {
-                    if (equivalencias[mano_cartas[i].cara] != 10) {
-                        debug("jugador %d hace descarte", rank);
-                        cartas_a_descartar[n_cartas_a_descartar] = mano_cartas[i].id;
-                        n_cartas_a_descartar++;
+                if ((modo_juego==1) && jugador_humano==rank){//jugador humano
+                    enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
+                    MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent, &stat);
+                    MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent, &stat);
+                }
+                else { //modo automático
+                    // identificar cuántas cartas se van a descartar
+                    // identificar qué cartas se van a descartar
+                    n_cartas_a_descartar = 0;
+                    for (i = 0; i < N_CARTAS_MANO; i++) {
+                        if (equivalencias[mano_cartas[i].cara] != 10) {
+                            debug("jugador %d hace descarte", rank);
+                            cartas_a_descartar[n_cartas_a_descartar] = mano_cartas[i].id;
+                            n_cartas_a_descartar++;
+
+                        }
 
                     }
+                    // enviar número de cartas que se van a descartar
+                    MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent); //cuantas cartas quiero
 
-                }
-                // enviar número de cartas que se van a descartar
-                MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent); //cuantas cartas quiero
-
-                //llegados a este punto siempre va a haber descartes
+                    //llegados a este punto siempre va a haber descartes
                     // enviar ids de cartas a descartar en un array
                     MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent); //envío de descartes
-
+                }
                     //recibir cartas nuevas
                 int k;
                 for ( i = 0; i < N_CARTAS_MANO; i++) {
 
                     for (k = 0; k < n_cartas_a_descartar; k++) {
                         if (mano_cartas[i].id == cartas_a_descartar[k]) {
+                            printf("[jugador %d] Descartando carta con id %d\n", rank, cartas_a_descartar[k]);
                             mano_cartas[i] = recibir_carta(0, parent, &stat);
                             valores_jugador[i] = valores[mano_cartas[i].cara];
                             equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
@@ -244,28 +263,36 @@ int main(int argc, char **argv) {
                 debug("Jugador: %d reparte descartes", rank);
                 MPI_Recv(&size_mazo, 1, MPI_INT, 0, 0, parent, &stat);
                 recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
+                print_mazo(mazo, N_CARTAS_MAZO);
                 i=0;
                 int j;
                 while(i<4) {
 
                     if (i==3) { //soy el repartidor
-                        printf("[jugador %d] SOY EL REPARTIDOR\n", rank);
-                        n_cartas_a_descartar=0;
-                        for (j = 0; j < N_CARTAS_MANO; j++) {
-                            if (equivalencias[mano_cartas[j].cara] != 10) {
-                                debug("jugador %d hace descarte", rank);
-                                cartas_a_descartar[n_cartas_a_descartar] = mano_cartas[j].id;
-                                n_cartas_a_descartar++;
+                        if ((modo_juego == 1) && jugador_humano == rank) {//jugador humano
+                            enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
+                            MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent, &stat);
+                            MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent, &stat);
+                        } else {
+                            printf("[jugador %d] SOY EL REPARTIDOR\n", rank);
+                            n_cartas_a_descartar = 0;
+                            for (j = 0; j < N_CARTAS_MANO; j++) {
+                                if (equivalencias[mano_cartas[j].cara] != 10) {
+                                    debug("jugador %d hace descarte", rank);
+                                    cartas_a_descartar[n_cartas_a_descartar] = mano_cartas[j].id;
+                                    n_cartas_a_descartar++;
+
+                                }
 
                             }
+                            printf("REPARTIDOR DESCARTA %d CARTAS \n", n_cartas_a_descartar);
+                            MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent); //cuantas cartas quiero
 
+                            //llegados a este punto siempre va a haber descartes
+                            // enviar ids de cartas a descartar en un array
+                            MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0,
+                                     parent); //envío de descartes
                         }
-                        printf("REPARTIDOR DESCARTA %d CARTAS \n", n_cartas_a_descartar);
-                        MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent); //cuantas cartas quiero
-
-                        //llegados a este punto siempre va a haber descartes
-                        // enviar ids de cartas a descartar en un array
-                        MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent); //envío de descartes
                     }
 
                 // repartidor pregunta a siguiente judador cuantas cartas a través de maestro y las reparte
@@ -341,17 +368,6 @@ int main(int argc, char **argv) {
                 MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
                 enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                 break;
-            case 5: { //jugador humano
-                enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
-                // Si recibe del maestro es porque le toca
-                recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
-                enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
-                MPI_Recv(&mus, 1, MPI_INT, 0, 0, parent, &stat);
-                if (mus == 0) {
-                    enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
-                }
-                break;
-            }
 
         }
       //  if (mus == 1) {
@@ -385,12 +401,17 @@ int main(int argc, char **argv) {
 
         switch (token) {
             case 1: //decidir envite
-                MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
-                apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
-                jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-                //TODO: no subir envite a misma pareja
-                envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
-                MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+                if ((modo_juego==1) && (rank!=jugador_humano) || (modo_juego == 0)) {
+                    debug("[jugador %d] decidiendo envite...\n", rank);
+                    MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
+                    apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
+                    jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
+                    //TODO: no subir envite a misma pareja
+                    envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
+                    printf("[jugador %d] Generado envite: %d\n", envites[0]);
+                    printf("[jugador %d] Generado envite_N: %d\n", envites[1]);
+                    MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+                }
                 break;
             case 2: //esperar a ver qué dicen los otros
                 break;

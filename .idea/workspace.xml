@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/jugador.c" line="239" />
+    <bookmark url="file://$PROJECT_DIR$/jugador.c" line="258" />
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" assignedExecutableTargets="true" buildAllGenerated="true">
     <generated>
@@ -17,6 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="56f2a703-45ae-476d-be87-3cfa1a844b51" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/juego.c" afterPath="$PROJECT_DIR$/juego.c" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/jugador.c" afterPath="$PROJECT_DIR$/jugador.c" />
     </list>
@@ -29,7 +30,6 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
@@ -38,13 +38,13 @@
     <favorites_list name="mus" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.50946546">
+    <splitter split-orientation="horizontal" split-proportion="0.52259743">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="60">
+                <state relative-caret-position="0">
                   <caret line="4" column="42" selection-start-line="4" selection-start-column="42" selection-end-line="4" selection-end-column="42" />
                   <folding />
                 </state>
@@ -84,7 +84,7 @@
           <file leaf-file-name="juego_feb.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/juego_feb.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="348">
+                <state relative-caret-position="3360">
                   <caret line="224" column="53" selection-start-line="224" selection-start-column="23" selection-end-line="225" selection-end-column="58" />
                   <folding />
                 </state>
@@ -94,7 +94,7 @@
           <file leaf-file-name="mus_feb.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/mus_feb.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="873">
+                <state relative-caret-position="12360">
                   <caret line="824" column="18" selection-start-line="824" selection-start-column="4" selection-end-line="824" selection-end-column="18" />
                   <folding />
                 </state>
@@ -104,18 +104,8 @@
           <file leaf-file-name="juego.c" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/juego.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="420">
-                  <caret line="257" column="74" selection-start-line="257" selection-start-column="74" selection-end-line="257" selection-end-column="74" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="test.c" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test.c">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1365">
-                  <caret line="91" column="22" selection-start-line="91" selection-start-column="22" selection-end-line="91" selection-end-column="22" />
+                <state relative-caret-position="537">
+                  <caret line="293" column="17" selection-start-line="293" selection-start-column="17" selection-end-line="293" selection-end-column="17" />
                   <folding />
                 </state>
               </provider>
@@ -124,8 +114,8 @@
           <file leaf-file-name="mus.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/mus.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-806">
-                  <caret line="1109" column="216" selection-start-line="1109" selection-start-column="216" selection-end-line="1109" selection-end-column="216" />
+                <state relative-caret-position="462">
+                  <caret line="957" column="9" selection-start-line="957" selection-start-column="9" selection-end-line="957" selection-end-column="9" />
                   <folding />
                 </state>
               </provider>
@@ -134,8 +124,8 @@
           <file leaf-file-name="jugador.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/jugador.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="3750">
-                  <caret line="250" column="31" selection-start-line="250" selection-start-column="31" selection-end-line="250" selection-end-column="31" />
+                <state relative-caret-position="3495">
+                  <caret line="251" column="31" selection-start-line="251" selection-start-column="31" selection-end-line="251" selection-end-column="31" />
                   <folding>
                     <element signature="e#44#60#0" expanded="true" />
                   </folding>
@@ -150,8 +140,8 @@
           <file leaf-file-name="jugador.c" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/jugador.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2310">
-                  <caret line="349" column="31" selection-start-line="349" selection-start-column="31" selection-end-line="349" selection-end-column="31" />
+                <state relative-caret-position="-138">
+                  <caret line="298" column="77" selection-start-line="298" selection-start-column="77" selection-end-line="298" selection-end-column="77" />
                   <folding>
                     <element signature="e#44#60#0" expanded="true" />
                   </folding>
@@ -184,8 +174,8 @@
         <option value="$PROJECT_DIR$/test.c" />
         <option value="$PROJECT_DIR$/mus.h" />
         <option value="$PROJECT_DIR$/mus.c" />
-        <option value="$PROJECT_DIR$/jugador.c" />
         <option value="$PROJECT_DIR$/juego.c" />
+        <option value="$PROJECT_DIR$/jugador.c" />
       </list>
     </option>
   </component>
@@ -197,10 +187,10 @@
   </component>
   <component name="OCFindUsagesOptions" text="false" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1" />
+    <option name="x" value="512" />
     <option name="y" value="27" />
-    <option name="width" value="1922" />
-    <option name="height" value="1054" />
+    <option name="width" value="1536" />
+    <option name="height" value="1125" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -460,21 +450,21 @@
       <workItem from="1470406753634" duration="7909000" />
       <workItem from="1471529883409" duration="9366000" />
       <workItem from="1471846960287" duration="11330000" />
+      <workItem from="1471934819564" duration="13934000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34185000" />
+    <option name="totallyTimeSpent" value="48119000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="27" width="1922" height="1054" extended-state="6" />
+    <frame x="512" y="27" width="1536" height="1125" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.060416665" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.08018253" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3656958" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4017094" sideWeight="0.503125" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32799146" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -486,6 +476,7 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.424072" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31704885" sideWeight="0.496875" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32799146" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4732906" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
@@ -848,7 +839,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
+        <state relative-caret-position="0">
           <caret line="4" column="42" selection-start-line="4" selection-start-column="42" selection-end-line="4" selection-end-column="42" />
           <folding />
         </state>
@@ -858,14 +849,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1440">
           <caret line="96" column="51" selection-start-line="96" selection-start-column="51" selection-end-line="96" selection-end-column="51" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1365">
-          <caret line="91" column="22" selection-start-line="91" selection-start-column="22" selection-end-line="91" selection-end-column="22" />
           <folding />
         </state>
       </provider>
@@ -886,27 +869,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mus.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-806">
-          <caret line="1109" column="216" selection-start-line="1109" selection-start-column="216" selection-end-line="1109" selection-end-column="216" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/jugador.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3750">
-          <caret line="250" column="31" selection-start-line="250" selection-start-column="31" selection-end-line="250" selection-end-column="31" />
-          <folding>
-            <element signature="e#44#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mus_feb.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="873">
+        <state relative-caret-position="12360">
           <caret line="824" column="18" selection-start-line="824" selection-start-column="4" selection-end-line="824" selection-end-column="18" />
           <folding />
         </state>
@@ -914,17 +879,43 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/juego_feb.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="348">
+        <state relative-caret-position="3360">
           <caret line="224" column="53" selection-start-line="224" selection-start-column="23" selection-end-line="225" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="91" column="22" selection-start-line="91" selection-start-column="22" selection-end-line="91" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mus.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="957" column="9" selection-start-line="957" selection-start-column="9" selection-end-line="957" selection-end-column="9" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/juego.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="257" column="74" selection-start-line="257" selection-start-column="74" selection-end-line="257" selection-end-column="74" />
+        <state relative-caret-position="537">
+          <caret line="293" column="17" selection-start-line="293" selection-start-column="17" selection-end-line="293" selection-end-column="17" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jugador.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-138">
+          <caret line="298" column="77" selection-start-line="298" selection-start-column="77" selection-end-line="298" selection-end-column="77" />
+          <folding>
+            <element signature="e#44#60#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

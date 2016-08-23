@@ -17,7 +17,7 @@
 #define N_PAREJAS 2
 #define N_LANCES 4
 #define DEBUG 1
-#define MODO_JUEGO 0
+#define MODO_JUEGO 1
 
 
 extern const char * caras[];
@@ -33,10 +33,10 @@ int main(int argc, char **argv) {
     /*
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
-    int rank, size, version, subversion, namelen, universe_size, size_mazo, size_mano, proceso, jugador_humano, corte, repartidor, postre, mano,
+    int rank, size, version, subversion, namelen, universe_size, modo_juego, size_mazo, size_mano, proceso, jugador_humano, corte, repartidor, postre, mano,
             ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, envite_vigor, em, ep;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100], c;
-    int cartas_a_descartar[N_CARTAS_MANO];
+    int cartas_a_descartar[N_CARTAS_MANO]={99,99,99,99};
     //Array de 4 posiciones para los envites, una para cada jugador
     //0: no ha hablado
     //1: paso
@@ -85,12 +85,12 @@ int main(int argc, char **argv) {
         printf("[jugador %d] Jugador %d: Listo para jugar!\n", proceso, proceso);
     }
 
-    if (MODO_JUEGO==1) {
+
         //jugador_humano = rand() % (N_JUGADORES + 1 - 0) + 0;
+
         jugador_humano = 3;
         printf("El identificador para el jugador humano es: %d\n", jugador_humano);
 
-    }
 
     /*
      * INICIALIZACIÓN DEL MAZO
@@ -117,6 +117,9 @@ int main(int argc, char **argv) {
               juego_comm); // envío del id de proceso que realizará el corte a todos los jugadores
     debug("Corte broadcasted: %d\n", corte);
     MPI_Bcast(&size_mazo, 1, MPI_INT, MPI_ROOT, juego_comm);//Envío del tamaño del mazo*/
+    modo_juego = MODO_JUEGO;
+    MPI_Bcast(&modo_juego, 1, MPI_INT, MPI_ROOT, juego_comm);
+    MPI_Bcast(&jugador_humano, 1, MPI_INT, MPI_ROOT, juego_comm);//Envío deljugador humano*/
 
     /*
      * RECEPCIÓN DEL JUGADOR REPARTIDOR POR PARTE DEL CORTE
@@ -174,21 +177,6 @@ int main(int argc, char **argv) {
      debug("[maestro] Comienza el turno : %d", turno);
     siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
 
-        if ((MODO_JUEGO == 1) && (siguiente_jugador == 3)) {
-            token = 5;
-            MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
-            recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
-            printf("[maestro] Mano del jugador %d\n", siguiente_jugador);
-            print_mazo(mano_jugador, N_CARTAS_MANO);
-            debug("Envío de mazo a jugador %d", siguiente_jugador);
-            enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
-            do {
-                printf("[jugador %d] ¿Quieres mus?: (0:Dame mus, 1:no hay mus)\n", siguiente_jugador);
-                }
-            while (((scanf("%d%c", &mus, &c) != 2 || c!= '\n') && clean_stdin()) || esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
-            MPI_Send(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
-        }
-        else {
             token = 1;
             MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
@@ -197,9 +185,18 @@ int main(int argc, char **argv) {
             debug("Envío de mazo a jugador %d", siguiente_jugador);
             enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
             // El jugador decide si quiere mus
+            if ((MODO_JUEGO == 1) && (siguiente_jugador == jugador_humano)) {
+                do {
+                    printf("[jugador %d] ¿Quieres mus?: (0:Dame mus, 1:no hay mus)\n", siguiente_jugador);
+                }
+                while (((scanf("%d%c", &mus, &c) != 2 || c!= '\n') && clean_stdin()) || esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
+                MPI_Send(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
 
-            MPI_Recv(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
-        }
+            }
+            else {
+                MPI_Recv(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+            }
+
 
     if (mus == 1) { // corta el mus
         // En caso de no querer mus, ese jugador es mano y el anterior postre, al que habrá que pasar el mazo
@@ -224,9 +221,10 @@ int main(int argc, char **argv) {
 
             recibir_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
 
+
         }
         else {
-            printf("FIN DE RONDA SIN CORTAR MUS\n");
+            printf("FIN DE RONDA SIN CORTAR MUS. COMIENZA FASE DE DESCARTES.\n");
 
             // Si pasa una ronda completa sin cortar mus, el mazo pasa al jugador de la derecha del último que repartió
             recibir_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
@@ -237,6 +235,7 @@ int main(int argc, char **argv) {
             debug("Envío de token=%d a jugador %d", token, siguiente_jugador);
             MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             debug("Envío de mazo a jugador %d", siguiente_jugador);
+
             MPI_Send(&size_mazo, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
             enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
             i=0;
@@ -252,29 +251,47 @@ int main(int argc, char **argv) {
                     MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                 }
                 else {
-                    printf("[maestro] LE TOCA AL REPARTIDOR\n");
+                    debug("[maestro] LE TOCA AL REPARTIDOR\n");
                 }
 
                 // TODO: gestionar entrada de descartes con jugador humano
-                /*
-                if ((MODO_JUEGO==1) && siguiente_jugador==3) {
 
-                    //enviar token a jugador para que envíe mano
-                    //recoger mano del jugador
+                if ((MODO_JUEGO==1) && (siguiente_jugador==jugador_humano)) {
+                    recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                    for (j=0;j<N_CARTAS_MANO; j++) {
 
-                    printf("¿Desea descartar %s de %s? (0: no, 1: sí)\n", manoJugadorHumano[i].cara,
-                           manoJugadorHumano[i].palo);
-                    if (descarte == 1) {
-                        //añadir id a lista
+                        do {
+                            printf("¿[jugador %d] Quieres descartar %s de %s? (0: no, 1: sí)\n", siguiente_jugador, caras[mano_jugador[j].cara],
+                                   palos[mano_jugador[j].palo]);
+                        }
+                        while (((scanf("%d%c", &descarte, &c) != 2 || c!= '\n') && clean_stdin()) || esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
+
+                        if (descarte == 1) {
+                            //añadir id a lista
+                            cartas_a_descartar[j] = mano_jugador[j].id;
+                            n_cartas_a_descartar++;
+                            //mostrar por pantalla lista de ids a descartar
+
+                        }
                     }
-                }*/
+                    printf("Lista de ids a descartar: ");
+                    for (j=0;j<N_CARTAS_MANO; j++) {
 
-              printf("[maestro] Jugador %d, ¿cuántas cartas quieres?\n", siguiente_jugador);
-                //recibir cuantas cartas quiere
-                MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
-                printf("[jugador %d] Quiero %d cartas\n", siguiente_jugador, n_cartas_a_descartar);
-                //recibir las cartas descartadas
-                MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+                        printf("%d ", cartas_a_descartar[j]);
+                    }
+                    printf("\n");
+                    MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, jugador_humano, 0, juego_comm);
+                    MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, jugador_humano, 0, juego_comm);
+                }
+                else { //jugador automático
+                    printf("[maestro] Jugador %d, ¿cuántas cartas quieres?\n", siguiente_jugador);
+                    //recibir cuantas cartas quiere
+                    MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+                    printf("[jugador %d] Quiero %d cartas\n", siguiente_jugador, n_cartas_a_descartar);
+                    //recibir las cartas descartadas
+                    MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, siguiente_jugador, 0, juego_comm,
+                             MPI_STATUS_IGNORE);
+                }
                 // envío de número de cartas a descartar a repartidor
                 MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, repartidor_descartes, 0, juego_comm);
 
@@ -356,46 +373,47 @@ printf("[maestro] Manos con las que se juega la partida: \n");
 
         // si modo interactivo y el siguiente jugador es humano
        // if ((MODO_JUEGO == 1) && (siguiente_jugador == jugador_humano)) {
-        if ((MODO_JUEGO == 1) && ((siguiente_jugador == 3) || siguiente_jugador == 2)) {
-            token=3;
-            MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
-            do {
-                if(hay_apuesta(envites_grande, N_JUGADORES) == 0) {
-                    printf("[jugador %d] Introduzca envite a %s: (1:paso, 2: envido, 3: envido N)\n", siguiente_jugador, lances_etiquetas[0]);
-                }
-                else {
-                    printf("[jugador %d] Introduzca envite a %s: (1:no, 2: lo quiero, 3: envido N más)\n", siguiente_jugador, lances_etiquetas[0]);
-                }
-            }
-            while (((scanf("%d%c", &envite, &c) != 2 || c!= '\n') && clean_stdin()) || esta_valor_en_array(envite, entradas_posibles, 3) == 0);
 
-            if (envite == 3) { // cuántos envida
-                do {
-                    if(hay_apuesta(envites_grande, N_JUGADORES) == 0) {
-                        printf("[jugador %d] ¿Cuántos envida? (introduzca un número entero) \n", siguiente_jugador);
-                    }
-                    else {
-                        printf("[jugador %d] ¿Cuántos más envida? (introduzca un número entero)\n", siguiente_jugador);
-                    }
-                }
-                while (((scanf("%d%c", &envite_N, &c) != 2 || c!= '\n') && clean_stdin()));
-            }
-
-        }
-        else {
             //enviar token a jugador, empezando por la mano
             token=1;
+            printf("[maestro]: Siguiente jugador: %d, mano: %d\n", siguiente_jugador, mano);
             MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
-            debug("[maestro] Token %d enviado...", i);
+            debug("[maestro] Token %d enviado con valor %d a jugador %d...", i, token, siguiente_jugador);
+            if ((MODO_JUEGO==1) && (siguiente_jugador==jugador_humano)) {
+                do {
+                    if(hay_apuesta(envites_grande, N_JUGADORES) == 0) {
+                        printf("[jugador %d] Introduzca envite a %s: (1:paso, 2: envido, 3: envido N)\n", siguiente_jugador, lances_etiquetas[0]);
+                    }
+                    else {
+                        printf("[jugador %d] Introduzca envite a %s: (1:no, 2: lo quiero, 3: envido N más)\n", siguiente_jugador, lances_etiquetas[0]);
+                    }
+                }
+                while (((scanf("%d%c", &envite, &c) != 2 || c!= '\n') && clean_stdin()) || esta_valor_en_array(envite, entradas_posibles, 3) == 0);
 
+                if (envite == 3) { // cuántos envida
+                    do {
+                        if(hay_apuesta(envites_grande, N_JUGADORES) == 0) {
+                            printf("[jugador %d] ¿Cuántos envida? (introduzca un número entero) \n", siguiente_jugador);
+                        }
+                        else {
+                            printf("[jugador %d] ¿Cuántos más envida? (introduzca un número entero)\n", siguiente_jugador);
+                        }
+                    }
+                    while (((scanf("%d%c", &envite_N, &c) != 2 || c!= '\n') && clean_stdin()));
+                }
+            }
+            else {
+                MPI_Send(envites_grande, 4, MPI_INT, siguiente_jugador, 0, juego_comm);
+
+                // para jugadores automáticos, se recibe desde los procesos jugadores
+                MPI_Recv(envites, 2, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
+                envite = envites[0];
+                envite_N = envites[1];
+            }
             // Hay que enviar los envites al jugador para que pueda hacer su cálculo
-            MPI_Send(envites_grande, 4, MPI_INT, siguiente_jugador, 0, juego_comm);
 
-            // para jugadores automáticos, se recibe desde los procesos jugadores
-            MPI_Recv(envites, 2, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
-            envite = envites[0];
-            envite_N = envites[1];
-        }
+
+
 
 
         print_envite(envite, siguiente_jugador, hay_apuesta(envites_grande, N_JUGADORES), envite_N);
