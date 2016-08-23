@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 
 
     }//se termina el reparto
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&size_mazo, 1, MPI_INT, 0, parent); //recepción del tamaño después de repartir
 
 
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
                     MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent, &stat);
                     MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
 
-                    print_vector_estados(mazo, N_CARTAS_MAZO);
+
                     printf("CARTAS EN MANOS: %d\n", contar_cartas_en_manos(mazo));
                 for (j = 0; j < n_cartas_a_descartar; j++) {
                     marcar_descarte(mazo, N_CARTAS_MAZO, cartas_a_descartar[j]); //primero se tiran las cartas
@@ -341,7 +341,17 @@ int main(int argc, char **argv) {
                 MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
                 enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                 break;
-
+            case 5: { //jugador humano
+                enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
+                // Si recibe del maestro es porque le toca
+                recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
+                enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
+                MPI_Recv(&mus, 1, MPI_INT, 0, 0, parent, &stat);
+                if (mus == 0) {
+                    enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
+                }
+                break;
+            }
 
         }
       //  if (mus == 1) {
@@ -392,7 +402,7 @@ int main(int argc, char **argv) {
 
     }
 
-    MPI_Barrier(parent);
+    //MPI_Barrier(parent);
     token = 0;
     while (token != 2) {
 
