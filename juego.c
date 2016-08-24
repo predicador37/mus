@@ -292,6 +292,12 @@ int main(int argc, char **argv) {
                          //recibir las cartas descartadas
                          MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, siguiente_jugador, 0, juego_comm,
                                   MPI_STATUS_IGNORE);
+                         printf("[jugador %d] Lista de ids a descartar: ", siguiente_jugador);
+                         for (j=0;j<N_CARTAS_MANO; j++) {
+
+                             printf("%d ", cartas_a_descartar[j]);
+                         }
+                         printf("\n");
                      }
 
 
@@ -328,9 +334,9 @@ int main(int argc, char **argv) {
 
                  MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
                  recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
-                print_mazo(mazo,N_CARTAS_MAZO);
-                //barajar_mazo(mazo); TODO: barajeo provoca bloqueos
-                print_mazo(mazo,N_CARTAS_MAZO);
+
+                barajar_mazo(mazo); //TODO: barajeo provoca bloqueos
+
                // getchar();
 
             } // fin else cuando no se corta el mus y acaba la ronda

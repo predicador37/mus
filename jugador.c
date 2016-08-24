@@ -259,10 +259,11 @@ int main(int argc, char **argv) {
 
                     for (k = 0; k < n_cartas_a_descartar; k++) {
                         if (mano_cartas[i].id == cartas_a_descartar[k]) {
-                            printf("[jugador %d] Descartando carta con id %d\n", rank, cartas_a_descartar[k]);
+                            printf("[jugador %d] Descartando carta con id %d y k = %d\n", rank, cartas_a_descartar[k], k);
                             mano_cartas[i] = recibir_carta(0, parent, &stat);
                             valores_jugador[i] = valores[mano_cartas[i].cara];
                             equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
+                            break;
                         }
                     }
                 }
@@ -289,7 +290,8 @@ int main(int argc, char **argv) {
                             printf("[jugador %d] SOY EL REPARTIDOR\n", rank);
                             n_cartas_a_descartar = 0;
                             for (j = 0; j < N_CARTAS_MANO; j++) {
-                                if (equivalencias[mano_cartas[j].cara] != 10) {
+                                cartas_a_descartar[i]=99;
+                                if (equivalencias[mano_cartas[j].cara] != 10) { //Descartamos todo lo que no sea un rey
                                     debug("jugador %d hace descarte", rank);
                                     cartas_a_descartar[n_cartas_a_descartar] = mano_cartas[j].id;
                                     n_cartas_a_descartar++;
@@ -318,11 +320,15 @@ int main(int argc, char **argv) {
                     MPI_Send(&size_mazo, 1, MPI_INT, 0, 0, parent); //envío de tamaño del mazo
 
 
-                    printf("CARTAS EN MANOS: %d\n", contar_cartas_en_manos(mazo));
+                    printf("CARTAS EN MANOS: %d\n", contar_cartas_en_estado(mazo,1));
+
                 for (j = 0; j < n_cartas_a_descartar; j++) {
                     marcar_descarte(mazo, N_CARTAS_MAZO, cartas_a_descartar[j]); //primero se tiran las cartas
-                    printf("CARTAS EN MANOS: %d\n", contar_cartas_en_manos(mazo));
+
                 }
+                   // printf("[jugador %d] CARTAS EN MANOS: %d\n", rank, contar_cartas_en_estado(mazo, 1));
+                   // printf("[jugador %d] CARTAS EN MAZO: %d\n", rank, contar_cartas_en_estado(mazo, 0));
+                   // printf("[jugador %d] CARTAS DESCARTADAS: %d\n", rank, contar_cartas_en_estado(mazo, 2));
                     /**************** INICIO BLOQUE BLOQUEO***************/
 
                     for (j = 0; j < n_cartas_a_descartar; j++) { //luego se reparten N
@@ -351,7 +357,9 @@ int main(int argc, char **argv) {
                         size_mazo--;
                         printf("Cursor size_mazo: %d\n", size_mazo);
                      
-                        printf("[jugador %d] CARTAS EN MANOS: %d\n", rank, contar_cartas_en_manos(mazo));
+                        printf("[jugador %d] CARTAS EN MANOS: %d\n", rank, contar_cartas_en_estado(mazo, 1));
+                        printf("[jugador %d] CARTAS EN MAZO: %d\n", rank, contar_cartas_en_estado(mazo, 0));
+                        printf("[jugador %d] CARTAS DESCARTADAS: %d\n", rank, contar_cartas_en_estado(mazo, 2));
 
                         if (size_mazo == 0){
                             printf("[301] ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
@@ -363,6 +371,8 @@ int main(int argc, char **argv) {
                             size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                             //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                         }
+                    }else {
+                        printf("IMPOSSIBLE SITUATION\n");
                     }
 
                         if (i==3) { // repartidor se reparte a sí mismo
@@ -371,9 +381,11 @@ int main(int argc, char **argv) {
                                for (k = 0; k < N_CARTAS_MANO; k++) {
                                     if (mano_cartas[k].id == cartas_a_descartar[j]) {
                                         printf("Carta a reemplazar con id %d\n", cartas_a_descartar[j]);
+                                        printf("[jugador %d] Descartando carta con id %d y j = %d\n", rank, cartas_a_descartar[j], j);
                                         mano_cartas[k] = recibir_carta(0, parent, &stat);
                                         valores_jugador[k] = valores[mano_cartas[j].cara];
                                         equivalencias_jugador[k] = equivalencias[mano_cartas[j].cara];
+                                        break;
                                     }
                                 }
                             }

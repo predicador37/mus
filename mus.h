@@ -124,6 +124,6 @@ int esta_valor_en_array(int val, int *arr, int size);
 
 int poner_descartadas_en_mazo(Carta *wMazo);
 
-int contar_cartas_en_manos(Carta *wMazo);
+int contar_cartas_en_estado(Carta *wMazo, int estado);
 
 #endif //MUS_MUS_H

@@ -118,11 +118,11 @@ int poner_descartadas_en_mazo(Carta *wMazo) {
     return contador;
 }
 
-int contar_cartas_en_manos(Carta *wMazo) {
+int contar_cartas_en_estado(Carta *wMazo, int estado) {
     int i;
     int contador = 0;
     for (i = 0; i <= N_CARTAS_MAZO - 1; i++) {
-        if ((wMazo[i].estado != 0) && (wMazo[i].estado != 2)) {
+        if (wMazo[i].estado == estado) {
             contador++;
         }
     }
