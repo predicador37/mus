@@ -32,7 +32,7 @@ extern int equivalencias[];
 int main(int argc, char **argv) {
 
     /* Test para envido() */
-
+/*
     Carta mano_jugador[N_CARTAS_MANO];
     int equivalencias_jugador[N_CARTAS_MANO], cuentaCartas[N_CARTAS_PALO];
     int i, envite;
@@ -90,5 +90,34 @@ int main(int argc, char **argv) {
     }
     else {
         printf("FAIL\n");
+    }*/
+
+    /*TEST PARA CALCULO DE GANADOR A GRANDE*/
+
+    // La siguiente jugada empata entre dos jugadores, uno de los cuales es mano
+    int rbuf_1[40] = {2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1};
+    int rbuf_2[40] = {3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0};
+    int mano_1 = 0;
+    int mano_2 = 0;
+    int ganador = 88;
+
+   /* ganador = calculaGrande(rbuf_1, mano_1);
+    if (ganador == 0) {
+        printf("TEST 1 OK: %d\n", ganador);
     }
+    else {
+        printf("TEST 1 ERROR: %d\n", ganador);
+    }
+*/
+    ganador = calculaGrande(rbuf_2, mano_2);
+
+    printf("TEST 2 : %d\n", ganador);
+
+    /*if (ganador == 0) {
+        printf("TEST 2 OK: %d\n", ganador);
+    }
+    else {
+        printf("TEST 2 ERROR: %d\n", ganador);
+    }*/
+
 }

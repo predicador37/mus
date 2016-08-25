@@ -60,7 +60,7 @@ void invertirArray(int *orig, int *dest, int longitud);
 
 int calculaGrande(int rbuf[], int jugadorMano);
 
-int calculaChica(int rbufInv[]);
+int calculaChica(int rbufInv[], int jugadorMano);
 
 int cmpfunc(const void *a, const void *b);
 
@@ -95,6 +95,8 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 int busca_indice(int a[], int longitud, int numero);
 
 int que_pareja_soy(int rank, int jugadorMano);
+
+int que_pareja_inicial_soy(int rank);
 
 int misma_pareja(int rank1, int rank2);
 

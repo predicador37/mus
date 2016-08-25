@@ -343,13 +343,10 @@ void invertirArray(int *orig, int *dest, int longitud) {
 
 int calculaGrande(int rbuf[], int jugadorMano) {
 
-    int empates[4];
+    int empates[4] = {0,0,0,0};
     int i, k = 0;
 
-    for (i = 0; i < 4; i++) {
-        empates[i] = 0;
-    }
-    int ganador;
+    int ganador = 999;
     for (k = 0; k < 10; k++) {
         if (k == 0) { /* se buscan reyes y treses*/
             int suma[4];
@@ -390,9 +387,7 @@ int calculaGrande(int rbuf[], int jugadorMano) {
                         if ((suma[i] == maximo) && (empates[i] == 1)) {
                             empates[i] = 1;
                         }
-                        else {
-                            empates[i] = 0;
-                        }
+
                     }
                     if (ocurrenciasArray(empates, 4, 1) == 1) {
                         ganador = buscaIndice(suma, 4, 1);
@@ -415,25 +410,42 @@ int calculaGrande(int rbuf[], int jugadorMano) {
             }
             else if (ocurrencias != 0) { //gana la mano o el más cercano
                 printf("Se deshace empate con distancia a la mano...\n");
-                ganador = deshacerEmpate(suma, jugadorMano, 1);
+
+                for (i = 0; i < 4; i++) {
+                    if ((suma[i] == maximo) && (empates[i] == 1)) {
+                        empates[i] = 1;
+                    }
+
+                }
+
+                if (ocurrenciasArray(empates, 4, 1) == 1) {
+                    printf("DESEMPATE: sólo queda un jugador en vector de empates\n");
+                    ganador = buscaIndice(suma, 4, 1);
+                    break;
+                }
+                else {
+                    ganador = deshacerEmpate(empates, jugadorMano, 1);
+                }
                 break;
             }
         }
+
+    }
+    if (ganador >5) {
+        printf("[maestro] ERROR en funcion calculaGrande\n");
     }
     return ganador;
 }
 
-int calculaChica(int rbufInv[]) {
+int calculaChica(int rbufInv[], int jugadorMano) {
 
-    int empates[4];
+    int empates[4] = {0,0,0,0};
     int i, k = 0;
 
-    for (i = 0; i < 4; i++) {
-        empates[i] = 0;
-    }
-    int ganador;
+
+    int ganador = 999;
     for (k = 0; k < 10; k++) {
-        if (k == 0) { /* se buscan Ases y treses*/
+        if (k == 0) { /* se buscan Ases y doses*/
             int suma[4];
             suma[0] = rbufInv[0] + rbufInv[1];
             suma[1] = rbufInv[10] + rbufInv[11];
@@ -472,9 +484,7 @@ int calculaChica(int rbufInv[]) {
                         if (suma[i] == maximo && empates[i] == 1) {
                             empates[i] = 1;
                         }
-                        else {
-                            empates[i] = 0;
-                        }
+
                     }
                     if (ocurrenciasArray(empates, 4, 1) == 1) {
                         ganador = buscaIndice(suma, 4, 1);
@@ -493,6 +503,26 @@ int calculaChica(int rbufInv[]) {
             int ocurrencias = ocurrenciasArray(suma, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene más Ases
                 ganador = buscaIndice(suma, 4, maximo);
+                break;
+            }
+            else if (ocurrencias != 0) { //gana la mano o el más cercano
+                printf("Se deshace empate con distancia a la mano...\n");
+
+                for (i = 0; i < 4; i++) {
+                    if ((suma[i] == maximo) && (empates[i] == 1)) {
+                        empates[i] = 1;
+                    }
+
+                }
+
+                if (ocurrenciasArray(empates, 4, 1) == 1) {
+                    printf("DESEMPATE: sólo queda un jugador en vector de empates\n");
+                    ganador = buscaIndice(suma, 4, 1);
+                    break;
+                }
+                else {
+                    ganador = deshacerEmpate(empates, jugadorMano, 1);
+                }
                 break;
             }
         }
@@ -1046,6 +1076,17 @@ int que_pareja_soy(int rank, int jugadorMano) { //1 mano, 0 postre
     }
     else return 99;
 }
+
+/*Determina en qué pareja de las iniciales se encuentra un jugador: 0: pareja_02 o 1: pareja_13 */
+int que_pareja_inicial_soy(int rank) {
+    if ((rank == 0 )|| (rank == 2)){
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
 
 /* Determina si dos jugadores pertenecen a la misma pareja */
 int misma_pareja(int rank1, int rank2) {
