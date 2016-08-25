@@ -256,7 +256,7 @@ int main(int argc, char **argv) {
                         debug("[maestro] LE TOCA AL REPARTIDOR\n");
                     }
 
-                    // TODO: gestionar entrada de descartes con jugador humano
+
 
                      if ((MODO_JUEGO==1) && (siguiente_jugador==jugador_humano)) {
                          recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
@@ -338,14 +338,14 @@ int main(int argc, char **argv) {
                  MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
                  recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
 
-                barajar_mazo(mazo); //TODO: barajeo provoca bloqueos
+                barajar_mazo(mazo);
 
                // getchar();
 
             } // fin else cuando no se corta el mus y acaba la ronda
         } //fin else cuando jugador pide mus
     } // fin while mus corrido (se pide mus)
-    //TODO: comprobar estados de las cartas del mazo devuelto
+
     printf("[maestro] Enviando mano...\n");
 //Se comunica a todos los jugadores quien es la mano
     MPI_Bcast(&mano, 1, MPI_INT, MPI_ROOT, juego_comm);
@@ -377,7 +377,7 @@ int main(int argc, char **argv) {
     // GRANDE
 
     printf("[maestro] INICIANDO LANCES...\n");
-    //TODO: GUARDAR APUESTA ANTERIOR PARA CONTEO DE PIEDRAS
+
 
     i = 0;
     token = 1;
@@ -501,6 +501,7 @@ int main(int argc, char **argv) {
         //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
         //if ((MODO_JUEGO == 1) && (jugador_1_pareja_subida == jugador_humano)) {
         if ((MODO_JUEGO == 1) && (jugador_apuesta_inicial == jugador_humano)) {
+            //TODO: probar esto
         /*
             envite = 0;
             envite_N = 0;
