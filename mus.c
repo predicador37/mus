@@ -897,7 +897,7 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
 
 /*
  if (contrario a 5 puntos de ganar) cortar mus */
-  /*  int juego = sumaArray(valores, N_CARTAS_MANO);
+    int juego = sumaArray(valores, N_CARTAS_MANO);
     if ((juego == 31) || (tengoDuples(paresBuf) == 1) || (tengoMedias(paresBuf) == 1) ||
         (tengoPares(paresBuf) && tengo_juego_decente(juego))) {
         return 1;
@@ -906,8 +906,6 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf) {
     else {
         return 0;
     }
-*/
-    return 0;
 
 }
 
