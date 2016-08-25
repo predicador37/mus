@@ -17,7 +17,7 @@
 #define N_PAREJAS 2
 #define N_LANCES 4
 #define DEBUG 0
-#define MODO_JUEGO 1
+#define MODO_JUEGO 0
 
 
 extern const char *caras[];
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
     int rank, size, version, subversion, namelen, universe_size, modo_juego, size_mazo, size_mano, proceso, jugador_humano, corte, repartidor, postre, mano,
-            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, em, ep;
+            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, em, ep, piedra_no;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100], c;
     int cartas_a_descartar[N_CARTAS_MANO] = {99, 99, 99, 99};
     //Array de 4 posiciones para los envites, una para cada jugador
@@ -381,6 +381,7 @@ int main(int argc, char **argv) {
 
     i = 0;
     token = 1;
+    piedra_no=0; //inicializar a cero en cada lance!
 
 
     siguiente_jugador = mano;
@@ -388,6 +389,7 @@ int main(int argc, char **argv) {
     while (i < N_JUGADORES) {
         envite = 0;
         envite_N = 0;
+
 
         //recibir envite/paso de jugador
 
@@ -475,6 +477,23 @@ int main(int argc, char **argv) {
            envites_grande[2], envites_grande[3]);
 
     printf("APUESTA: %d\n", apuesta_terminada(envites_grande, N_JUGADORES));
+
+    //si pareja contraria no acepta un envite, sumar una piedra a la otra inmediatamente
+    if (((max(envites_grande[0], envites_grande[2]) == 1)  || (max(envites_grande[1], envites_grande[3]) == 1)) && (max(envites_grande[0], envites_grande[2]) != max(envites_grande[1], envites_grande[3]) == 1)){
+        for (k=0; k< N_JUGADORES - 1; k++) {
+            if (envites_grande[k] != 1){
+                printf("[maestro] Piedra por no\n");
+                piedras[que_pareja_soy(k, mano)]++;
+                piedra_no=1;
+                break;
+            }
+
+        }
+        printf("[maestro] Pareja %s se lleva piedra por el no\n", parejas[que_pareja_soy(k, mano)]);
+        printf("[maestro] PIEDRAS MANO: %d\n", piedras[1]);
+        printf("[maestro] PIEDRAS POSTRE: %d\n", piedras[0]);
+    }
+
     //evaluar envites de las parejas
     //mientras apuesta no esté terminada
 
@@ -501,8 +520,8 @@ int main(int argc, char **argv) {
         //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
         //if ((MODO_JUEGO == 1) && (jugador_1_pareja_subida == jugador_humano)) {
         if ((MODO_JUEGO == 1) && (jugador_apuesta_inicial == jugador_humano)) {
-            //TODO: probar esto
-        /*
+
+
             envite = 0;
             envite_N = 0;
 
@@ -528,7 +547,7 @@ int main(int argc, char **argv) {
                     }
                 } while (((scanf("%d%c", &envite_N, &c) != 2 || c != '\n') && clean_stdin()));
             }
-        */
+
         } else { //modo automático
             token = 1;
             MPI_Send(&token, 1, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
@@ -599,36 +618,40 @@ int main(int argc, char **argv) {
     printf("[maestro] Mejor mano a grande: jugador %d\n", ganador[0]);
     printf("[maestro] Mejor pareja a grande: %s\n", parejas[que_pareja_soy(ganador[0], mano)]);
 
+
     // Cálculo de piedras
 
-    // Calcular envite de pareja mano em
-    em = envite_pareja(1, mano, envites_grande);
-    printf("[maestro] Envite final de pareja mano ha sido: %d\n", em);
-    printf("[maestro] Envite anterior de pareja mano ha sido: %d\n", envite_anterior[1]);
-    // Calcular envite de pareja postre ep
-    ep = envite_pareja(0, mano, envites_grande);
-    printf("[maestro] Envite final de pareja postre ha sido: %d\n", ep);
-    printf("[maestro] Envite anterior de pareja postre ha sido: %d\n", envite_anterior[0]);
-    // em == ep !=1? :
-    if ((em == ep) && (em != 1)) { //apuesta igualada, pareja del ganador se lleva el envite (todas las piedras)
-        piedras[que_pareja_soy(ganador[0], mano)] += (2 * em);
+    if (piedra_no != 1) {
+        printf("[maestro] Calculando piedras, ninguna previa...\n");
+        // Calcular envite de pareja mano em
+        em = envite_pareja(1, mano, envites_grande);
+        printf("[maestro] Envite final de pareja mano ha sido: %d\n", em);
+        printf("[maestro] Envite anterior de pareja mano ha sido: %d\n", envite_anterior[1]);
+        // Calcular envite de pareja postre ep
+        ep = envite_pareja(0, mano, envites_grande);
+        printf("[maestro] Envite final de pareja postre ha sido: %d\n", ep);
+        printf("[maestro] Envite anterior de pareja postre ha sido: %d\n", envite_anterior[0]);
+        // em == ep !=1? :
+        if ((em == ep) && (em != 1)) { //apuesta igualada, pareja del ganador se lleva el envite (todas las piedras)
+            piedras[que_pareja_soy(ganador[0], mano)] += (2 * em);
 
-    }
-
-        // em != ep && min(em,ep) == 1 ?
-    else if ((em != ep)) { // una pareja pasa y la otro ha envidado 2 o más; envite más alto se lleva 1 tanto
-
-
-        if (em > ep) {
-            piedras[1] += envite_anterior[0];
-        } else {
-            piedras[0] += envite_anterior[1];
         }
-    }
 
-    // todos pasan: pareja a la que pertenece la jugada ganadora se lleva una piedra
-    if ((em == ep) && (ep == 1)) {
-        piedras[que_pareja_soy(ganador[0], mano)]++;
+            // em != ep && min(em,ep) == 1 ?
+        else if ((em != ep)) { // una pareja pasa y la otro ha envidado 2 o más; envite más alto se lleva 1 tanto
+
+
+            if (em > ep) {
+                piedras[1] += envite_anterior[0];
+            } else {
+                piedras[0] += envite_anterior[1];
+            }
+        }
+
+        // todos pasan: pareja a la que pertenece la jugada ganadora se lleva una piedra
+        if ((em == ep) && (ep == 1)) {
+            piedras[que_pareja_soy(ganador[0], mano)]++;
+        }
     }
 
     printf("[maestro] PIEDRAS MANO: %d\n", piedras[1]);

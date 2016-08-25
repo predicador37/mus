@@ -1100,7 +1100,6 @@ int apuesta_terminada(int envites_jugadores[], int longitud) {
     // 3 jugadores están en paso y 1 en 2-99
     // 2 jugadores están en paso, son de la misma pareja y 1 en 2-99
     // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
-    //TODO ver qué pasa si las únicas apuestas están en la misma pareja...
     //0: no ha hablado
     //1: paso
     //2: envido (2 piedras, apuesta mínima)
@@ -1224,4 +1223,6 @@ int esta_valor_en_array(int val, int *arr, int size){
     }
     return 0;
 }
+
+
 

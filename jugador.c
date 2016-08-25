@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
                             n_cartas_a_descartar = 0;
                             for (j = 0; j < N_CARTAS_MANO; j++) {
                                 cartas_a_descartar[i]=99;
-                                if (equivalencias[mano_cartas[j].cara] != 10) { //Descartamos todo lo que no sea un rey
+                                if (equivalencias[mano_cartas[j].cara] != 10) { //Descartamos carta que no sea un rey
                                     debug("jugador %d hace descarte", rank);
                                     cartas_a_descartar[n_cartas_a_descartar] = mano_cartas[j].id;
                                     n_cartas_a_descartar++;
@@ -351,7 +351,7 @@ int main(int argc, char **argv) {
                         }
                     if (mazo[N_CARTAS_MAZO - size_mazo].estado == 0) {
 
-                        mazo[N_CARTAS_MAZO - size_mazo].estado = 1; //TODO: BUCLE INFINITO; TODAS LAS CARTAS SE PONEN A ESTADO 1
+                        mazo[N_CARTAS_MAZO - size_mazo].estado = 1;
                         repartir_carta(mazo[N_CARTAS_MAZO - size_mazo], 0, parent);
                         printf("[jugador %d] Repartiendo carta con size_mazo %d\n", rank, size_mazo);
                         size_mazo--;
@@ -376,7 +376,7 @@ int main(int argc, char **argv) {
                     }
 
                         if (i==3) { // repartidor se reparte a sí mismo
-                            printf("[jugador %d] REPARTIDOR SE REPARTE A SI MISMO\n");
+                            printf("[jugador %d] REPARTIDOR SE REPARTE A SI MISMO\n", rank);
                              int k;
                                for (k = 0; k < N_CARTAS_MANO; k++) {
                                     if (mano_cartas[k].id == cartas_a_descartar[j]) {
@@ -443,10 +443,10 @@ int main(int argc, char **argv) {
                     MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
                     apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
                     jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-                    //TODO: no subir envite a misma pareja
+                    //TODO: no subir envite a misma pareja?? no pasa nada...
                     envido(envites, equivalencias_jugador, N_CARTAS_MANO, 0, apuesta_en_vigor, rank, mano);
-                    printf("[jugador %d] Generado envite: %d\n", envites[0]);
-                    printf("[jugador %d] Generado envite_N: %d\n", envites[1]);
+                    printf("[jugador %d] Generado envite: %d\n", rank, envites[0]);
+                    printf("[jugador %d] Generado envite_N: %d\n", rank, envites[1]);
                     MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                 }
                 break;
@@ -486,6 +486,15 @@ int main(int argc, char **argv) {
     }
 
     /* Envío de datos al maestro para que evalúe*/
+
+    /* Se repiten las cuentas para comparar jugadas porque las manos pueden haber cambiado */
+
+    for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
+        cuenta = cuenta_cartas_mano(mano_cartas,i);
+
+        cuenta_cartas[N_CARTAS_PALO - i - 1] = cuenta;
+
+    }
 
     MPI_Gather(cuenta_cartas, 10, MPI_INT, rbuf, 10, MPI_INT, 0, parent);
 
