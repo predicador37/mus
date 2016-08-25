@@ -16,8 +16,8 @@
 #define N_JUGADORES 4
 #define N_PAREJAS 2
 #define N_LANCES 4
-#define DEBUG 1
-#define MODO_JUEGO 0
+#define DEBUG 0
+#define MODO_JUEGO 1
 
 
 extern const char *caras[];
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
     int rank, size, version, subversion, namelen, universe_size, modo_juego, size_mazo, size_mano, proceso, jugador_humano, corte, repartidor, postre, mano,
-            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, envite_vigor, em, ep;
+            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, em, ep;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100], c;
     int cartas_a_descartar[N_CARTAS_MANO] = {99, 99, 99, 99};
     //Array de 4 posiciones para los envites, una para cada jugador
@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
     int entradas_posibles_mus[2] = {0, 1};
     int piedras[N_PAREJAS] = {0, 0};
     int envites[2] = {0, 0};
+    int envite_anterior[]={1,1};
     int conteos[10], rbuf[50]; //buffers para recibir jugadas
     int ganador[N_LANCES]; // buffer para almacenar ganadores de cada lance
     MPI_Comm juego_comm;
@@ -185,7 +186,7 @@ int main(int argc, char **argv) {
         debug("Envío de mazo a jugador %d", siguiente_jugador);
         MPI_Send(&size_mazo, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
         enviar_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO);
-        // El jugador decide si quiere mus
+        // El jugador humano decide si quiere mus; entrada por teclado
         if ((MODO_JUEGO == 1) && (siguiente_jugador == jugador_humano)) {
             do {
                 printf("[jugador %d] ¿Quieres mus?: (0:Dame mus, 1:no hay mus)\n", siguiente_jugador);
@@ -193,15 +194,17 @@ int main(int argc, char **argv) {
                      esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
             MPI_Send(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
 
-        } else {
+        } else { //modo automático
             MPI_Recv(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
         }
 
 
-        if (mus == 1) { // corta el mus
+        if (mus == 1) { // se corta el mus
             // En caso de no querer mus, ese jugador es mano y el anterior postre, al que habrá que pasar el mazo
+            // en posteriores rondas repartirá el que haya sido mano cada vez
             printf("[jugador %d] No hay mus\n", siguiente_jugador);
             mano = siguiente_jugador;
+            postre = add_mod(siguiente_jugador, 3, 4);
             //int ultimo = add_mod(siguiente_jugador, 4, 4);
             ultimo = siguiente_jugador;
             siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
@@ -346,7 +349,9 @@ int main(int argc, char **argv) {
     printf("[maestro] Enviando mano...\n");
 //Se comunica a todos los jugadores quien es la mano
     MPI_Bcast(&mano, 1, MPI_INT, MPI_ROOT, juego_comm);
-
+    MPI_Bcast(&postre, 1, MPI_INT, MPI_ROOT, juego_comm);
+    // Después de cortar el mus corrido el jugador mano, se pasa el mazo al jugador postre (el de su izquierda)
+    enviar_mazo(mazo, postre, juego_comm, N_CARTAS_MAZO);
     printf("[maestro] Manos con las que se juega la partida: \n");
     siguiente_jugador = mano;
     for (i = 0; i < 4; i++) {
@@ -377,7 +382,7 @@ int main(int argc, char **argv) {
     i = 0;
     token = 1;
 
-    envite_vigor = 0;
+
     siguiente_jugador = mano;
     // para cada jugador:
     while (i < N_JUGADORES) {
@@ -432,16 +437,18 @@ int main(int argc, char **argv) {
         print_envite(envite, siguiente_jugador, hay_apuesta(envites_grande, N_JUGADORES), envite_N);
 
         printf("¿HAY APUESTA?: %d\n", hay_apuesta(envites_grande, N_JUGADORES));
-        printf("APUESTA EN VIGOR: %d\n", envite_vigor);
+        printf("Apuesta anterior pareja postre: %d\n", envite_anterior[0]);
+        printf("Apuesta anterior pareja mano: %d\n", envite_anterior[1]);
 
-        envites_grande[siguiente_jugador] = calcular_envite(envites_grande, envite, envite_N, envite_vigor);
+        envites_grande[siguiente_jugador] = calcular_envite(envites_grande, envite, envite_N, max(envite_anterior[0],envite_anterior[1]));
 
         if (envites_grande[siguiente_jugador] > 1 &&
             envites_grande[siguiente_jugador] >= maximo_array(envites_grande, N_JUGADORES)) {
             if (envite == 3) {
-                envite_vigor += envite_N;
+
+                envite_anterior[que_pareja_soy(siguiente_jugador, mano)] += envite_N;
             } else {
-                envite_vigor = envite;
+                envite_anterior[que_pareja_soy(siguiente_jugador, mano)] = envite;
             }
         }
 
@@ -493,7 +500,7 @@ int main(int argc, char **argv) {
 
         //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
         //if ((MODO_JUEGO == 1) && (jugador_1_pareja_subida == jugador_humano)) {
-        if ((MODO_JUEGO == 1) && ((jugador_apuesta_inicial == 3) || jugador_apuesta_inicial == 2)) {
+        if ((MODO_JUEGO == 1) && (jugador_apuesta_inicial == jugador_humano)) {
         /*
             envite = 0;
             envite_N = 0;
@@ -532,14 +539,14 @@ int main(int argc, char **argv) {
         }
         print_envite(envite, jugador_apuesta_inicial, hay_apuesta(envites_grande, N_JUGADORES), envite_N);
         //evaluar nuevo envite de la pareja y actualizar envites
-        envites_grande[jugador_apuesta_inicial] = calcular_envite(envites_grande, envite, envite_N, envite_vigor);
+        envites_grande[jugador_apuesta_inicial] = calcular_envite(envites_grande, envite, envite_N, max(envite_anterior[0],envite_anterior[1]));
         if (envites_grande[jugador_apuesta_inicial] > 1 &&
             envites_grande[jugador_apuesta_inicial] >= maximo_array(envites_grande, N_JUGADORES)) {
             if (envite == 3) {
-                envite_vigor += envite_N;
+                envite_anterior[que_pareja_soy(jugador_apuesta_inicial, mano)] += envite_N;
 
             } else {
-                envite_vigor = envite;
+                envite_anterior[que_pareja_soy(jugador_apuesta_inicial, mano)] = envite;
             }
         }
 
@@ -595,37 +602,33 @@ int main(int argc, char **argv) {
 
     // Calcular envite de pareja mano em
     em = envite_pareja(1, mano, envites_grande);
-    printf("[maestro] Envite de pareja mano ha sido: %d\n", em);
+    printf("[maestro] Envite final de pareja mano ha sido: %d\n", em);
+    printf("[maestro] Envite anterior de pareja mano ha sido: %d\n", envite_anterior[1]);
     // Calcular envite de pareja postre ep
     ep = envite_pareja(0, mano, envites_grande);
-    printf("[maestro] Envite de pareja postre ha sido: %d\n", ep);
+    printf("[maestro] Envite final de pareja postre ha sido: %d\n", ep);
+    printf("[maestro] Envite anterior de pareja postre ha sido: %d\n", envite_anterior[0]);
     // em == ep !=1? :
-    if ((em == ep) && (em != 1)) { //apuesta igualada, pareja del ganador se lleva el envite
-        piedras[que_pareja_soy(ganador[0], mano)] += em;
-
-    }
-        // em != ep && min(em,ep) !=1 ?
-    else if ((em != ep) &&
-             (min(em, ep) != 1)) { //alguien subió la apuesta y se rajó; envite más alto se lleva min(em,ep)
-        if (em > ep) {
-            piedras[1] += min(em, ep);
-        } else {
-            piedras[0] += min(em, ep);
-        }
+    if ((em == ep) && (em != 1)) { //apuesta igualada, pareja del ganador se lleva el envite (todas las piedras)
+        piedras[que_pareja_soy(ganador[0], mano)] += (2 * em);
 
     }
 
         // em != ep && min(em,ep) == 1 ?
-    else if ((em != ep) &&
-             (min(em, ep) == 1)) { // una pareja pasa y la otro ha envidado 2 o más; envite más alto se lleva 1 tanto
+    else if ((em != ep)) { // una pareja pasa y la otro ha envidado 2 o más; envite más alto se lleva 1 tanto
+
+
         if (em > ep) {
-            piedras[1] += 1;
+            piedras[1] += envite_anterior[0];
         } else {
-            piedras[0] += 1;
+            piedras[0] += envite_anterior[1];
         }
     }
 
-    // TODO em == ep == 1? : todos pasan: la mejor mano se lleva una piedra
+    // todos pasan: pareja a la que pertenece la jugada ganadora se lleva una piedra
+    if ((em == ep) && (ep == 1)) {
+        piedras[que_pareja_soy(ganador[0], mano)]++;
+    }
 
     printf("[maestro] PIEDRAS MANO: %d\n", piedras[1]);
     printf("[maestro] PIEDRAS POSTRE: %d\n", piedras[0]);

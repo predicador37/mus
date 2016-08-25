@@ -410,6 +410,10 @@ int main(int argc, char **argv) {
 
 //Se recibe del maestro quien es el jugador mano
     MPI_Bcast(&mano, 1, MPI_INT, 0, parent);
+    MPI_Bcast(&postre, 1, MPI_INT, 0, parent);
+    if (rank == postre) { //recibir mazo
+        recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
+    }
     enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
     /*
    * FASE DE LANCES
