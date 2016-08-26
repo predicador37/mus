@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     int piedras[N_PAREJAS] = {0, 0};
     int piedras_parejas[N_PAREJAS] = {0,0};
     int envites[2] = {0, 0};
-    int envite_anterior[]={1,1};
+    int envite_anterior[]={0,0};
     int conteos[10], rbuf[50]; //buffers para recibir jugadas
     int ganador[N_LANCES]; // buffer para almacenar ganadores de cada lance
     int n_puntos_juego = 40;
@@ -522,6 +522,7 @@ int main(int argc, char **argv) {
 
             if (envites_grande[siguiente_jugador] > 1 &&
                 envites_grande[siguiente_jugador] >= maximo_array(envites_grande, N_JUGADORES)) {
+                //TODO revisar mecanismo de envites
                 if (envite == 3) {
 
                     envite_anterior[que_pareja_soy(siguiente_jugador, mano)] += envite_N;
@@ -747,8 +748,8 @@ int main(int argc, char **argv) {
         //reinicialización de las piedras para la próxima partida
         piedras[0]=0;
         piedras[1]=0;
-        envite_anterior[0]=1;
-        envite_anterior[1]=1;
+        envite_anterior[0]=0;
+        envite_anterior[1]=0;
         ronda++;
         iteracion++;
     }

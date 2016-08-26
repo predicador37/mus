@@ -280,6 +280,11 @@ int main(int argc, char **argv) {
                             }
                         }
                         //se han actualizado las equivalencias, hay que actualizar los pares
+                        printf("[jugador %d] Equivalencias: \n", rank);
+                        for (k=0;k<N_CARTAS_MANO;k++){
+                            printf("%d ", equivalencias_jugador[k]);
+                        }
+                        printf("\n");
                         preparaPares(equivalencias_jugador, pares);
 
                         /**************** FIN BLOQUE BLOQUEO***************/
@@ -406,10 +411,16 @@ int main(int argc, char **argv) {
                                             mano_cartas[k] = recibir_carta(0, parent, &stat);
                                             valores_jugador[k] = valores[mano_cartas[j].cara];
                                             equivalencias_jugador[k] = equivalencias[mano_cartas[j].cara];
+                                            //TODO problema con conteo de reyes en equivalencias
                                             break;
                                         }
                                     }
                                     //se han actualizado las equivalencias, luego hay que actualizar los pares
+                                    printf("[jugador %d] Equivalencias: \n", rank);
+                                            for (k=0;k<N_CARTAS_MANO;k++){
+                                                printf("%d ", equivalencias_jugador[k]);
+                                            }
+                                    printf("\n");
                                     preparaPares(equivalencias_jugador, pares);
                                 }
 
