@@ -415,17 +415,18 @@ int main(int argc, char **argv) {
                                             break;
                                         }
                                     }
-                                    //se han actualizado las equivalencias, luego hay que actualizar los pares
-                                    printf("[jugador %d] Equivalencias: \n", rank);
-                                            for (k=0;k<N_CARTAS_MANO;k++){
-                                                printf("%d ", equivalencias_jugador[k]);
-                                            }
-                                    printf("\n");
+
                                     preparaPares(equivalencias_jugador, pares);
                                 }
 
 
                             }
+                            //se han actualizado las equivalencias, luego hay que actualizar los pares
+                            printf("[jugador %d] Equivalencias: \n", rank);
+                            for (k=0;k<N_CARTAS_MANO;k++){
+                                printf("%d ", equivalencias_jugador[k]);
+                            }
+                            printf("\n");
 
                             /**************** FIN BLOQUE BLOQUEO***************/
                             i++;
@@ -447,7 +448,7 @@ int main(int argc, char **argv) {
             MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent); //recepción del repartidor desde el proceso maestro
             // MPI_Barrier(MPI_COMM_WORLD);
             /*
-             * REPARTO DE CARTAS PARA MUS CORRIDO
+             * REPARTO DE CARTAS PARA MUS
              */
             if (rank == repartidor) {
                 size_mazo = repartidor_reparte(rank, repartidor, size_mazo, size_descartadas, mazo, mano_cartas, parent,
@@ -463,6 +464,44 @@ int main(int argc, char **argv) {
             }//se termina el reparto
             //MPI_Barrier(MPI_COMM_WORLD);
             MPI_Bcast(&size_mazo, 1, MPI_INT, 0, parent); //recepción del tamaño después de repartir
+
+            /* EVALUACION PREVIA DE CARTAS */
+
+            i = 0;
+            juego = 0;
+
+
+            for (i = 0; i < N_CARTAS_MANO; i++) {
+                equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
+            }
+
+            int valores_jugador[N_CARTAS_MANO];
+            for (i = 0; i < N_CARTAS_MANO; i++) {
+                valores_jugador[i] = valores[mano_cartas[i].cara];
+            }
+
+            //Grande
+
+            cuenta = 0;
+
+            for (i = N_CARTAS_PALO - 1; i >= 0; i--) {
+                cuenta = cuenta_cartas_mano(mano_cartas, i);
+
+                cuenta_cartas[N_CARTAS_PALO - i - 1] = cuenta;
+
+            }
+
+            // chica
+
+            invertirArray(cuenta_cartas, invertido, N_CARTAS_PALO);
+
+            // pares
+
+            preparaPares(equivalencias_jugador, pares);
+
+            // juego
+
+            juego = sumaArray(valores_jugador, N_CARTAS_MANO);
 
         }
 

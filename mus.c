@@ -949,6 +949,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
         }
     }
 }
+
 //TODO: funcion ordago es una chufa. Hacer algo decente...
 int ordago() {
     srand(time(0));
@@ -1251,7 +1252,7 @@ int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor) {
     }
     else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N == 0) && (envite == 1)) {
         // si hay apuesta en vigor y envite_N == 0 y envite = 0, el envite es: 1
-        return 1; //no lo quiero
+        return envite; //no lo quiero
     }
 
 }

@@ -523,12 +523,12 @@ int main(int argc, char **argv) {
             if (envites_grande[siguiente_jugador] > 1 &&
                 envites_grande[siguiente_jugador] >= maximo_array(envites_grande, N_JUGADORES)) {
                 //TODO revisar mecanismo de envites
-                if (envite == 3) {
+              //  if (envite == 3) {
 
-                    envite_anterior[que_pareja_soy(siguiente_jugador, mano)] += envite_N;
-                } else {
-                    envite_anterior[que_pareja_soy(siguiente_jugador, mano)] = envite;
-                }
+                    envite_anterior[que_pareja_soy(siguiente_jugador, mano)] += envites_grande[siguiente_jugador];
+                //} else {
+                  //  envite_anterior[que_pareja_soy(siguiente_jugador, mano)] = envite;
+                //}
             }
 
             printf("[maestro] Array de envites: %d, %d, %d, %d\n", envites_grande[0], envites_grande[1],
@@ -641,12 +641,13 @@ int main(int argc, char **argv) {
                                                                       max(envite_anterior[0], envite_anterior[1]));
             if (envites_grande[jugador_apuesta_inicial] > 1 &&
                 envites_grande[jugador_apuesta_inicial] >= maximo_array(envites_grande, N_JUGADORES)) {
-                if (envite == 3) {
-                    envite_anterior[que_pareja_soy(jugador_apuesta_inicial, mano)] += envite_N;
+               // if (envite == 3) {
+                 //   envite_anterior[que_pareja_soy(jugador_apuesta_inicial, mano)] += envite_N;
 
-                } else {
-                    envite_anterior[que_pareja_soy(jugador_apuesta_inicial, mano)] = envite;
-                }
+                //} else {
+                 //   envite_anterior[que_pareja_soy(jugador_apuesta_inicial, mano)] = envite;
+               // }
+                envite_anterior[que_pareja_soy(siguiente_jugador, mano)] += envites_grande[siguiente_jugador];
             }
 
             int j;
@@ -745,11 +746,17 @@ int main(int argc, char **argv) {
         }
         printf("[maestro] PIEDRAS PAREJA 0-2: %d\n", piedras_parejas[0]);
         printf("[maestro] PIEDRAS PAREJA 1-3: %d\n", piedras_parejas[1]);
-        //reinicialización de las piedras para la próxima partida
+
+        //reinicialización de variables para la próxima partida
         piedras[0]=0;
         piedras[1]=0;
         envite_anterior[0]=0;
         envite_anterior[1]=0;
+        envites[0]=0;
+        envites[1]=0;
+        for (i=0;i<N_JUGADORES;i++) {
+            envites_grande[i] = 0;
+        }
         ronda++;
         iteracion++;
     }
