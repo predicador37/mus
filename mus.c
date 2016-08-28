@@ -25,6 +25,7 @@ const char * caras[] = {"As", "Dos", "Tres", "Cuatro", "Cinco",
 const char * palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
 const char * lances_etiquetas[] = {"Grande", "Chica", "Pares", "Juego", "Al punto"};
 const char * parejas[] = {"Postre", "Mano"};
+const char * respuestas[] = {"No", "Sí"};
 int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
 int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
 
@@ -437,7 +438,7 @@ int calcula_grande(int rbuf[], int jugadorMano) {
     return ganador;
 }
 /*Calcula el jugador ganador a chica, recibiendo conteos de cartas de todos los jugadores*/
-int calculaChica(int rbufInv[], int jugadorMano) {
+int calcula_chica(int rbufInv[], int jugadorMano) {
 
     int empates[4] = {0,0,0,0};
     int i, k = 0;
@@ -526,9 +527,10 @@ int calculaChica(int rbufInv[], int jugadorMano) {
                 break;
             }
         }
-        if (ganador >5) {
-            printf("[maestro] ERROR en funcion calcula_chica\n");
-        }
+
+    }
+    if (ganador >5) {
+        printf("[maestro] ERROR en funcion calcula_chica\n");
     }
     return ganador;
 }
@@ -540,7 +542,7 @@ int cmpfunc(const void *a, const void *b) {
 /* Devuelve array con 3 elementos: el número de parejas y las cartas asociadas */
 void unique_pairs(int *array, int longitud, int repeticion, int parejas[]) {
     qsort(array, longitud, sizeof(int), cmpfunc);
-    // now we have: [1, 1, 1, 4, 4, 5, 5, 7, 7] //
+
     int k = 0;
     for (k = 0; k < longitud; k++) {
     }
@@ -577,7 +579,7 @@ void unique_pairs(int *array, int longitud, int repeticion, int parejas[]) {
     //return res;
 }
 
-int calcularPares(int paresBuf[], int jugadorMano) {
+int calcular_pares(int paresBuf[], int jugadorMano) {
     /* pares */
     /* parámetros: paresBuf */
     /* devuelve entero con proceso ganador */
@@ -595,14 +597,14 @@ int calcularPares(int paresBuf[], int jugadorMano) {
     jugadores[1] = paresBuf[5];
     jugadores[2] = paresBuf[10];
     jugadores[3] = paresBuf[15];
-    int ocurrencias = ocurrenciasArray(jugadores, 4, 99);
+    int ocurrencias = ocurrenciasArray(jugadores, 4, 99); //se cuentan jugadores que no tienen duples
     if (ocurrencias == 3) { //hay un proceso con duples
         ganador = buscarIndiceNumeroNoIgual(jugadores, 4, 99);
     }
 
-    else { // hay empates
+    else { // hay empates o nadie tiene duples
         int maximo = 99;
-        maximo = maximo_array_excluyendo(jugadores, 4, 99);
+        maximo = maximo_array_excluyendo(jugadores, 4, 99); //Cual es el máximo excluyendo 99
         int ocurrencias = ocurrenciasArray(jugadores, 4, maximo);
         if (ocurrencias == 1) { //el jugador gana porque el duples es mayor
             ganador = buscaIndice(jugadores, 4, maximo);
@@ -709,13 +711,22 @@ int calcularPares(int paresBuf[], int jugadorMano) {
 
             }
             int maximo = maximo_array(valoresPares, 4);
+
             ocurrencias = ocurrenciasArray(valoresPares, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque tiene cartas más altas
                 ganador = buscaIndice(valoresPares, 4, maximo);
             }
             else { // otra vez empates
+                int empates[N_JUGADORES]={0,0,0,0};
+                for (i=0;i<N_JUGADORES;i++){
+                    if (valoresPares[i]==maximo){
+                        empates[i]=1;
+
+                    }
+
+                }
                 printf("Se deshace empate con distancia a la mano...\n");
-                ganador = deshacerEmpate(jugadores, jugadorMano, 1);
+                ganador = deshacerEmpate(empates, jugadorMano, 1);
             }
         }
     }
@@ -965,7 +976,7 @@ int ordago() {
 }
 
 /* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor y la pareja en la que se encuentra*/
-void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank) {
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[]) {
 /*
     if (ordago() == 1) { // ordago!
         return 99;
@@ -998,32 +1009,101 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
             envites[1]=0;
         }
     }
-        /*
+
     else if (lance == 1) { // a chica
         int ases = ocurrenciasArray(equivalencias, longitud, 1);
-        if (ases >= 3) {
-            return 5;
-        }
-        else if ((ases == 2) && (apuesta_vigor <= 2)) {
-            return 2;
-        }
-        else {
-            return 1;
-        }
+         printf("NÚMERO DE OCURRENCIAS DE ASES: %d\n", ases);
+         if ((ases >= 3) && (apuesta_vigor < 2)) { // si no hay apuestas, empieza fuerte
+             envites[0] = 3;
+             envites[1] = 5;
+         }
+         else if ((ases>=3) && (apuesta_vigor>=2)){
+             if (que_pareja_soy(rank, jugador_mano) == 1) {
+                 envites[0] = 3;
+                 envites[1] = 1;
+             }
+             else {
+                 envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                 envites[1] = 0;
+             }
+         }
+         else if ((ases == 2) && (apuesta_vigor <= 2)) {
+             //con un envite y dos reyes, igualamos
+             envites[0] = 2;
+             envites[1] = 0;
+         }
+         else {
+             envites[0]=1; //si no tengo cartas, paso
+             envites[1]=0;
+         }
     }
     else if (lance == 2) { // a pares
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
-        if (reyes >= 3) { //duples o medias de reyes
-            return 5;
-        }
-        else if ((reyes == 2) && (apuesta_vigor <= 2)) { // pareja de reyes
-            return 2;
-        }
-        else { // pareja de otra cosa
-            return 1;
-        }
 
-    }
+
+
+         if ((reyes >= 3) && (apuesta_vigor < 2)) { // si no hay apuestas, empieza fuerte
+             envites[0] = 3;
+             envites[1] = 5;
+         }
+         else if ((reyes>=3) && (apuesta_vigor>=2)){
+             if (que_pareja_soy(rank, jugador_mano) == 1) {
+                 envites[0] = 3;
+                 envites[1] = 1;
+             }
+             else {
+                 envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                 envites[1] = 0;
+             }
+         }
+
+             //si tengo otros duples
+          else if (tengoDuples(pares)==1){
+             if (apuesta_vigor < 2) {
+                 envites[0] = 3;
+                 envites[1] = 5;
+             }
+             else {
+                 if (que_pareja_soy(rank, jugador_mano) == 1) {
+                     envites[0] = 3;
+                     envites[1] = 1;
+                 }
+                 else {
+                     envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                     envites[1] = 0;
+                 }
+             }
+
+         }
+
+             //si tengo otras medias
+
+         else if (tengoMedias(pares)==1){
+             if (apuesta_vigor < 2) {
+                 envites[0] = 3;
+                 envites[1] = 5;
+             }
+             else {
+
+                     envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                     envites[1] = 0;
+
+             }
+
+         }
+
+         else if ((reyes == 2) && (apuesta_vigor <= 2)) {
+             //con un envite y dos reyes, igualamos
+             envites[0] = 2;
+             envites[1] = 0;
+         }
+
+         else {
+             envites[0]=1; //si no tengo cartas, paso
+             envites[1]=0;
+         }
+
+    }/*
     else if (lance == 3) { // a juego
         int suma = sumaArray(equivalencias, 4);
         if (suma == 31) {

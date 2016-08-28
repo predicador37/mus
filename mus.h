@@ -60,13 +60,13 @@ void invertirArray(int *orig, int *dest, int longitud);
 
 int calcula_grande(int rbuf[], int jugadorMano);
 
-int calculaChica(int rbufInv[], int jugadorMano);
+int calcula_chica(int rbufInv[], int jugadorMano);
 
 int cmpfunc(const void *a, const void *b);
 
 void unique_airs(int array[], int longitud, int repeticion,  int parejas[]);
 
-int calcularPares(int paresBuf[], int jugadorMano);
+int calcular_pares(int paresBuf[], int jugadorMano);
 
 int sumaArray(int a[], int longitud);
 
@@ -90,7 +90,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id);
 
 int ordago();
 
-void envido(int envites[], int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank);
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank, int pares[]);
 
 int busca_indice(int a[], int longitud, int numero);
 

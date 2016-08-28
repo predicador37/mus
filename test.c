@@ -97,8 +97,15 @@ int main(int argc, char **argv) {
     // La siguiente jugada empata entre dos jugadores, uno de los cuales es mano
     int rbuf_1[40] = {2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1};
     int rbuf_2[40] = {3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0};
+    int invertido_1[40]={0, 1, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1};
+    int invertido_2[40]={1, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1};
+    int pares_1[20]={99, 99, 1, 1, 99, 99, 99, 0, 99, 99, 99, 99, 1, 10, 99,99, 99, 1, 10, 99};
+
     int mano_1 = 0;
     int mano_2 = 0;
+    int mano_3 = 3;
+    int mano_4 = 1;
+    int mano_5 = 2;
     int ganador = 88;
 
    /* ganador = calculaGrande(rbuf_1, mano_1);
@@ -121,5 +128,15 @@ int main(int argc, char **argv) {
     }*/
 
         int n_juegos_vaca = 3;
-    printf("%d", (n_juegos_vaca / 2) + 1);
+    printf("AL MEJOR DE %d PARTIDAS\n", (n_juegos_vaca / 2) + 1);
+
+    ganador = calcula_chica(invertido_1, mano_3);
+    printf("TEST 3 A CHICA: %d\n", ganador);
+
+    ganador = calcula_chica(invertido_2, mano_4);
+    printf("TEST 4 A CHICA: %d\n", ganador);
+
+    ganador=calcular_pares(pares_1, mano_5);
+    printf("TEST 5 A PARES: %d\n", ganador);
+    return 0;
 }
