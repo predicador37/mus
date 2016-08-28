@@ -2,4 +2,5 @@
 for i in {1..10000}
 do
 mpirun -n 1 ./Debug/juego
+sleep 2
 done

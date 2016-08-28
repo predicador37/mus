@@ -58,7 +58,7 @@ int buscarIndiceNumeroNoIgual(int a[], int longitud, int numero);
 
 void invertirArray(int *orig, int *dest, int longitud);
 
-int calculaGrande(int rbuf[], int jugadorMano);
+int calcula_grande(int rbuf[], int jugadorMano);
 
 int calculaChica(int rbufInv[], int jugadorMano);
 

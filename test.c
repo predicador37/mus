@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
         printf("TEST 1 ERROR: %d\n", ganador);
     }
 */
-    ganador = calculaGrande(rbuf_2, mano_2);
+    ganador = calcula_grande(rbuf_2, mano_2);
 
     printf("TEST 2 : %d\n", ganador);
 
@@ -120,4 +120,6 @@ int main(int argc, char **argv) {
         printf("TEST 2 ERROR: %d\n", ganador);
     }*/
 
+        int n_juegos_vaca = 3;
+    printf("%d", (n_juegos_vaca / 2) + 1);
 }

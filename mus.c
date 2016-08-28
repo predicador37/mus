@@ -13,7 +13,7 @@
 #define N_CARTAS_MANO 4
 #define N_JUGADORES 4
 #define N_PALOS 4
-#define DEBUG 1
+#define DEBUG 0
 #define CHAR_BUFFER 8
 
 typedef int bool;
@@ -67,8 +67,8 @@ int crear_mazo(Carta *mazo) {
 void print_mazo(Carta *wMazo, int size_mazo) {
     int i;
     for (i = 0; i <= size_mazo - 1; i++) {
-        printf("El valor de %-8s\t de \t%s es \t%d \tcon id \t%d y estado %d\n \t", caras[wMazo[i].cara],
-               palos[wMazo[i].palo], valores[wMazo[i].cara], wMazo[i].id, wMazo[i].estado);
+        printf("El valor de %-8s\t de \t%s es \t%d \tcon id \t%d, estado %d y cara %d\n \t", caras[wMazo[i].cara],
+               palos[wMazo[i].palo], valores[wMazo[i].cara], wMazo[i].id, wMazo[i].estado, wMazo[i].cara);
         printf("\n");
     }
     printf("Fin del contenido del mazo/mano.\n");
@@ -341,7 +341,7 @@ void invertirArray(int *orig, int *dest, int longitud) {
 }
 
 
-int calculaGrande(int rbuf[], int jugadorMano) {
+int calcula_grande(int rbuf[], int jugadorMano) {
 
     int empates[4] = {0,0,0,0};
     int i, k = 0;
@@ -432,11 +432,11 @@ int calculaGrande(int rbuf[], int jugadorMano) {
 
     }
     if (ganador >5) {
-        printf("[maestro] ERROR en funcion calculaGrande\n");
+        printf("[maestro] ERROR en funcion calcula_grande\n");
     }
     return ganador;
 }
-
+/*Calcula el jugador ganador a chica, recibiendo conteos de cartas de todos los jugadores*/
 int calculaChica(int rbufInv[], int jugadorMano) {
 
     int empates[4] = {0,0,0,0};
@@ -525,6 +525,9 @@ int calculaChica(int rbufInv[], int jugadorMano) {
                 }
                 break;
             }
+        }
+        if (ganador >5) {
+            printf("[maestro] ERROR en funcion calcula_chica\n");
         }
     }
     return ganador;
@@ -838,7 +841,6 @@ void *preparaPares(int equivalencias[], int *pares) {
 
     int duplesIguales = 99; //99 significa no hay duples; cualquier otro valor, es el orden de la carta de la que si hay
     int medias = 99; //99 significa no hay medias; cualquier otro valor, es el orden de la carta de la que si hay
-
 
     //int *parejas = (int *) malloc(3 * sizeof(int));
     int parejas[3] = {0, 99, 99}; //99 es valor fuera de rango para una carta
@@ -1236,21 +1238,21 @@ int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor) {
 
     if ((hay_apuesta(envites, N_JUGADORES) == 0) && (envite_N == 0)) {
         // si no hay apuesta en vigor y envite_N == 0, el envite es envite
-        return envite;
+        return envite; //envido o paso
     }
     else if ((hay_apuesta(envites, N_JUGADORES) == 0) && (envite_N != 0)) {
         // si no hay apuesta en vigor y envite_N != 0, el envite es envite_N
-        return envite_N;
+        return envite_N; //envido N
     }
-    else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N != 0)) {
+    else if ((hay_apuesta(envites, N_JUGADORES) == 1)   && (envite ==3)) {
         // si hay apuesta en vigor y envite_N != 0, el envite es: apuesta_vigor + envite_N
-        return (envite_vigor + envite_N);
+        return (envite_vigor + envite_N); // subo N
     }
-    else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N == 0) && (envite == 2)) {
+    else if ((hay_apuesta(envites, N_JUGADORES) == 1)  && (envite == 2)) {
         //si hay apuesta en vigor y envite_N ==0 y envite = 1, el envite es: apuesta_vigor
-       return envite_vigor;
+       return envite_vigor; //lo quiero
     }
-    else if ((hay_apuesta(envites, N_JUGADORES) == 1) && (envite_N == 0) && (envite == 1)) {
+    else if ((hay_apuesta(envites, N_JUGADORES) == 1)  && (envite == 1)) {
         // si hay apuesta en vigor y envite_N == 0 y envite = 0, el envite es: 1
         return envite; //no lo quiero
     }
