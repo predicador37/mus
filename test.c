@@ -149,5 +149,9 @@ int main(int argc, char **argv) {
     int resto = 13%5;
 
     printf("Tengo %d amarracos y %d piedras\n", amarracos, resto);
+
+    int envites[4]={5,0,0,0};
+    int envite=calcular_envite(envites, 3, 99, 5);
+    printf("TEST 6 ENVITE: %d\n", envite);
     return 0;
 }

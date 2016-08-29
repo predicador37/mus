@@ -1009,6 +1009,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
 
          if (ordagos > 0) {
+             printf("[maestro] Alguien ha lanzado el desafío...HAY UN ÓRDAGO SOBRE LA MESA!\n");
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                  envites[0]=2; //se acepta el órdago
                  envites[1]=0;
@@ -1164,7 +1165,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
     else if (lance == 3) { // a juego
          int suma = sumaArray(equivalencias, 4);
 
-         if (juego_al_punto == 0) {
+         if (juego_al_punto == 2) {
 
              if (ordagos > 0) {
                  if ((suma == 31) && (que_pareja_soy(rank, jugador_mano) == 1)) {
@@ -1354,8 +1355,13 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
             case 2:
                 printf("[jugador %d] Envido\n", siguiente_jugador);
                 break;
-            default:
-                printf("[jugador %d] Envido %d\n", siguiente_jugador, envite_N);
+            case 3:
+                if (envite_N != 99) {
+                    printf("[jugador %d] Envido %d\n", siguiente_jugador, envite_N);
+                }
+                else {
+                    printf("[jugador %d] Órdago!\n");
+                }
                 break;
         }
     }
@@ -1367,8 +1373,13 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
             case 2:
                 printf("[jugador %d] Lo quiero\n", siguiente_jugador);
                 break;
-            default:
-                printf("[jugador %d] Envido %d más\n", siguiente_jugador, envite_N);
+            case 3:
+                if (envite_N != 99) {
+                    printf("[jugador %d] Envido %d más\n", siguiente_jugador, envite_N);
+                }
+                else {
+                    printf("[jugador %d] Órdago!\n");
+                }
                 break;
         }
     }
@@ -1431,7 +1442,13 @@ int calcular_envite(int envites[], int envite, int envite_N, int envite_vigor) {
     }
     else if ((hay_apuesta(envites, N_JUGADORES) == 1)   && (envite ==3)) {
         // si hay apuesta en vigor y envite_N != 0, el envite es: apuesta_vigor + envite_N
-        return (envite_vigor + envite_N); // subo N
+        if ((envite_vigor == 99) || (envite_N==99)) {
+            //TODO Que el jugador no diga envido 1 más al querer un órdago
+            return 99; // el órdago no se sube, se quiere o no
+        }
+        else {
+            return (envite_vigor + envite_N); // subo N
+        }
     }
     else if ((hay_apuesta(envites, N_JUGADORES) == 1)  && (envite == 2)) {
         //si hay apuesta en vigor y envite_N ==0 y envite = 1, el envite es: apuesta_vigor
