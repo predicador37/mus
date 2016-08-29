@@ -1,0 +1,7 @@
+- Indicar si se tienen pares o juego antes de iniciar estos lances
+- Comprobar que al menos un miembro de cada pareja los tiene antes de jugarlos
+- Al final de cada ronda se cuentan los tantos adicionales por pares y juego
+- Si ningún jugador tiene juego, se juega al punto
+- Cada 5 piedras, se tiene un amarraco 
+- Una vez finalizada la ronda, se recogen las cargas, se cambia el jugador mano, se vuelven a repartir y se comienza nueva ronda.
+- La baraja deberá ser custodiada por el proceso que represente al jugador  postre, que es quien reparte. El resto de procesos únicamente conocerán las cartas de su mano. 

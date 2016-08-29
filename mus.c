@@ -757,7 +757,8 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
         for (i = 0; i < N_JUGADORES; i++) {
             printf("Se deshace empate con distancia a la mano...\n");
-            ganador = deshacerEmpate(juegoBuf, jugadorMano, i);
+            ganador = deshacerEmpate(juegoBuf, jugadorMano,juegosGanadores[0]);
+            return ganador;
         }
     }
     ocurrencias = ocurrenciasArray(juegoBuf, 4, juegosGanadores[1]);
@@ -767,7 +768,8 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
     }
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
         printf("Se deshace empate con distancia a la mano...\n");
-        ganador = deshacerEmpate(juegoBuf, jugadorMano, i);
+        ganador = deshacerEmpate(juegoBuf, jugadorMano, juegosGanadores[1]);
+        return ganador;
     }
 
     ocurrencias = ocurrenciasArray(juegoBuf, 4, juegosGanadores[2]);
@@ -777,7 +779,8 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
     }
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
         printf("Se deshace empate con distancia a la mano...\n");
-        ganador = deshacerEmpate(juegoBuf, jugadorMano, i);
+        ganador = deshacerEmpate(juegoBuf, jugadorMano, juegosGanadores[2]);
+        return ganador;
     }
 
     for (i = 37; i >= 33; i--) {
@@ -789,6 +792,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
         else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
             printf("Se deshace empate con distancia a la mano...\n");
             ganador = deshacerEmpate(juegoBuf, jugadorMano, i);
+            return ganador;
         }
     }
 
@@ -976,7 +980,7 @@ int ordago() {
 }
 
 /* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor y la pareja en la que se encuentra*/
-void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[]) {
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[], int juego_al_punto) {
 /*
     if (ordago() == 1) { // ordago!
         return 99;
@@ -1103,35 +1107,61 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
              envites[1]=0;
          }
 
-    }/*
+    }
     else if (lance == 3) { // a juego
-        int suma = sumaArray(equivalencias, 4);
-        if (suma == 31) {
-            return 5;
-        }
-        else if ((suma == 32) && (apuesta_vigor <= 2)) {
-            return 2;
-        }
-        else {
-            return 1;
-        }
+         int suma = sumaArray(equivalencias, 4);
+         if (juego_al_punto == 0) {
 
-    }
+             if ((suma == 31) && (apuesta_vigor < 2)) {
+                 envites[0] = 3;
+                 envites[1] = 5;
+             }
+             else if ((suma == 31) && (apuesta_vigor >= 2)){
+                 if (que_pareja_soy(rank, jugador_mano) == 1) {
+                     envites[0] = 3;
+                     envites[1] = 1;
+                 }
+                 else {
+                     envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                     envites[1] = 0;
+                 }
+             }
+             else if ((suma == 32) && (apuesta_vigor <= 2)) {
+                 envites[0] = 2;
+                 envites[1] = 0;
+             }
+             else {
+                 envites[0]=1; //si no tengo cartas, paso
+                 envites[1]=0;
+             }
 
-    else if (lance == 4) { // al punto
-        int suma = sumaArray(equivalencias, 4);
-        if (suma >= 27) {
-            return 5;
-        }
-        else if ((suma >= 24) && (suma < 27) && (apuesta_vigor <= 2)) {
-            return 2;
-        }
-        else {
-            return 0;
-        }
+         }
+         else {
+             if ((suma >= 27) && (apuesta_vigor < 2)) {
+                 envites[0] = 3;
+                 envites[1] = 5;
+             }
+             else if ((suma >= 27) && (apuesta_vigor >= 2)){
+                 if (que_pareja_soy(rank, jugador_mano) == 1) {
+                     envites[0] = 3;
+                     envites[1] = 1;
+                 }
+                 else {
+                     envites[0] = 2; //si soy pareja mano, subir; si no, igualar
+                     envites[1] = 0;
+                 }
+             }
+             else if ((suma >= 24) && (suma < 27) && (apuesta_vigor <= 2)) {
+                 envites[0] = 2;
+                 envites[1] = 0;
+             }
+             else {
+                 envites[0]=1; //si no tengo cartas, paso
+                 envites[1]=0;
+             }
+         }
+     }
 
-    }
-    return 0;*/
 }
 
 /* Devuelve el índice o posición de un valor dado en un array de enteros */
