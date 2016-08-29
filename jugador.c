@@ -906,11 +906,7 @@ int main(int argc, char **argv) {
                         case 1:
                             apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
                             jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
-                            if ((l == 2) && (tengoPares(pares) == 0)) { //si no tengo pares no envido. envite en paso.
-                                envites[0] = 1;
-                                envites[1] = 0;
-                                MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
-                            } else {
+                            //TODO BLOQUEO A PARES
                                 if ((modo_juego == 1) && (rank != jugador_humano) || (modo_juego == 0)) {
                                     debug("[jugador %d] decidiendo envite...\n", rank);
                                     MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
@@ -932,10 +928,11 @@ int main(int argc, char **argv) {
                                         MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                                     }
                                 }
-                                else if ((modo_juego == 1) && rank == jugador_humano){ //enviar mazo para enseñarselo al jugador humano antes de envidar
+                                else if ((modo_juego == 1) && (rank == jugador_humano) && (tengoPares(pares)==1) && (l==2)){ //enviar mazo para enseñarselo al jugador humano antes de envidar
                                     enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
+
                                 }
-                            }
+
                             break;
                         case 2:
                             break;

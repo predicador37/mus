@@ -17,7 +17,7 @@
 #define N_PAREJAS 2
 #define N_LANCES 4
 #define DEBUG 0
-#define MODO_JUEGO 1
+#define MODO_JUEGO 0
 #define RESET   "\033[0m"
 #define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
 #define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
                 int siguiente = buffer[1];
                 int carta = buffer[0];
                 MPI_Recv(&buffer, 3, MPI_INT, siguiente, 0, juego_comm, MPI_STATUS_IGNORE);
-                printf(BOLDYELLOW "[jugador %d] Recibo carta %d \n" RESET, siguiente, siguiente, carta);
+                printf(BOLDYELLOW "[jugador %d] Recibo carta %d \n" RESET, siguiente, carta);
             }
             /* Recepción de mazo una vez repartido*/
             MPI_Recv(&size_mazo, 1, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
@@ -648,7 +648,7 @@ int main(int argc, char **argv) {
         int l;
         for (l = 0; l < N_LANCES; l++) { // iterar N_LANCES...
 
-            printf("[maestro] INICIANDO LANCES...\n");
+            printf("[maestro] Iniciando lance de %s\n", lances_etiquetas[l]);
 
 
             piedra_no = 0; //inicializar a cero en cada lance!
@@ -927,7 +927,7 @@ int main(int argc, char **argv) {
 
                     //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
                     //if ((MODO_JUEGO == 1) && (jugador_1_pareja_subida == jugador_humano)) {
-                    if ((MODO_JUEGO == 1) && (jugador_apuesta_inicial == jugador_humano)) {
+                    if ((MODO_JUEGO == 1) && (jugador_apuesta_inicial == jugador_humano) && (l!=2) || ((MODO_JUEGO==1) && (jugador_apuesta_inicial == jugador_humano) && (tengo_pares[jugador_humano]==1) && (l==2))) {
 
 
                         envite = 0;

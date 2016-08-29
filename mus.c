@@ -997,7 +997,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
       //si tengo buena mano y soy mano, acepto
       //si no, lo dejo
 
-    if (ordago(rank, jugador_mano, puntos_juego) == 1) {
+    if ((ordago(rank, jugador_mano, puntos_juego) == 1) && (ordagos==0)) {
         envites[0]=3; //lanzo órdago al lance que sea
         envites[1]=99;
     }
@@ -1011,7 +1011,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
          if (ordagos > 0) {
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                  envites[0]=2; //se acepta el órdago
-                 envites[1]=2;
+                 envites[1]=0;
              }
              else { //no se coge
                  envites[0]=1;
