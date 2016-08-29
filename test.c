@@ -143,5 +143,11 @@ int main(int argc, char **argv) {
 
     ganador=calcularJuego(juego_1, mano_6);
     printf("TEST 6 A JUEGO: %d\n", ganador);
+
+    int piedras = 13;
+    int amarracos= 13/5;
+    int resto = 13%5;
+
+    printf("Tengo %d amarracos y %d piedras\n", amarracos, resto);
     return 0;
 }

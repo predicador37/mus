@@ -17,8 +17,16 @@
 #define N_PAREJAS 2
 #define N_LANCES 4
 #define DEBUG 0
-#define MODO_JUEGO 0
-
+#define MODO_JUEGO 1
+#define RESET   "\033[0m"
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 extern const char *caras[];
 extern const char *palos[];
@@ -95,14 +103,14 @@ int main(int argc, char **argv) {
     for (i = 0; i < 4; i++) {
         MPI_Send(&i, 1, MPI_INT, i, 0, juego_comm);
         MPI_Recv(&proceso, 1, MPI_INT, i, 0, juego_comm, MPI_STATUS_IGNORE);
-        printf("[jugador %d] Jugador %d: Listo para jugar!\n", proceso, proceso);
+        printf(BOLDYELLOW "[jugador %d] Jugador %d: Listo para jugar!\n" RESET, proceso, proceso);
     }
 
 
     //jugador_humano = rand() % (N_JUGADORES + 1 - 0) + 0;
 
     jugador_humano = 3;
-    printf("El identificador para el jugador humano es: %d\n", jugador_humano);
+    printf("[maestro] El identificador para el jugador humano es: %d\n", jugador_humano);
     modo_juego = MODO_JUEGO;
     MPI_Bcast(&modo_juego, 1, MPI_INT, MPI_ROOT, juego_comm);
     MPI_Bcast(&jugador_humano, 1, MPI_INT, MPI_ROOT, juego_comm);//Envío deljugador humano*/
@@ -135,7 +143,7 @@ int main(int argc, char **argv) {
             //            (RAND_MAX / (N - M + 1) + 1); // proceso aleatorio de entre los existentes para determinar el corte
 
             corte = rand_lim(N_JUGADORES - 1);
-            debug("El jugador que cortará es: %d\n", corte);
+            printf("[maestro] El jugador que cortará es: %d\n", corte);
             MPI_Bcast(&corte, 1, MPI_INT, MPI_ROOT,
                       juego_comm); // envío del id de proceso que realizará el corte a todos los jugadores
             debug("Corte broadcasted: %d\n", corte);
@@ -173,7 +181,7 @@ int main(int argc, char **argv) {
                 int siguiente = buffer[1];
                 int carta = buffer[0];
                 MPI_Recv(&buffer, 3, MPI_INT, siguiente, 0, juego_comm, MPI_STATUS_IGNORE);
-                printf("[jugador %d] Jugador %d recibe carta %d \n", siguiente, siguiente, carta);
+                printf(BOLDYELLOW "[jugador %d] Recibo carta %d \n" RESET, siguiente, siguiente, carta);
             }
             /* Recepción de mazo una vez repartido*/
             MPI_Recv(&size_mazo, 1, MPI_INT, repartidor, 0, juego_comm, MPI_STATUS_IGNORE);
@@ -196,7 +204,7 @@ int main(int argc, char **argv) {
             // Se envía el mazo al jugador a la derecha del repartidor
             while (mus == 0) {
                 turno++;
-                printf("[maestro] Comienza el turno de MUS CORRIDO: %d\n", turno);
+                printf( BOLDBLUE "[maestro] Comienza el turno %d de mus corrido\n" RESET, turno);
                 siguiente_jugador = add_mod(siguiente_jugador, 1, 4);
 
                 token = 1;
@@ -211,7 +219,7 @@ int main(int argc, char **argv) {
                 // El jugador humano decide si quiere mus; entrada por teclado
                 if ((MODO_JUEGO == 1) && (siguiente_jugador == jugador_humano)) {
                     do {
-                        printf("[jugador %d] ¿Quieres mus?: (0:Dame mus, 1:no hay mus)\n", siguiente_jugador);
+                        printf(BOLDMAGENTA "[jugador %d] ¿Quieres mus?: (0:Dame mus, 1:no hay mus)\n" RESET, siguiente_jugador);
                     } while (((scanf("%d%c", &mus, &c) != 2 || c != '\n') && clean_stdin()) ||
                              esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
                     MPI_Send(&mus, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
@@ -224,7 +232,7 @@ int main(int argc, char **argv) {
                 if (mus == 1) { // se corta el mus
                     // En caso de no querer mus, ese jugador es mano y el anterior postre, al que habrá que pasar el mazo
                     // en posteriores rondas repartirá el que haya sido mano cada vez
-                    printf("[jugador %d] No hay mus\n", siguiente_jugador);
+                    printf(BOLDRED "[jugador %d] No hay mus \n" RESET , siguiente_jugador);
                     mano = siguiente_jugador;
                     postre = add_mod(siguiente_jugador, 3, 4);
                     //int ultimo = add_mod(siguiente_jugador, 4, 4);
@@ -239,16 +247,16 @@ int main(int argc, char **argv) {
                     }
                     break;
                 } else { // hay mus
-                    printf("[jugador %d] Quiero mus\n", siguiente_jugador);
+                    printf(BOLDGREEN "[jugador %d] Quiero mus\n" RESET, siguiente_jugador);
                     if (turno % 4 != 0) {
                         //En caso de querer mus, devuelve el mazo al maestro que a su vez lo pasará al jugador siguiente
-                        printf("[maestro] Recibo mazo de jugador %d\n", siguiente_jugador);
+                        printf("[maestro] Recibido mazo de jugador %d\n", siguiente_jugador);
                         MPI_Recv(&size_mazo, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
                         recibir_mazo(mazo, siguiente_jugador, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
 
 
                     } else { //comienza fase de descartes
-                        printf("FIN DE RONDA SIN CORTAR MUS. COMIENZA FASE DE DESCARTES.\n");
+                        printf(BOLDBLUE "Fin de ronda sin cortar mus. Comienza fase de descartes.\n" RESET);
 
                         // Si pasa una ronda completa sin cortar mus, el mazo pasa al jugador de la derecha del último que repartió
                         MPI_Recv(&size_mazo, 1, MPI_INT, siguiente_jugador, 0, juego_comm, MPI_STATUS_IGNORE);
@@ -286,7 +294,7 @@ int main(int argc, char **argv) {
                                 for (j = 0; j < N_CARTAS_MANO; j++) {
 
                                     do {
-                                        printf("¿[jugador %d] Quieres descartar %s de %s? (0: no, 1: sí)\n",
+                                        printf(BOLDMAGENTA "¿[jugador %d] Quieres descartar %s de %s? (0: no, 1: sí)\n RESET",
                                                siguiente_jugador, caras[mano_jugador[j].cara],
                                                palos[mano_jugador[j].palo]);
                                     }
@@ -300,34 +308,24 @@ int main(int argc, char **argv) {
                                         //mostrar por pantalla lista de ids a descartar
 
                                     }
+                                    printf(BOLDYELLOW "[jugador %d] Quiero %d cartas\n" RESET, siguiente_jugador, n_cartas_a_descartar);
                                 }
-                                printf("Lista de ids a descartar: ");
-                                for (j = 0; j < N_CARTAS_MANO; j++) {
-
-                                    printf("%d ", cartas_a_descartar[j]);
-                                }
-                                printf("\n");
 
                                 MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, jugador_humano, 0, juego_comm);
                                 MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, jugador_humano, 0,
                                          juego_comm);
                             }
                             else { //jugador automático
-                                printf("[maestro] Jugador %d, ¿cuántas cartas quieres?\n", siguiente_jugador);
+                                printf(BOLDMAGENTA"[maestro] Jugador %d, ¿cuántas cartas quieres?\n" RESET, siguiente_jugador);
                                 //recibir cuantas cartas quiere
                                 MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, siguiente_jugador, 0, juego_comm,
                                          MPI_STATUS_IGNORE);
-                                printf("[jugador %d] Quiero %d cartas\n", siguiente_jugador, n_cartas_a_descartar);
+                                printf(BOLDYELLOW "[jugador %d] Quiero %d cartas\n RESET", siguiente_jugador, n_cartas_a_descartar);
                                 //recibir las cartas descartadas
                                 MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, siguiente_jugador, 0,
                                          juego_comm,
                                          MPI_STATUS_IGNORE);
-                                printf("[jugador %d] Lista de ids a descartar: ", siguiente_jugador);
-                                for (j = 0; j < N_CARTAS_MANO; j++) {
 
-                                    printf("%d ", cartas_a_descartar[j]);
-                                }
-                                printf("\n");
                             }
 
 
@@ -339,7 +337,6 @@ int main(int argc, char **argv) {
                                      juego_comm);
                             MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
 
-                            /**************** INICIO BLOQUE BLOQUEO***************/
 
                             for (j = 0; j < n_cartas_a_descartar; j++) {
 
@@ -348,16 +345,9 @@ int main(int argc, char **argv) {
                                 repartir_carta(descartada, siguiente_jugador, juego_comm);
                                 printf("[maestro] Repartidor %d reparte carta con id %d a jugador %d\n",
                                        repartidor_descartes, descartada.id, siguiente_jugador);
-                                /*size_mazo--;
-                           if (size_mazo == 0) {
-                               recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
-                               print_mazo(mazo, N_CARTAS_MAZO);
-                               size_mazo=N_CARTAS_MAZO;
-                           }*/
 
                             }
 
-                            /**************** FIN BLOQUE BLOQUEO***************/
                             debug("[maestro] Fin del reparto de cartas\n");
                             i++;
 
@@ -366,10 +356,10 @@ int main(int argc, char **argv) {
 
                         MPI_Recv(&size_mazo, 1, MPI_INT, repartidor_descartes, 0, juego_comm, MPI_STATUS_IGNORE);
                         recibir_mazo(mazo, repartidor_descartes, juego_comm, N_CARTAS_MAZO, MPI_STATUS_IGNORE);
-
+                        //TODO ver si hay que hacerlo aquí o antes
                         barajar_mazo(mazo);
 
-                        // getchar();
+
 
                     } // fin else cuando no se corta el mus y acaba la ronda
                 } //fin else cuando jugador pide mus
@@ -391,8 +381,8 @@ int main(int argc, char **argv) {
             //determinar mano y postre sumando uno
             mano = add_mod(mano, 1, 4);
             postre = add_mod(postre, 1, 4);
-            printf("[maestro] Ahora el jugador mano es: %d\n", mano);
-            printf("[maestro] Ahora el jugador postre (repartidor) es: %d\n", postre);
+            printf(BOLDBLUE "[maestro] Ahora el jugador mano es: %d\n" RESET, mano);
+            printf(BOLDBLUE "[maestro] Ahora el jugador postre (repartidor) es: %d\n" RESET, postre);
             repartidor = postre;
             MPI_Bcast(&repartidor, 1, MPI_INT, MPI_ROOT, juego_comm); //envío del repartidor a todos los procesos
 
@@ -656,7 +646,7 @@ int main(int argc, char **argv) {
 
 
         int l;
-        for (l = 3; l < N_LANCES; l++) { // iterar N_LANCES...
+        for (l = 0; l < N_LANCES; l++) { // iterar N_LANCES...
 
             printf("[maestro] INICIANDO LANCES...\n");
 
@@ -668,23 +658,26 @@ int main(int argc, char **argv) {
             indicador_pares = 0;
             if (l == 2) {
                 //preguntar a cada jugador si tiene pares
-                //TODO tengo pares en modo interactivo
+
                 MPI_Gather(conteos, 1, MPI_INT, tengo_pares, 1, MPI_INT, MPI_ROOT, juego_comm);
 
                 i = mano;
                 contador = 0;
                 indicador_pares = 0;
+                int pares_humano=0;
                 while (contador < N_JUGADORES) {
+                    if ((MODO_JUEGO == 1) && (i == jugador_humano)) { //modo interactivo
+                        do {
+                            printf("[jugador %d] ¿Tienes pares?: (0:No, 1:Sí)\n", i);
+                        } while (((scanf("%d%c", &pares_humano, &c) != 2 || c != '\n') && clean_stdin()) ||
+                                 esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
+                       tengo_pares[i] = pares_humano;
+                    }
                     printf("[maestro] Jugador %d %s tengo pares\n", i, respuestas[tengo_pares[i]]);
                     i = add_mod(i, 1, 4);
                     contador++;
                 }
-                printf("Vector de pares: ");
-                int j;
-                for (j = 0; j < N_JUGADORES; j++) {
-                    printf("%d ", tengo_pares[j]);
-                }
-                printf("\n");
+
                 //si nadie tiene, no se calcula ganador. 0 piedras para cada pareja.
                 if (ocurrenciasArray(tengo_pares, 4, 0) == 4) {
                     indicador_pares = 0;
@@ -737,22 +730,26 @@ int main(int argc, char **argv) {
                 //0: una pareja no tiene juego y la otra sí
                 //1: ninguna pareja tiene juego. Se juega al punto
                 //2: las dos parejas tienen juego.
+                int juego_humano=0;
                 while (contador < N_JUGADORES) {
+
+                    if ((MODO_JUEGO == 1) && (i == jugador_humano)) { //modo interactivo
+                        do {
+                            printf("[jugador %d] ¿Tienes juego?: (0:No, 1:Sí)\n", i);
+                        } while (((scanf("%d%c", &juego_humano, &c) != 2 || c != '\n') && clean_stdin()) ||
+                                 esta_valor_en_array(mus, entradas_posibles_mus, 2) == 0);
+                        tengo_juego[i] = juego_humano;
+                    }
+
                     printf("[maestro] Jugador %d %s tengo juego\n", i, respuestas[tengo_juego[i]]);
                     i = add_mod(i, 1, 4);
                     contador++;
                 }
-                printf("Vector de juego: ");
-                int j;
-                for (j = 0; j < N_JUGADORES; j++) {
-                    printf("%d ", tengo_juego[j]);
-                }
-                printf("\n");
 
                 if (ocurrenciasArray(tengo_juego, 4, 0) == 4) {
                     //No hay juego. Se juega al punto.
                     juego_al_punto = 1;
-                    printf("No hay juego. Se juega al punto.\n");
+                    printf(BOLDBLUE "[maestro] No hay juego. Se juega al punto.\n" RESET);
                 }
                     //si tiene sólo una pareja, esta ganará una piedra en el conteo al final
                 else if ((tengo_juego[0] == 0) && (tengo_juego[2] == 0) &&
@@ -798,6 +795,12 @@ int main(int argc, char **argv) {
                     MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                     debug("[maestro] Token %d enviado con valor %d a jugador %d...", i, token, siguiente_jugador);
                     if ((MODO_JUEGO == 1) && (siguiente_jugador == jugador_humano)) {
+
+                        //TODO mostrar mano del jugador humano
+                        printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_humano);
+                        recibir_mazo(mano_jugador, jugador_humano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+
+                        print_mazo(mano_jugador, N_CARTAS_MANO);
                         do {
                             if (hay_apuesta(envites_jugador, N_JUGADORES) == 0) {
                                 printf("[jugador %d] Introduzca envite a %s: (1:paso, 2: envido, 3: envido N)\n",
@@ -931,6 +934,9 @@ int main(int argc, char **argv) {
 
                         envite = 0;
                         envite_N = 0;
+                        recibir_mazo(mano_jugador, jugador_humano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                        printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_humano);
+                        print_mazo(mano_jugador, N_CARTAS_MANO);
 
                         do {
                             if (hay_apuesta(envites_jugador, N_JUGADORES) == 0) {
@@ -995,14 +1001,12 @@ int main(int argc, char **argv) {
                            envites_jugador[2], envites_jugador[3]);
                     printf("Fin de ronda de apuestas\n");
                 }
-
-                printf("APUESTA TERMINADA...\n");
                 int j;
                 siguiente_jugador = 0;
 
                 for (j = 0; j < N_JUGADORES; j++) {
                     token = 2;
-                    printf("[maestro] Enviado token %d a jugador %d\n", token, j);
+                    debug("[maestro] Enviado token %d a jugador %d\n", token, j);
                     MPI_Send(&token, 1, MPI_INT, j, 0, juego_comm);
 
                 }
@@ -1118,8 +1122,15 @@ int main(int argc, char **argv) {
                     printf("[maestro] Envite final de pareja postre ha sido: %d\n", ep);
                     printf("[maestro] Envite anterior de pareja postre ha sido: %d\n", envite_anterior[0]);
                     // em == ep !=1? :
-                    if ((em == ep) &&
-                        (em != 1)) { //apuesta igualada, pareja del ganador se lleva el envite (todas las piedras)
+                    if ((em == ep) && (em == 99)) {
+                        printf("ÓRDAGO\n");
+                        piedras[que_pareja_soy(ganador[l], mano)] = 0;
+                        piedras[add_mod(que_pareja_soy(ganador[l], mano), 1,1)] = 0;
+                        n_juegos[que_pareja_soy(ganador[l], mano)] +=1;
+                        break; //salir de lances
+                    }
+                    else if ((em == ep) &&
+                        (em != 1) && (em != 99)) { //apuesta igualada, pareja del ganador se lleva el envite (todas las piedras)
                         piedras[que_pareja_soy(ganador[l], mano)] += (2 * em);
 
                     }
@@ -1137,7 +1148,7 @@ int main(int argc, char **argv) {
                     }
 
                     // todos pasan: pareja a la que pertenece la jugada ganadora se lleva una piedra
-                    if ((em == ep) && (ep == 1)) {
+                    else if ((em == ep) && (ep == 1)) {
                         piedras[que_pareja_soy(ganador[l], mano)]++;
                     }
                 }
@@ -1150,6 +1161,7 @@ int main(int argc, char **argv) {
             for (i = 0; i < N_JUGADORES; i++) {
                 envites_jugador[i] = 0;
             }
+
 
         }
 
@@ -1169,6 +1181,9 @@ int main(int argc, char **argv) {
 
         puntos_juego[0] = piedras_parejas[0];
         puntos_juego[1] = piedras_parejas[1];
+
+        //TODO broadcast de puntos de juego a todos los jugadores
+        MPI_Bcast(puntos_juego, 2, MPI_INT, MPI_ROOT, juego_comm);
 
         //si una pareja gana cuarenta puntos o más, gana un juego
         if (puntos_juego[0] >= n_puntos_juego) {
@@ -1210,7 +1225,7 @@ int main(int argc, char **argv) {
 
         printf("PUNTUACIONES:\n");
         printf("PAREJA 0-2\n");
-        printf("RONDA: %d\n", puntos_juego[0]);
+        printf("RONDA: %d amarracos y %d piedras\n", puntos_juego[0]/5,  puntos_juego[0]%5);
         printf("JUEGO: %d\n", n_juegos[0]);
         printf("VACA: %d\n", n_vacas[0]);
 
@@ -1239,7 +1254,11 @@ int main(int argc, char **argv) {
             fin_partida = 0;
             MPI_Bcast(&fin_partida, 1, MPI_INT, MPI_ROOT, juego_comm);
         }
-    }
+
+        if ((em==ep) && (em==99)){
+            ronda=0;
+        }
+    } //while fin_partida != 0
     printf("[maestro] FINALIZADO!\n");
     /*free(mazo->palo);
     free(mazo->cara);*/

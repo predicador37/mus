@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     //3-99: envido N piedras
     int envites_jugadores[N_JUGADORES] = {0, 0, 0, 0};
     int envites[2] = {0, 0};
+    int puntos_juego[2]={0,0};
     int fin_partida = 0;
     int cartas_a_descartar[N_CARTAS_MANO] = {99, 99, 99, 99};
     int rbuf[50]; //buffer de recepcion para evaluar jugadas
@@ -149,13 +150,6 @@ int main(int argc, char **argv) {
 
             i = 0;
             juego = 0;
-
-            printf("[jugador %d] Equivalencias mano original: ", rank);
-            for (i = 0; i < N_CARTAS_MANO; i++) {
-                equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
-                printf("%d ", equivalencias_jugador[i]);
-            }
-            printf("\n");
 
             int valores_jugador[N_CARTAS_MANO];
             for (i = 0; i < N_CARTAS_MANO; i++) {
@@ -267,22 +261,16 @@ int main(int argc, char **argv) {
 
                         }
                         int k;
-                        printf("[jugador %d] Equivalencias antes de descartes: ", rank);
-                        for (k = 0; k < N_CARTAS_MANO; k++) {
-                            printf("%d ", equivalencias_jugador[k]);
-                        }
-                        printf("\n");
-
-                        //recibir cartas nuevas
+                                              //recibir cartas nuevas
 
                         for (i = 0; i < N_CARTAS_MANO; i++) {
 
                             for (k = 0; k < n_cartas_a_descartar; k++) {
                                 if (mano_cartas[i].id == cartas_a_descartar[k]) {
-                                    printf("[jugador %d] Descartando carta con id %d y k = %d\n", rank,
+                                    debug("[jugador %d] Descartando carta con id %d y k = %d\n", rank,
                                            cartas_a_descartar[k], k);
                                     mano_cartas[i] = recibir_carta(0, parent, &stat);
-                                    printf("[jugador %d] Recibida carta con id %d y cara = %d\n", rank,
+                                    debug("[jugador %d] Recibida carta con id %d y cara = %d\n", rank,
                                            mano_cartas[i].id, mano_cartas[i].cara);
                                     valores_jugador[i] = valores[mano_cartas[i].cara];
                                     equivalencias_jugador[i] = equivalencias[mano_cartas[i].cara];
@@ -291,11 +279,7 @@ int main(int argc, char **argv) {
                             }
                         }
                         //se han actualizado las equivalencias, hay que actualizar los pares
-                        printf("[jugador %d] Equivalencias después de descartes: ", rank);
-                        for (k = 0; k < N_CARTAS_MANO; k++) {
-                            printf("%d ", equivalencias_jugador[k]);
-                        }
-                        printf("\n");
+
                         //TODO esto modifica el vector de equivalencias. Usar sólo cuando venga lance de pares.
                         //preparaPares(equivalencias_jugador, pares);
 
@@ -316,7 +300,7 @@ int main(int argc, char **argv) {
                                     MPI_Recv(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent, &stat);
                                     MPI_Recv(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, 0, 0, parent, &stat);
                                 } else {
-                                    printf("[jugador %d] SOY EL REPARTIDOR\n", rank);
+                                    printf("[jugador %d] Me toca repartir.\n", rank);
                                     n_cartas_a_descartar = 0;
                                     for (j = 0; j < N_CARTAS_MANO; j++) {
                                         cartas_a_descartar[i] = 99;
@@ -329,7 +313,7 @@ int main(int argc, char **argv) {
                                         }
 
                                     }
-                                    printf("REPARTIDOR DESCARTA %d CARTAS \n", n_cartas_a_descartar);
+                                    debug("REPARTIDOR DESCARTA %d CARTAS \n", n_cartas_a_descartar);
                                     MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, 0, 0, parent); //cuantas cartas quiero
 
                                     //llegados a este punto siempre va a haber descartes
@@ -846,7 +830,7 @@ int main(int argc, char **argv) {
         // 3 jugadores están en paso y 1 en 2-99
         // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
         int l;
-        for (l = 3; l < N_LANCES; l++) { // iterar N_LANCES...
+        for (l = 0; l < N_LANCES; l++) { // iterar N_LANCES...
 
             if (l == 2) { //lance de pares
                 preparaPares(equivalencias_jugador, pares);
@@ -891,11 +875,15 @@ int main(int argc, char **argv) {
                                     MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                                 } else {
                                     envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, rank,
-                                           mano, pares, juego_al_punto);
-                                    printf("[jugador %d] Generado envite: %d\n", rank, envites[0]);
-                                    printf("[jugador %d] Generado envite_N: %d\n", rank, envites[1]);
+                                           mano, pares, juego_al_punto, puntos_juego);
+                                    debug("[jugador %d] Generado envite: %d\n", rank, envites[0]);
+                                    debug("[jugador %d] Generado envite_N: %d\n", rank, envites[1]);
                                     MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                                 }
+                            }
+                            else if ((modo_juego==1) && (rank == jugador_humano)){ //enviar mazo para enseñarselo al jugador humano antes de envidar
+                                printf("[jugador %d] Enviando cartas a maestro...\n", rank);
+                                enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
                             }
                             break;
                         case 2: //esperar a ver qué dicen los otros
@@ -923,9 +911,30 @@ int main(int argc, char **argv) {
                                 envites[1] = 0;
                                 MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                             } else {
-                                envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, rank, mano,
-                                       pares, juego_al_punto);
-                                MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+                                if ((modo_juego == 1) && (rank != jugador_humano) || (modo_juego == 0)) {
+                                    debug("[jugador %d] decidiendo envite...\n", rank);
+                                    MPI_Recv(envites_jugadores, 4, MPI_INT, 0, 0, parent, &stat);
+                                    apuesta_en_vigor = maximo_array(envites_jugadores, N_JUGADORES);
+                                    jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES,
+                                                                            apuesta_en_vigor);
+                                    //TODO: no subir envite a misma pareja?? no pasa nada...
+                                    //TODO: LO QUE DIGA EL OTRO
+                                    if ((l == 2) &&
+                                        (tengoPares(pares) == 0)) { //si no tengo pares no envido. envite en paso.
+                                        envites[0] = 1;
+                                        envites[1] = 0;
+                                        MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+                                    } else {
+                                        envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, rank,
+                                               mano, pares, juego_al_punto, puntos_juego);
+                                        debug("[jugador %d] Generado envite: %d\n", rank, envites[0]);
+                                        debug("[jugador %d] Generado envite_N: %d\n", rank, envites[1]);
+                                        MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
+                                    }
+                                }
+                                else if ((modo_juego == 1) && rank == jugador_humano){ //enviar mazo para enseñarselo al jugador humano antes de envidar
+                                    enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
+                                }
                             }
                             break;
                         case 2:
@@ -991,6 +1000,7 @@ int main(int argc, char **argv) {
         //MPI_Comm_disconnect(&parent);
 
         //MPI_Barrier(parent);
+        MPI_Bcast(puntos_juego, 2, MPI_INT, 0, parent);
         MPI_Bcast(&fin_partida, 1, MPI_INT, 0, parent);
     }
     int token_end = 1;
