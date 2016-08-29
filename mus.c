@@ -1010,10 +1010,10 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
          if (ordagos > 0) {
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
-                 envites[0]=3; //se acepta el órdago
-                 envites[1]=99;
+                 envites[0]=2; //se acepta el órdago
+                 envites[1]=2;
              }
-             else {
+             else { //no se coge
                  envites[0]=1;
                  envites[1]=0;
              }
@@ -1051,8 +1051,8 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
          if (ordagos > 0) {
              if ((ases >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
-                 envites[0]=3; //se acepta el órdago
-                 envites[1]=99;
+                 envites[0]=2; //se acepta el órdago
+                 envites[1]=0;
              }
              else {
                  envites[0]=1;
@@ -1089,8 +1089,8 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
          if (ordagos > 0) {
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
-                 envites[0]=3; //se acepta el órdago
-                 envites[1]=99;
+                 envites[0]=2; //se acepta el órdago
+                 envites[1]=0;
              }
              else {
                  envites[0]=1;
@@ -1168,8 +1168,8 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
              if (ordagos > 0) {
                  if ((suma == 31) && (que_pareja_soy(rank, jugador_mano) == 1)) {
-                     envites[0]=3; //se acepta el órdago
-                     envites[1]=99;
+                     envites[0]=2; //se acepta el órdago
+                     envites[1]=0;
                  }
                  else {
                      envites[0]=1;
@@ -1204,8 +1204,8 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
              if (ordagos > 0) {
                  if ((suma == 30) && (que_pareja_soy(rank, jugador_mano) == 1)) {
-                     envites[0]=3; //se acepta el órdago
-                     envites[1]=99;
+                     envites[0]=2; //se acepta el órdago
+                     envites[1]=0;
                  }
                  else {
                      envites[0]=1;

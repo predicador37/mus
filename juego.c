@@ -770,8 +770,6 @@ int main(int argc, char **argv) {
                 MPI_Bcast(&juego_al_punto, 1, MPI_INT, MPI_ROOT, juego_comm);
 
             }
-            printf("INDICADOR PARES: %d\n", indicador_pares);
-            printf("INDICADOR JUEGO (0 SI, 1 NO): %d\n", juego_al_punto);
 
             if (((l != 2) && (l !=3)) || ((l == 2) && (indicador_pares ==
                                          2)) || ((l==3) && (juego_al_punto!=0))) { //los envites sólo tienen lugar si hay pares en ambas parejas y en el resto de los lances
@@ -1123,9 +1121,9 @@ int main(int argc, char **argv) {
                     printf("[maestro] Envite anterior de pareja postre ha sido: %d\n", envite_anterior[0]);
                     // em == ep !=1? :
                     if ((em == ep) && (em == 99)) {
-                        printf("ÓRDAGO\n");
-                        piedras[que_pareja_soy(ganador[l], mano)] = 0;
-                        piedras[add_mod(que_pareja_soy(ganador[l], mano), 1,1)] = 0;
+                        printf("[maestro] Ha habido ÓRDAGO; gana el juego la pareja %s\n",  parejas[que_pareja_soy(ganador[l], mano)]);
+                        piedras[0] = 0;
+                        piedras[1] = 0;
                         n_juegos[que_pareja_soy(ganador[l], mano)] +=1;
                         break; //salir de lances
                     }
