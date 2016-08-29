@@ -992,12 +992,13 @@ int ordago(int rank, int mano, int puntos_juego[]) {
 void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[], int juego_al_punto, int puntos_juego[]) {
 
 
-    int ordagos = ocurrenciasArray(envites, longitud, 99);
+
     //si hay algun envite de la otra pareja con órdago en el lance:
       //si tengo buena mano y soy mano, acepto
       //si no, lo dejo
 
-    if ((ordago(rank, jugador_mano, puntos_juego) == 1) && (ordagos==0)) {
+    if ((ordago(rank, jugador_mano, puntos_juego) == 1) && (apuesta_vigor!=99)) {
+        printf("NADIE HA LANZADO ORDAGO, LO LANZO YO: %d", rank);
         envites[0]=3; //lanzo órdago al lance que sea
         envites[1]=99;
     }
@@ -1008,7 +1009,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
         printf("NÚMERO DE OCURRENCIAS DE REYES: %d\n", reyes);
 
 
-         if (ordagos > 0) {
+         if (apuesta_vigor == 99) { //alguien ha lanzado un órdago ya
              printf("[maestro] Alguien ha lanzado el desafío...HAY UN ÓRDAGO SOBRE LA MESA!\n");
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                  envites[0]=2; //se acepta el órdago
@@ -1050,7 +1051,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
         int ases = ocurrenciasArray(equivalencias, longitud, 1);
          printf("NÚMERO DE OCURRENCIAS DE ASES: %d\n", ases);
 
-         if (ordagos > 0) {
+         if (apuesta_vigor == 99) {
              if ((ases >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                  envites[0]=2; //se acepta el órdago
                  envites[1]=0;
@@ -1088,7 +1089,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
     else if (lance == 2) { // a pares
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
 
-         if (ordagos > 0) {
+         if (apuesta_vigor == 99) {
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                  envites[0]=2; //se acepta el órdago
                  envites[1]=0;
@@ -1167,7 +1168,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
          if (juego_al_punto == 2) {
 
-             if (ordagos > 0) {
+             if (apuesta_vigor == 99) {
                  if ((suma == 31) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                      envites[0]=2; //se acepta el órdago
                      envites[1]=0;
@@ -1203,7 +1204,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
          }
          else {
 
-             if (ordagos > 0) {
+             if (apuesta_vigor == 99) {
                  if ((suma == 30) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                      envites[0]=2; //se acepta el órdago
                      envites[1]=0;
