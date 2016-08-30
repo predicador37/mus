@@ -55,7 +55,7 @@ int rand_lim(int limit) {
 }
 
 
-/* FUNCION crearMazo: puebla un array de estructuras Carta con sus valores y palos*/
+/* Puebla un array de estructuras Carta con sus valores y palos*/
 int crear_mazo(Carta *mazo) {
     int i; /* contador */
     int size_mazo = 0;
@@ -75,7 +75,7 @@ int crear_mazo(Carta *mazo) {
 
 
 
-/* FUNCION printMazo: muestra por pantalla un mazo de cartas */
+/* Muestra por pantalla un mazo de cartas */
 void print_mazo(Carta *wMazo, int size_mazo) {
     int i;
     for (i = 0; i <= size_mazo - 1; i++) {
@@ -86,6 +86,7 @@ void print_mazo(Carta *wMazo, int size_mazo) {
     printf("Fin del contenido del mazo/mano.\n");
 }
 
+/* Muestra en la consola un vector de estados de las cartas de un mazo o mano */
 void print_vector_estados(Carta *wMazo, int size_mazo) {
     int i;
     for (i = 0; i <=
@@ -99,7 +100,7 @@ void print_vector_estados(Carta *wMazo, int size_mazo) {
     printf("\n");
 }
 
-/* FUNCION barajarMazo: baraja las cartas del mazo*/
+/* Baraja las cartas del mazo*/
 
 void barajar_mazo(Carta *wMazo) {
     int i;     /* contador */
@@ -116,8 +117,9 @@ void barajar_mazo(Carta *wMazo) {
     } /* fin for */
     printf("Mazo barajado.\n");
 
-} /* fin funcion barajar */
+}
 
+/* Cambia el estado de las cartas de un mazo de descartadas a en el mazo*/
 int poner_descartadas_en_mazo(Carta *wMazo) {
     int i;
     int contador = 0;
@@ -130,6 +132,7 @@ int poner_descartadas_en_mazo(Carta *wMazo) {
     return contador;
 }
 
+/* Cuenta las cartas de un mazo en un estado determinado*/
 int contar_cartas_en_estado(Carta *wMazo, int estado) {
     int i;
     int contador = 0;
@@ -141,18 +144,7 @@ int contar_cartas_en_estado(Carta *wMazo, int estado) {
     return contador;
 }
 
-/* FUNCION cortarMazo: corta el mazo, esto es, saca una carta aleatoria del mazo */
-
-/*void cortar_mazo(Carta *wMazo, char *paloCorte) {
-
-    int r; *//* índice aleatorio para el mazo*//*
-    r = rand() % (N_CARTAS_MAZO + 1 - 0) + 0;
-    //r = M + rand() / (RAND_MAX / (N - M + 1) + 1);
-    paloCorte = (char *) malloc(CHAR_BUFFER * sizeof(char));
-    strcpy(paloCorte, wMazo[r].palo);
-
-}*/
-
+/* Empaqueta el envío de una estructura de mazo o mano de cartas*/
 void enviar_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
 
     int j;
@@ -166,6 +158,7 @@ void enviar_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas) {
     }
 }
 
+/* Empaqueta la reecepción de una estructura de mazo o mano de cartas*/
 void recibir_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_Status *stat) {
 
     int i;
@@ -179,7 +172,7 @@ void recibir_mazo(Carta *wMazo, int proceso, MPI_Comm wComm, int nCartas, MPI_St
     }
 }
 
-/* suma modular */
+/* Realiza una suma modular */
 int add_mod(int a, int b, int m) {
     if (0 == b) return a;
 
@@ -191,6 +184,7 @@ int add_mod(int a, int b, int m) {
         return m - b + a;
 }
 
+/* Empaqueta el envío de una estructura de tipo carta */
 void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
 
     MPI_Send(&wCarta.id, 1, MPI_INT, proceso, 0, wComm);
@@ -201,6 +195,7 @@ void repartir_carta(Carta wCarta, int proceso, MPI_Comm wComm) {
 
 }
 
+/* Empaqueta la recepción de una estructura de tipo carta */
 Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status *stat) {
     Carta wCarta;
 
@@ -213,12 +208,8 @@ Carta recibir_carta(int proceso, MPI_Comm wComm, MPI_Status *stat) {
     return wCarta;
 }
 
-void determinar_repartidor(int corte, int repartidor, char * palo_corte, Carta mazo[], MPI_Comm parent, const char * palos[], MPI_Status stat) {
 
-
-
-    }
-
+/* Encapsula la lógica de reparto de cartas para un jugador repartidor */
 int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descartadas,  Carta mazo[], Carta mano_cartas[], MPI_Comm parent, MPI_Status stat){
 
     recibir_mazo(mazo, 0, parent, N_CARTAS_MAZO, &stat);
@@ -266,6 +257,7 @@ int repartidor_reparte(int rank, int repartidor,  int size_mazo, int size_descar
 
 }
 
+/* Encapsula la lógica de recepción de cartas por parte de un jugador */
 void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_Comm parent, MPI_Status *stat){
     int i = 0;
     int buffer_reparto[3];
@@ -280,6 +272,7 @@ void jugador_recibe_cartas(int rank, int repartidor, Carta mano_cartas[],  MPI_C
     }
 }
 
+/* Devuelve el número de cartas con una cara determinada en un mazo o mano */
 int cuenta_cartas_mano(Carta *wMano, int cara) {
     int i = 0;
     int cuenta = 0;
@@ -291,6 +284,7 @@ int cuenta_cartas_mano(Carta *wMano, int cara) {
     return cuenta;
 }
 
+/* Devuelve el máximo de un array de enteros de longitud arbitraria*/
 int maximo_array(int array[], int longitud) {
     int i = 0;
     int max = array[0];
@@ -303,6 +297,7 @@ int maximo_array(int array[], int longitud) {
     return max;
 }
 
+/* Devuelve el máximo de un array de enteros de longitud arbitraria excluyendo un número dado*/
 int maximo_array_excluyendo(int array[], int longitud, int excluido) {
     int i = 0;
     int max = array[0];
@@ -315,6 +310,7 @@ int maximo_array_excluyendo(int array[], int longitud, int excluido) {
     return max;
 }
 
+/* Devuelve el número de ocurrencias de un valor determinado en un array de enteros*/
 int ocurrenciasArray(int array[], int longitud, int numero) {
     int n = 0;
     int i = 0;
@@ -325,6 +321,7 @@ int ocurrenciasArray(int array[], int longitud, int numero) {
     return n;
 }
 
+/* Devuelve el índice de la posición en la que se encuentra un valor dado en un array de enteros*/
 int buscaIndice(int a[], int longitud, int numero) {
     int index = 0;
 
@@ -333,6 +330,7 @@ int buscaIndice(int a[], int longitud, int numero) {
     return (index == longitud ? -1 : index);
 }
 
+/* Devuelve el índice de la posición en la que se encuentra un valor distinto de uno dado en un array de enteros*/
 int buscarIndiceNumeroNoIgual(int a[], int longitud, int numero) {
     int index = 0;
 
@@ -352,7 +350,7 @@ void invertirArray(int *orig, int *dest, int longitud) {
     }
 }
 
-
+/* Devuelve el ganador a grande dadas las manos de los jugadores y el jugador mano*/
 int calcula_grande(int rbuf[], int jugadorMano) {
 
     int empates[4] = {0,0,0,0};
@@ -590,6 +588,7 @@ void unique_pairs(int *array, int longitud, int repeticion, int parejas[]) {
     //return res;
 }
 
+/* Devuelve el ganador a pares dadas las parejas encontradas en las cartas de los jugadores y el jugador mano*/
 int calcular_pares(int paresBuf[], int jugadorMano) {
     /* pares */
     /* parámetros: paresBuf */
@@ -744,6 +743,7 @@ int calcular_pares(int paresBuf[], int jugadorMano) {
     return ganador;
 }
 
+/* DEvuelve la suma de los valores de un array de enteros de longitud dada */
 int sumaArray(int a[], int longitud) {
     int i, sum = 0;
     for (i = 0; i < longitud; i++) {
@@ -752,6 +752,7 @@ int sumaArray(int a[], int longitud) {
     return (sum);
 }
 
+/* Devuelve el ganador a juego dados los juegos de los cuatro jugadores y el jugador mano */
 int calcularJuego(int juegoBuf[], int jugadorMano) {
     /* JUEGO */
     printf("Calculando juego...\n");
@@ -825,6 +826,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
     return ganador;
 }
 
+/* Deshace un empate en una jugada dados los conteos de valores en función de la distancia a la mano por la derecha*/
 int deshacerEmpate(int *conteos, int jugadorMano, int valor) {
     int j = 0;
     for (j = 0; j < N_JUGADORES; j++) {
@@ -841,6 +843,7 @@ int deshacerEmpate(int *conteos, int jugadorMano, int valor) {
     return 99;
 }
 
+/* Deshace un empate en una jugada dados los conteos distintos a un valor en función de la distancia a la mano por la derecha*/
 int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor) {
     int j = 0;
     for (j = 0; j < N_JUGADORES; j++) {
@@ -978,7 +981,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
     }
 }
 
-
+/* Lanza un órdago en función de una probabilidad o los puntos acumulados de la pareja contraria */
 int ordago(int rank, int mano, int puntos_juego[], int n_puntos_juego) {
 
     srand(time(0));
@@ -999,10 +1002,8 @@ int ordago(int rank, int mano, int puntos_juego[], int n_puntos_juego) {
     }
 }
 
-/* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor y la pareja en la que se encuentra*/
+/* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor, la pareja en la que se encuentra, sus pares, y las piedras acumuladas por la pareja contraria*/
 void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[], int juego_al_punto, int puntos_juego[], int n_puntos_juego) {
-
-
 
     //si hay algun envite de la otra pareja con órdago en el lance:
       //si tengo buena mano y soy mano, acepto
@@ -1367,7 +1368,7 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
                     printf(BOLDYELLOW "[jugador %d] Envido %d\n" RESET, siguiente_jugador, envite_N);
                 }
                 else {
-                    printf("BOLDYELLOW [jugador %d] Órdago!\n" RESET, siguiente_jugador);
+                    printf(BOLDYELLOW "[jugador %d] Órdago!\n" RESET, siguiente_jugador);
                 }
                 break;
         }
@@ -1485,6 +1486,3 @@ int que_pareja_etiqueta_tengo(int rank) {
         return 1; //pareja 1-3
     }
 }
-
-
-
