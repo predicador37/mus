@@ -25,6 +25,11 @@
 - Desarrollo de interfaz gráfico: se implementan colores en la salida de la consola
 
 
-- Entrada manual pares, juego
-- Órdago
+//TODO
+- Entrada manual: vacas, juegos
+- Entrada manual: automatico, interactivo
 - Generación aleatoria jugador humano
+- Mejorar salida de texto por consola
+- Revisar comentarios de código
+- Probar modo interactivo
+- Probar modo automático

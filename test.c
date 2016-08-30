@@ -153,5 +153,16 @@ int main(int argc, char **argv) {
     int envites[4]={5,0,0,0};
     int envite=calcular_envite(envites, 3, 99, 5);
     printf("TEST 6 ENVITE: %d\n", envite);
+
+    int envites_2[4] = {3,1,1,99};
+    int envites_3[2]={0,0};
+    int equivalencias[4]={10,10,10,8};
+    int pares[5]={99,10,1,10,99};
+    int puntos_juego[4]={31,31,31,31};
+
+    envido(envites_3, equivalencias, 4, 2, 99, 2, 0,pares, 0, puntos_juego);
+    print_envite(envites_3[0], 0, 1, envites_3[1]);
+    int envite_2=calcular_envite(envites_3, 2, 0, 99);
+    printf("TEST 7 ENVITE: %d\n", envite_2);
     return 0;
 }

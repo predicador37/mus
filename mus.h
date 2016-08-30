@@ -128,4 +128,6 @@ int poner_descartadas_en_mazo(Carta *wMazo);
 
 int contar_cartas_en_estado(Carta *wMazo, int estado);
 
+int que_pareja_etiqueta_tengo(int rank);
+
 #endif //MUS_MUS_H

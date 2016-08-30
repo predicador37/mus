@@ -16,6 +16,16 @@
 #define DEBUG 0
 #define CHAR_BUFFER 8
 
+#define RESET   "\033[0m"
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
 typedef int bool;
 #define true 1
 #define false 0
@@ -26,6 +36,7 @@ const char * palos[] = {"Oros", "Copas", "Espadas", "Bastos"};
 const char * lances_etiquetas[] = {"Grande", "Chica", "Pares", "Juego", "Al punto"};
 const char * parejas[] = {"Postre", "Mano"};
 const char * respuestas[] = {"No", "Sí"};
+const char * parejas_etiquetas[] = {"Pareja 0-2", "Pareja 1-3"};
 int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
 int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
 
@@ -420,7 +431,7 @@ int calcula_grande(int rbuf[], int jugadorMano) {
                 }
 
                 if (ocurrenciasArray(empates, 4, 1) == 1) {
-                    printf("DESEMPATE: sólo queda un jugador en vector de empates\n");
+                    debug("DESEMPATE: sólo queda un jugador en vector de empates\n");
                     ganador = buscaIndice(suma, 4, 1);
                     break;
                 }
@@ -517,7 +528,7 @@ int calcula_chica(int rbufInv[], int jugadorMano) {
                 }
 
                 if (ocurrenciasArray(empates, 4, 1) == 1) {
-                    printf("DESEMPATE: sólo queda un jugador en vector de empates\n");
+                   debug("DESEMPATE: sólo queda un jugador en vector de empates\n");
                     ganador = buscaIndice(suma, 4, 1);
                     break;
                 }
@@ -962,7 +973,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
     for (i = 0; i <= sizeMazo - 1; i++) {
         if (wMazo[i].id == id) {
             wMazo[i].estado = 2;
-            printf("CARTA CON ID %d ha sido marcada con estado 2\n", id);
+           debug("CARTA CON ID %d ha sido marcada con estado 2\n", id);
         }
     }
 }
@@ -998,7 +1009,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
       //si no, lo dejo
 
     if ((ordago(rank, jugador_mano, puntos_juego) == 1) && (apuesta_vigor!=99)) {
-        printf("NADIE HA LANZADO ORDAGO, LO LANZO YO: %d", rank);
+        debug("NADIE HA LANZADO ORDAGO, LO LANZO YO: %d", rank);
         envites[0]=3; //lanzo órdago al lance que sea
         envites[1]=99;
     }
@@ -1006,7 +1017,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
     else if (lance == 0) { // a grande
         int reyes = ocurrenciasArray(equivalencias, longitud, 10);
-        printf("NÚMERO DE OCURRENCIAS DE REYES: %d\n", reyes);
+       debug("NÚMERO DE OCURRENCIAS DE REYES: %d\n", reyes);
 
 
          if (apuesta_vigor == 99) { //alguien ha lanzado un órdago ya
@@ -1049,7 +1060,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
     else if (lance == 1) { // a chica
         int ases = ocurrenciasArray(equivalencias, longitud, 1);
-         printf("NÚMERO DE OCURRENCIAS DE ASES: %d\n", ases);
+         debug("NÚMERO DE OCURRENCIAS DE ASES: %d\n", ases);
 
          if (apuesta_vigor == 99) {
              if ((ases >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
@@ -1138,16 +1149,11 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
              //si tengo otras medias
 
          else if (tengoMedias(pares)==1){
-             if (apuesta_vigor < 2) {
-                 envites[0] = 3;
-                 envites[1] = 5;
-             }
-             else {
 
-                     envites[0] = 2; //si soy pareja mano, subir; si no, igualar
-                     envites[1] = 0;
+                 envites[0] = 2;
+                 envites[1] = 0;
 
-             }
+
 
          }
 
@@ -1351,17 +1357,17 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
     if (hay_apuesta == 0) {
         switch (envite) {
             case 1:
-                printf("[jugador %d] Paso\n", siguiente_jugador);
+                printf(BOLDYELLOW "[jugador %d] Paso\n" RESET, siguiente_jugador);
                 break;
             case 2:
-                printf("[jugador %d] Envido\n", siguiente_jugador);
+                printf(BOLDYELLOW "[jugador %d] Envido\n" RESET, siguiente_jugador);
                 break;
             case 3:
                 if (envite_N != 99) {
-                    printf("[jugador %d] Envido %d\n", siguiente_jugador, envite_N);
+                    printf(BOLDYELLOW "[jugador %d] Envido %d\n" RESET, siguiente_jugador, envite_N);
                 }
                 else {
-                    printf("[jugador %d] Órdago!\n");
+                    printf("BOLDYELLOW [jugador %d] Órdago!\n" RESET, siguiente_jugador);
                 }
                 break;
         }
@@ -1369,17 +1375,17 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
     else {
         switch (envite) {
             case 1:
-                printf("[jugador %d] No\n", siguiente_jugador);
+                printf(BOLDYELLOW "[jugador %d] No\n" RESET, siguiente_jugador);
                 break;
             case 2:
-                printf("[jugador %d] Lo quiero\n", siguiente_jugador);
+                printf(BOLDYELLOW "[jugador %d] Lo quiero\n" RESET, siguiente_jugador);
                 break;
             case 3:
                 if (envite_N != 99) {
-                    printf("[jugador %d] Envido %d más\n", siguiente_jugador, envite_N);
+                    printf(BOLDYELLOW "[jugador %d] Envido %d más\n" RESET, siguiente_jugador, envite_N);
                 }
                 else {
-                    printf("[jugador %d] Órdago!\n");
+                    printf(BOLDYELLOW "[jugador %d] Órdago!\n" RESET, siguiente_jugador);
                 }
                 break;
         }
@@ -1469,6 +1475,15 @@ int esta_valor_en_array(int val, int *arr, int size){
             return 1;
     }
     return 0;
+}
+
+int que_pareja_etiqueta_tengo(int rank) {
+    if ((rank==0) || (rank==2)){
+        return 0; //Pareja 0-2
+    }
+    else {
+        return 1; //pareja 1-3
+    }
 }
 
 

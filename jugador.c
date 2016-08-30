@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
                                         debug("ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
                                         int vuelta_al_mazo = poner_descartadas_en_mazo(mazo);
                                         debug("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
-                                        //barajar_mazo(mazo); //Baraja el mazo
+                                        barajar_mazo(mazo); //Baraja el mazo
                                         print_mazo(mazo, N_CARTAS_MAZO);
                                         size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                                         //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
@@ -379,7 +379,7 @@ int main(int argc, char **argv) {
                                         debug("ATENCIÓN: MAZO SIN CARTAS. VOLVER A MEZCLAR!!!\n");
                                         int vuelta_al_mazo = poner_descartadas_en_mazo(mazo);
                                         debug("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
-                                        //barajar_mazo(mazo); //Baraja el mazo
+                                        barajar_mazo(mazo); //Baraja el mazo
                                         print_mazo(mazo, N_CARTAS_MAZO);
                                         size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                                         //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
@@ -426,12 +426,15 @@ int main(int argc, char **argv) {
                 //     break;
                 //}
             } //fin while mus==0
+            //sincronización del jugador mano
+            MPI_Bcast(&mano, 1, MPI_INT, 0, parent);
         } //end if ronda inicial
 
         else { //rondas normales sin mus corrido
             MPI_Bcast(&size_mazo, 1, MPI_INT, 0, parent);
-            MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent); //recepción del repartidor desde el proceso maestro
-
+            MPI_Bcast(&repartidor, 1, MPI_INT, 0, parent); //recepción del repartidor desde el proceso maestr
+            MPI_Bcast(&mano, 1, MPI_INT, 0, parent);
+            postre = repartidor;
             /*
              * REPARTO DE CARTAS PARA MUS
              */
@@ -717,7 +720,7 @@ int main(int argc, char **argv) {
                             }
 
 
-                            /**************** FIN BLOQUE BLOQUEO***************/
+
                             i++; //incrementar jugador
                         }
                         debug("[jugador %d] Final de caso repartidor\n", rank);
@@ -737,6 +740,7 @@ int main(int argc, char **argv) {
 
         }
 
+        //MPI_Bcast(&mano, 1, MPI_INT, 0, parent);
         /* EVALUACION PREVIA DE CARTAS */
 
         i = 0;
@@ -778,7 +782,7 @@ int main(int argc, char **argv) {
 
         juego = sumaArray(valores_jugador, N_CARTAS_MANO);
 
-//Se recibe del maestro quien es el jugador mano
+        //Se asegura que el jugador mano es correcto
         MPI_Bcast(&mano, 1, MPI_INT, 0, parent);
         MPI_Bcast(&postre, 1, MPI_INT, 0, parent);
         if (rank == postre) { //recibir mazo
@@ -959,7 +963,7 @@ int main(int argc, char **argv) {
                     }
             }
 
-            MPI_Bcast(&indicador_ordago, 2, MPI_INT, 0, parent);
+            MPI_Bcast(&indicador_ordago, 1, MPI_INT, 0, parent);
             if (indicador_ordago==1) {
                 break; //salir de lances
             }
