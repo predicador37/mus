@@ -41,7 +41,7 @@ int valores[] = {1, 1, 10, 4, 5, 6, 7, 10, 10, 10};
 int equivalencias[] = {1, 1, 10, 4, 5, 6, 7, 8, 9, 10};
 
 int rand_lim(int limit) {
-/* return a random number between 0 and limit inclusive.
+/* devuelve un número aleatorio entre 0 y limit incluido
  */
 
     int divisor = RAND_MAX/(limit+1);
@@ -979,7 +979,7 @@ void marcar_descarte(Carta *wMazo, int sizeMazo, int id) {
 }
 
 
-int ordago(int rank, int mano, int puntos_juego[]) {
+int ordago(int rank, int mano, int puntos_juego[], int n_puntos_juego) {
 
     srand(time(0));
     double r = (double) rand() / (double) RAND_MAX;
@@ -987,7 +987,7 @@ int ordago(int rank, int mano, int puntos_juego[]) {
     int pareja_soy = que_pareja_soy(rank, mano);
     int pareja_no_soy = add_mod(pareja_soy, 1, 1);
 
-    if (puntos_juego[pareja_no_soy] > 30) { //si la otra pareja se acerca a 40, se lanza órdago
+    if (puntos_juego[pareja_no_soy] > (n_puntos_juego - 10)) { //si la otra pareja se acerca a 30 o 40, se lanza órdago
         return 1;
     }
 
@@ -1000,7 +1000,7 @@ int ordago(int rank, int mano, int puntos_juego[]) {
 }
 
 /* Determina el envite de un jugador en base a sus cartas, la apuesta en vigor y la pareja en la que se encuentra*/
-void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[], int juego_al_punto, int puntos_juego[]) {
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuesta_vigor, int jugador_mano, int rank, int pares[], int juego_al_punto, int puntos_juego[], int n_puntos_juego) {
 
 
 
@@ -1008,7 +1008,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
       //si tengo buena mano y soy mano, acepto
       //si no, lo dejo
 
-    if ((ordago(rank, jugador_mano, puntos_juego) == 1) && (apuesta_vigor!=99)) {
+    if ((ordago(rank, jugador_mano, puntos_juego, n_puntos_juego) == 1) && (apuesta_vigor!=99)) {
         debug("NADIE HA LANZADO ORDAGO, LO LANZO YO: %d", rank);
         envites[0]=3; //lanzo órdago al lance que sea
         envites[1]=99;

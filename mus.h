@@ -88,9 +88,9 @@ int cortarMus(int *valores, int *equivalencias, int *paresBuf);
 
 void marcar_descarte(Carta *wMazo, int sizeMazo, int id);
 
-int ordago(int rank, int mano, int puntos_juego[]);
+int ordago(int rank, int mano, int puntos_juego[], int n_puntos_juego);
 
-void envido(int envites[], int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank, int pares[], int juego_al_punto, int puntos_juego[]);
+void envido(int envites[], int *equivalencias, int longitud, int lance, int apuestaVigor, int jugador_mano, int rank, int pares[], int juego_al_punto, int puntos_juego[], int n_puntos_juego);
 
 int busca_indice(int a[], int longitud, int numero);
 

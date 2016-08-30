@@ -139,7 +139,11 @@ Para enviar masivamente información al maestro desde los jugadores (por ejemplo
 
 ### Lógica del juego
 
-Para iniciar el juego, se selecciona aleatoriamente un jugador para cortar la baraja. Según el palo que salga, se elige el jugador repartidor: 
+En primer lugar, se introduce por teclado el modo de juego y la duración de las partidas. En caso de elegirse el modo interactivo, el número de jugador humano se elige aleatoriamente. El jugador humano no tendrá que intervenir en tareas como el reparto de cartas, pero sí en decidir si quiere o no quiere mus, qué cartas se descarta o cuáles son sus envites.
+
+Para simplificar las pruebas, se ofrece la opción de utilizar una configuración por defecto de tres vacas por partida, tres juegos por vaca y cuarenta puntos al juego (la más habitual). En caso contrario, se limitan los valores a los más comunes según los distintos reglamentos (fuente: [Wikipedia](https://es.wikipedia.org/wiki/Mus)): tres o cinco vacas, tres o cinco juegos, treinta o cuarenta puntos.
+
+Para iniciar el juego, se selecciona aleatoriamente un jugador para cortar la baraja. Según el palo que salga en el corte, se elige el jugador repartidor: 
 
 - Oros: el de su derecha.
 - Copas: el de "en frente".
