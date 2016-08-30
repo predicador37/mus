@@ -19,9 +19,6 @@
   <component name="ChangeListManager">
     <list default="true" id="56f2a703-45ae-476d-be87-3cfa1a844b51" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/juego.c" afterPath="$PROJECT_DIR$/juego.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/jugador.c" afterPath="$PROJECT_DIR$/jugador.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/memoria.md" afterPath="$PROJECT_DIR$/memoria.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mus.c" afterPath="$PROJECT_DIR$/mus.c" />
     </list>
     <ignored path="mus.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -97,8 +94,8 @@
           <file leaf-file-name="mus.c" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/mus.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="586">
-                  <caret line="1487" column="1" selection-start-line="1487" selection-start-column="1" selection-end-line="1487" selection-end-column="1" />
+                <state relative-caret-position="225">
+                  <caret line="1360" column="61" selection-start-line="1360" selection-start-column="56" selection-end-line="1360" selection-end-column="61" />
                   <folding>
                     <element signature="e#44#62#0" expanded="true" />
                   </folding>
@@ -125,8 +122,8 @@
           <file leaf-file-name="jugador.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/jugador.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="345">
-                  <caret line="77" column="0" selection-start-line="77" selection-start-column="0" selection-end-line="77" selection-end-column="0" />
+                <state relative-caret-position="225">
+                  <caret line="156" column="30" selection-start-line="156" selection-start-column="25" selection-end-line="156" selection-end-column="30" />
                   <folding>
                     <element signature="e#44#60#0" expanded="true" />
                   </folding>
@@ -137,8 +134,8 @@
           <file leaf-file-name="juego.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/juego.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="405">
-                  <caret line="590" column="1" selection-start-line="590" selection-start-column="1" selection-end-line="590" selection-end-column="1" />
+                <state relative-caret-position="225">
+                  <caret line="842" column="56" selection-start-line="842" selection-start-column="55" selection-end-line="842" selection-end-column="56" />
                   <folding>
                     <element signature="e#45#61#0" expanded="true" />
                   </folding>
@@ -204,9 +201,9 @@
         <option value="$PROJECT_DIR$/requisitos.md" />
         <option value="$PROJECT_DIR$/mus.h" />
         <option value="$PROJECT_DIR$/jugador.c" />
-        <option value="$PROJECT_DIR$/juego.c" />
         <option value="$PROJECT_DIR$/memoria.md" />
         <option value="$PROJECT_DIR$/mus.c" />
+        <option value="$PROJECT_DIR$/juego.c" />
       </list>
     </option>
   </component>
@@ -942,26 +939,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/jugador.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="77" column="0" selection-start-line="77" selection-start-column="0" selection-end-line="77" selection-end-column="0" />
-          <folding>
-            <element signature="e#44#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/juego.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="590" column="1" selection-start-line="590" selection-start-column="1" selection-end-line="590" selection-end-column="1" />
-          <folding>
-            <element signature="e#45#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/memoria.md">
       <provider editor-type-id="MarkdownFxPreviewEditor">
         <state />
@@ -981,10 +958,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/juego.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="842" column="56" selection-start-line="842" selection-start-column="55" selection-end-line="842" selection-end-column="56" />
+          <folding>
+            <element signature="e#45#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jugador.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="156" column="30" selection-start-line="156" selection-start-column="25" selection-end-line="156" selection-end-column="30" />
+          <folding>
+            <element signature="e#44#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mus.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="586">
-          <caret line="1487" column="1" selection-start-line="1487" selection-start-column="1" selection-end-line="1487" selection-end-column="1" />
+        <state relative-caret-position="225">
+          <caret line="1360" column="61" selection-start-line="1360" selection-start-column="56" selection-end-line="1360" selection-end-column="61" />
           <folding>
             <element signature="e#44#62#0" expanded="true" />
           </folding>

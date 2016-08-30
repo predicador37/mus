@@ -828,7 +828,7 @@ int main(int argc, char **argv) {
                                        siguiente_jugador,
                                        lances_etiquetas[l]);
                             } else {
-                                printf(BOLDMAGENTA "[jugador %d] Introduzca envite a %s: (1:no, 2: lo quiero, 3: envido N más)\n RESET",
+                                printf(BOLDMAGENTA "[jugador %d] Introduzca envite a %s: (1:no, 2: lo quiero, 3: envido N más)\n "RESET,
                                        siguiente_jugador, lances_etiquetas[l]);
                             }
                         } while (((scanf("%d%c", &envite, &c) != 2 || c != '\n') && clean_stdin()) ||
