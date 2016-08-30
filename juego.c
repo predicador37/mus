@@ -586,7 +586,7 @@ int main(int argc, char **argv) {
 
                                     }
                                 }
-                                printf(BOLDYELLOW "[jugador %d] Quiero %d cartas\n" RESET,
+                                printf(BOLDYELLOW "[jugador %d] Quiero %d cartas\n" RESET, siguiente_jugador, n_cartas_a_descartar);
 
                                        MPI_Send(&n_cartas_a_descartar, 1, MPI_INT, jugador_humano, 0, juego_comm);
                                 MPI_Send(cartas_a_descartar, n_cartas_a_descartar, MPI_INT, jugador_humano, 0,
