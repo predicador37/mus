@@ -934,7 +934,7 @@ int main(int argc, char **argv) {
                 /******************************************************************************************************
                  * SUBIDA DE APUESTAS
                  ******************************************************************************************************/
-
+                int iteracion = 0;
                 while (apuesta_terminada(envites_jugador, N_JUGADORES) == 0) {
                     printf(BOLDBLUE "[maestro] Han subido el envite.\n" RESET);
                     // ahora el juego de apuestas debe tener lugar entre el jugador que apostó y el que la ha subido, no los otros
@@ -1031,6 +1031,7 @@ int main(int argc, char **argv) {
                            envites_jugador[0], envites_jugador[1],
                            envites_jugador[2], envites_jugador[3]);
                     printf(BOLDBLUE "[maestro] Fin de ronda de apuestas\n" RESET);
+                    iteracion++;
                 }
                 int j;
                 siguiente_jugador = 0;
@@ -1164,7 +1165,7 @@ int main(int argc, char **argv) {
 
         for (l = 0; l < N_LANCES; l++) {
 
-            if ((l == 0) || (l == 1) || ((l == 2) && (indicador_pares == 2)) || ((l == 3) && (juego_al_punto != 0))) {
+            if ((l == 0 && (piedra_no==0)) || (l == 1) && (piedra_no==0) || ((l == 2) && (indicador_pares == 2)) || ((l == 3) && (juego_al_punto != 0))) {
                 printf(BOLDBLUE "[maestro] Mejor mano a %s: jugador %d\n" RESET, lances_etiquetas[l], ganador[l]);
                 printf(BOLDBLUE "[maestro] Mejor pareja a %s: %s\n" RESET, lances_etiquetas[l],
                        parejas_etiquetas[que_pareja_etiqueta_tengo(ganador[l])]);

@@ -18,7 +18,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="56f2a703-45ae-476d-be87-3cfa1a844b51" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Debug/testmus" afterPath="$PROJECT_DIR$/Debug/testmus" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/juego.c" afterPath="$PROJECT_DIR$/juego.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/memoria.md" afterPath="$PROJECT_DIR$/memoria.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mus.c" afterPath="$PROJECT_DIR$/mus.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test.c" afterPath="$PROJECT_DIR$/test.c" />
     </list>
     <ignored path="mus.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -38,13 +43,13 @@
     <favorites_list name="mus" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4938344">
+    <splitter split-orientation="horizontal" split-proportion="0.42219612">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="0">
+                <state relative-caret-position="120">
                   <caret line="8" column="48" selection-start-line="8" selection-start-column="48" selection-end-line="8" selection-end-column="48" />
                   <folding />
                 </state>
@@ -54,8 +59,8 @@
           <file leaf-file-name="mus.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/mus.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="645">
-                  <caret line="92" column="175" selection-start-line="92" selection-start-column="175" selection-end-line="92" selection-end-column="175" />
+                <state relative-caret-position="420">
+                  <caret line="104" column="59" selection-start-line="104" selection-start-column="59" selection-end-line="104" selection-end-column="59" />
                   <folding />
                 </state>
               </provider>
@@ -84,21 +89,9 @@
           <file leaf-file-name="test.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/test.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="0">
-                  <caret line="163" column="36" selection-start-line="163" selection-start-column="36" selection-end-line="163" selection-end-column="36" />
+                <state relative-caret-position="783">
+                  <caret line="169" column="45" selection-start-line="169" selection-start-column="45" selection-end-line="169" selection-end-column="45" />
                   <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="mus.c" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/mus.c">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="12016">
-                  <caret line="1360" column="61" selection-start-line="1360" selection-start-column="56" selection-end-line="1360" selection-end-column="61" />
-                  <folding>
-                    <element signature="e#44#62#0" expanded="true" />
-                  </folding>
                 </state>
               </provider>
             </entry>
@@ -131,13 +124,25 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="juego.c" pinned="false" current-in-tab="true">
+          <file leaf-file-name="juego.c" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/juego.c">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="181">
-                  <caret line="587" column="33" selection-start-line="587" selection-start-column="33" selection-end-line="587" selection-end-column="33" />
+                <state relative-caret-position="240">
+                  <caret line="910" column="85" selection-start-line="910" selection-start-column="85" selection-end-line="910" selection-end-column="85" />
                   <folding>
                     <element signature="e#45#61#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="mus.c" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/mus.c">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="225">
+                  <caret line="1337" column="44" selection-start-line="1337" selection-start-column="44" selection-end-line="1337" selection-end-column="44" />
+                  <folding>
+                    <element signature="e#44#62#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -166,8 +171,8 @@
               </provider>
               <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
                 <state split_layout="FIRST">
-                  <first_editor relative-caret-position="216">
-                    <caret line="254" column="168" selection-start-line="254" selection-start-column="168" selection-end-line="254" selection-end-column="168" />
+                  <first_editor relative-caret-position="306">
+                    <caret line="257" column="113" selection-start-line="257" selection-start-column="113" selection-end-line="257" selection-end-column="113" />
                     <folding />
                   </first_editor>
                   <second_editor />
@@ -197,13 +202,13 @@
         <option value="$PROJECT_DIR$/juego_feb.c" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/jugador_feb.c" />
-        <option value="$PROJECT_DIR$/test.c" />
         <option value="$PROJECT_DIR$/requisitos.md" />
-        <option value="$PROJECT_DIR$/mus.h" />
         <option value="$PROJECT_DIR$/jugador.c" />
+        <option value="$PROJECT_DIR$/test.c" />
+        <option value="$PROJECT_DIR$/juego.c" />
+        <option value="$PROJECT_DIR$/mus.h" />
         <option value="$PROJECT_DIR$/memoria.md" />
         <option value="$PROJECT_DIR$/mus.c" />
-        <option value="$PROJECT_DIR$/juego.c" />
       </list>
     </option>
   </component>
@@ -506,7 +511,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="27" width="1922" height="1054" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11302083" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.7457627" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -895,16 +900,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="120">
           <caret line="8" column="48" selection-start-line="8" selection-start-column="48" selection-end-line="8" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="163" column="36" selection-start-line="163" selection-start-column="36" selection-end-line="163" selection-end-column="36" />
           <folding />
         </state>
       </provider>
@@ -931,11 +928,49 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="783">
+          <caret line="169" column="45" selection-start-line="169" selection-start-column="45" selection-end-line="169" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jugador.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="889" column="30" selection-start-line="889" selection-start-column="30" selection-end-line="889" selection-end-column="30" />
+          <folding>
+            <element signature="e#44#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mus.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="645">
-          <caret line="92" column="175" selection-start-line="92" selection-start-column="175" selection-end-line="92" selection-end-column="175" />
+        <state relative-caret-position="420">
+          <caret line="104" column="59" selection-start-line="104" selection-start-column="59" selection-end-line="104" selection-end-column="59" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/juego.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="910" column="85" selection-start-line="910" selection-start-column="85" selection-end-line="910" selection-end-column="85" />
+          <folding>
+            <element signature="e#45#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mus.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="1337" column="44" selection-start-line="1337" selection-start-column="44" selection-end-line="1337" selection-end-column="44" />
+          <folding>
+            <element signature="e#44#62#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -950,41 +985,11 @@
       </provider>
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor relative-caret-position="216">
-            <caret line="254" column="168" selection-start-line="254" selection-start-column="168" selection-end-line="254" selection-end-column="168" />
+          <first_editor relative-caret-position="306">
+            <caret line="257" column="113" selection-start-line="257" selection-start-column="113" selection-end-line="257" selection-end-column="113" />
             <folding />
           </first_editor>
           <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/jugador.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="156" column="30" selection-start-line="156" selection-start-column="25" selection-end-line="156" selection-end-column="30" />
-          <folding>
-            <element signature="e#44#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mus.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="12016">
-          <caret line="1360" column="61" selection-start-line="1360" selection-start-column="56" selection-end-line="1360" selection-end-column="61" />
-          <folding>
-            <element signature="e#44#62#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/juego.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="181">
-          <caret line="587" column="33" selection-start-line="587" selection-start-column="33" selection-end-line="587" selection-end-column="33" />
-          <folding>
-            <element signature="e#45#61#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

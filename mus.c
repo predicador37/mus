@@ -1338,12 +1338,13 @@ int apuesta_terminada(int envites_jugadores[], int longitud) {
     // 3 jugadores están en paso y 1 en 2-99
     // 2 jugadores están en paso, son de la misma pareja y 1 en 2-99
     // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
+    // mayor apuesta de pareja 1 y mayor apuesta de pareja 2 son iguales (apuesta igualada)
     //0: no ha hablado
     //1: paso
     //2: envido (2 piedras, apuesta mínima)
     //3-99: envido N piedras
 
-    if ((contar_ocurrencias(envites_jugadores, longitud, 1) >= 3 ) || (max(envites_jugadores[0], envites_jugadores[2]) == max(envites_jugadores[1], envites_jugadores[3])) || envites_misma_pareja(envites_jugadores)) {
+    if ((contar_ocurrencias(envites_jugadores, longitud, 1) >= 3 )  || (max(envites_jugadores[0], envites_jugadores[2]) == max(envites_jugadores[1], envites_jugadores[3])) || envites_misma_pareja(envites_jugadores)) {
         return 1; //4 o 3 en paso o apuesta igualada, apuesta terminada
     }
     else {

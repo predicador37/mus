@@ -159,10 +159,14 @@ int main(int argc, char **argv) {
     int equivalencias[4]={10,10,10,8};
     int pares[5]={99,10,1,10,99};
     int puntos_juego[4]={31,31,31,31};
+    int envites_jugadores[4]={1,1,1,2};
+    int apuesta = apuesta_terminada(envites_jugadores, 4, 2);
 
-    envido(envites_3, equivalencias, 4, 2, 99, 2, 0,pares, 0, puntos_juego);
+    //envido(envites_3, equivalencias, 4, 2, 99, 2, 0,pares, 0, puntos_juego);
     print_envite(envites_3[0], 0, 1, envites_3[1]);
     int envite_2=calcular_envite(envites_3, 2, 0, 99);
     printf("TEST 7 ENVITE: %d\n", envite_2);
+
+    printf("TEST 8: APUESTA: %d\n", apuesta);
     return 0;
 }

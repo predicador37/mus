@@ -261,8 +261,9 @@ Las **dificultades encontradas** para el desarrollo de la práctica han sido rea
 
 Como posibles mejoras se proponen las siguientes:
 
-- Mejora de la lógica de decisión (órdagos, mus corrido, envites, etc.) incluyendo más jugadas.
-- Tratamiento de errores de E/S.
+- Mejora de la lógica de decisión (órdagos, mus corrido, envites, etc.) incluyendo más jugadas o incluso probabilidades calculadas de ganar con una mano determinada a un lance dado. 
+- Tratamiento de "mentiras" o "engaños"; por ejemplo, si tres jugadores pasan en un lance y el jugador postre envida, con la lógica actual nunca le van a aceptar o subir el envite (cuando un jugador controlado por el programa pasa es porque cree que tiene una mala mano peor con la información de que dispone, con lo que un envite de postre no iba a cambiar la situación). 
+- Tratamiento de errores de E/S: ¿qué ocurre si un jugador miente y dice que tiene pares cuando no los tiene? Esta situación, equiparable a la anterior, no tiene tratamiento en la versión actual (se presupone que, para el propósito de esta práctica, el jugador humano dice la verdad). 
 - Corrección de posibles bugs.
 - Las propuestas en el enunciado de la práctica.
 
