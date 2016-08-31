@@ -1,5 +1,5 @@
 //
-// Created by Miguel Expósito Martín, 72056097H
+// Created by predicador on 15/06/16.
 //
 #include <mpi.h>
 #include <stdio.h>
@@ -864,7 +864,7 @@ int main(int argc, char **argv) {
                                 ((modo_juego == 1) && (rank == jugador_humano) && (l == 2) && (indicador_pares==2) && (tengoPares(pares) == 1)) || //pares y tengo pares
                                 ((modo_juego == 1) && (rank == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengoJuego(juego) == 1)) ||  //juego y tengo juego
                                 ((modo_juego == 1) && (rank == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //enviar mazo para enseñarselo al jugador humano antes de envidar
-                                debug("[jugador %d] Enviando cartas a maestro...\n", rank);
+                                printf("[jugador %d] Enviando cartas a maestro...\n", rank);
                                 enviar_mazo(mano_cartas, 0, parent, N_CARTAS_MANO); // se envía la mano al maestro para E/S
                             }
                              else {

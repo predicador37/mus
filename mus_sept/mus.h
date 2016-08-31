@@ -1,5 +1,5 @@
 //
-// Created by Miguel Expósito Martín, 72056097H
+// Created by predicador on 15/06/16.
 //
 
 #ifndef MUS_MUS_H

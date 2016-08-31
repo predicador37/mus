@@ -10,7 +10,7 @@ La presente práctica se ha desarrollado para las convocatorias de Febrero y Sep
  
  Para la versión de Septiembre, se ha optado por lo siguiente:
  
- - Refactorización completa del código, aprovechando tan sólo los módulos reutilizables así como depurando estos considerablemente.
+ - Refactorización completa del código, aprovechando tan sólo los módulos reutilizables.
  - Implementación de una arquitectura de la solución mejorada basada en tokens.
  - Implementación de procesos batch para ejecutar trabajos con miles de partidas.
  - Prueba simultánea en el entorno de desarrollo y en la máquina virtual proporcionada por los tutores de la asignatura.
@@ -25,10 +25,10 @@ Este entorno no podía ser instalado en la máquina virtual proporcionada por lo
 
 # Entregables
 
-- Memoria en formato Markdown (md)
-- Memoria en formato PDF
-- Código fuente del programa y archivos de configuración para su compilación y construcción
-- Programas compilado y linkado con ejecutable: `juego` y `jugador`
+- Memoria en formato Markdown (md).
+- Memoria en formato PDF.
+- Código fuente del programa y archivos de configuración para su compilación y construcción.
+- Programas compilado y linkado con ejecutable: `juego` y `jugador`.
 
 # Estructura y compilación del programa
 
@@ -49,18 +49,12 @@ Para compilar y construir el programa, es posible utilizar tanto la herramienta 
 
         mpicc -g -o ./juego juego.c mus.c
         mpicc -g -o ./jugador jugador.c mus.c
-        
-O bien usar el script shell proporcionado que hace lo mismo, asegurándose previamente de que tiene permisos de ejecución: `chmod +x ./compile.sh`:
-        
-        ./compile.sh
 
 ## Ejecución
 
         mpirun -n 1 ./juego
         
 **Es muy importante utilizar `mpirun` para ejecutar el programa, ya que proporciona un entorno de ejecución que evita errores de sincronización y comunicación de MPI.** 
-
-\pagebreak
 
 # Memoria descriptiva
 
@@ -74,9 +68,13 @@ Se opta por una arquitectura de procesos maestro - esclavos, con el siguiente fu
 - Mientras tanto, el resto de los jugadores esperan.
 - Determinados valores de token hacen que el flujo de programa en el que se encuentran los jugadores en ese momento termine.
 
-![Arquitectura](./img/arch.svg)
+Esta solución facilita el tratamiento de entrada y salida así como la sincronización con y entre jugadores, aunque introduce cierta redundancia en las comunicaciones entre procesos. Tambien proporciona una separación de responsabilidades más clara que un enfoque no centralizado, de ahí su elección.
 
-A continuación se incluye, grosso modo, el reparto de responsabilidades.
+![Arquitectura](./img/arch.png)
+
+\pagebreak
+
+A continuación se incluye, *grosso modo*, el reparto de responsabilidades.
 
 ### Proceso maestro
 
@@ -115,6 +113,8 @@ En primer lugar, se implementó la lógica de creación de procesos jugadores (e
 
 - `parent`: para la comunicación de los jugadores con el maestro.
 - `juego_comm`: para la comunicación del maestro con los jugadores.
+
+\pagebreak
 
 Las primeras decisiones de diseño se orientaron a las estructuras de datos para almacenar las cartas, el mazo o baraja y las manos. Para todo ello, se definió la siguiente estructura:
 
@@ -166,9 +166,10 @@ De esta forma se intenta maximizar que el jugador gane a pares y juego.
 
 Si no hay mus, se produce la fase de descartes. La lógica de decisiones para descartar es muy simple: se descartan todas las cartas que no sean "chones" (reyes o treses). El objetivo de esta estrategia es intentar conseguir más reyes para poder tener jugada a grande y pares. El jugador repartidor reparte la siguiente carta del mazo hasta que se queda sin cartas; en ese caso, recupera todas las descartadas, las barajea y sigue repartiendo.
 
-Una vez terminados los descartes y roto el mus, tiene lugar la fase de envites. La lógica de decisión para los envites es compleja. Depende de las cartas de cada jugador, de los envites que haya sobre la mesa, de las piedras que lleve ganadas la pareja contraria y de si el jugador pertenece o no a la pareja mano. A continuación se incluye un diagrama de flujo detallando el envite a grande:
+Una vez terminados los descartes y roto el mus, tiene lugar la fase de envites. La lógica de decisión para los envites es compleja. Depende de las cartas de cada jugador, de los envites que haya sobre la mesa, de las piedras que lleve ganadas la pareja contraria y de si el jugador pertenece o no a la pareja mano (ver figura 2: diagrama de flujo detallando el envite a grande).
 
-![Envite a grande](./img/envites_grande.svg)
+![Envite a grande](./img/envites_grande.png)
+
 
 Básicamente, primero se comprueba si se dan las condiciones para lanzar un órdago (por ejemplo, que la pareja contraria lleve más de 30 piedras ganadas en el juego actual). En tal caso, se lanza. Si no, dependiendo del lance, se comprueba si se tienen buenas cartas. En función de ello y de si hay envites sobre la mesa o no, se envida, se acepta o se envida más. Para ello también se tiene en cuenta si se pertenece a la pareja mano o no.
 
@@ -180,7 +181,7 @@ Por "buenas cartas" en esta práctica se entiende:
 - A juego: 31 ó 32.
 - Al punto: más de 27.
 
-En general, la lógica de envites presenta matices conservadores, si bien en función del desarrollo del juego las apuestas se vuelven más agresivas. Los envites y conteos de cartas son enviados al maestro, que se encarga de calcular los ganadores en cada lance y apuntar las piedras. Si dos jugadores de la misma pareja envidan, se entiende el envite como el mayor de ambos. Si hay envites sobre la mesa, el resto de jugadores puede elegir si los quiere o no. 
+En general, la lógica de envites presenta matices conservadores, si bien en función del desarrollo del juego las apuestas se vuelven más agresivas. Los envites y conteos de cartas son enviados al maestro, que se encarga de calcular los ganadores en cada lance y apuntar las piedras. 
 
 ### Desarrollo de la práctica
 
@@ -234,7 +235,7 @@ Se llevan a cabo según la lógica descrita anteriormente en este documento. Si 
 
 El órdago se lanza si:
 
-- La pareja contraria tiene más de 30 puntos.
+- A la pareja contraria le faltan diez puntos o menos para ganar un juego.
 - Aleatoriamente con un porcentaje muy bajo de ocurrencia. 
 
 #### Otras funcionalidades
@@ -267,7 +268,7 @@ Las **dificultades encontradas** para el desarrollo de la práctica han sido rea
 
 Como posibles mejoras al programa entregado se proponen las siguientes:
 
-- Mejora de la lógica de decisión (órdagos, mus corrido, envites, etc.) incluyendo más jugadas o incluso probabilidades calculadas de ganar con una mano determinada a un lance dado. 
+- Mejora de la lógica de decisión (órdagos, mus corrido, envites, etc.) incluyendo más jugadas o incluso probabilidades calculadas de ganar con una mano determinada a un lance dado ([ver referencia](http://upcommons.upc.edu/bitstream/handle/2099.1/5146/memoria.pdf?sequence=1)).
 - Tratamiento de "mentiras" o "engaños"; por ejemplo, si tres jugadores pasan en un lance y el jugador postre envida, con la lógica actual nunca le van a aceptar o subir el envite (cuando un jugador controlado por el programa pasa es porque cree que tiene una mala mano peor con la información de que dispone, con lo que un envite de postre no iba a cambiar la situación). 
 - Tratamiento de errores de E/S: ¿qué ocurre si un jugador miente y dice que tiene pares cuando no los tiene? Esta situación, equiparable a la anterior, no tiene tratamiento en la versión actual (se presupone que, para el propósito de esta práctica, el jugador humano dice la verdad). 
 - Corrección de posibles bugs.

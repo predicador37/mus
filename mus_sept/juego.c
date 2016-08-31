@@ -1,5 +1,5 @@
 //
-// Created by Miguel Expósito Martín, 72056097H
+// Created by predicador on 15/06/16.
 //
 
 #include <mpi.h>
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
     /* Fijar el total de procesos a ejecutar incluyendo el maestro */
     universe_size = 5;
 
-    strcpy(worker_program, "./Debug/jugador");
+    strcpy(worker_program, "./jugador");
     printf("[maestro] Generando %d procesos ejecutando %s\n", universe_size - 1, worker_program);
     MPI_Comm_spawn(worker_program, MPI_ARGV_NULL, universe_size - 1, MPI_INFO_NULL, 0, MPI_COMM_SELF, &juego_comm,
                    MPI_ERRCODES_IGNORE);
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
     *****************************************************************************************************************/
 
     //Selección de modo (interactivo: 1/automático: 0)
-/*
+
     do {
         printf(BOLDMAGENTA "¿[maestro] ¿Desea jugar en modo automático o interactivo? (0: automático, 1: interactivo)\n" RESET);
     } while (((scanf("%d%c", &modo_juego, &c) != 2 || c != '\n') && clean_stdin()) ||
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
                  esta_valor_en_array(n_puntos_juego, entradas_posibles_puntos, 2) == 0);
 
     }
-*/
+
     /******************************************************************************************************************
    * COMIENZO DE PARTIDA  *****************************************************************************************************************/
 
@@ -699,13 +699,7 @@ int main(int argc, char **argv) {
                             printf(BOLDMAGENTA "[jugador %d] ¿Tienes pares?: (0:No, 1:Sí)\n" RESET, i);
                         } while (((scanf("%d%c", &pares_humano, &c) != 2 || c != '\n') && clean_stdin()) ||
                                  esta_valor_en_array(pares_humano, entradas_posibles_mus, 2) == 0);
-                        if (tengo_pares[i] != pares_humano){
-                            printf(BOLDRED "[maestro] Te has equivocado con los pares!!!\n" RESET);
-                            //si el jugador miente, se le ignora para evitar bloqueos
-                        }
-                        else {
-                            tengo_pares[i] = pares_humano;
-                        }
+                        tengo_pares[i] = pares_humano;
                     }
                     printf(BOLDYELLOW "[maestro] Jugador %d %s tengo pares\n" RESET, i, respuestas[tengo_pares[i]]);
                     i = add_mod(i, 1, 4);
@@ -770,13 +764,7 @@ int main(int argc, char **argv) {
                             printf(BOLDMAGENTA "[jugador %d] ¿Tienes juego?: (0:No, 1:Sí)\n" RESET, i);
                         } while (((scanf("%d%c", &juego_humano, &c) != 2 || c != '\n') && clean_stdin()) ||
                                  esta_valor_en_array(juego_humano, entradas_posibles_mus, 2) == 0);
-                        if (tengo_juego[i] != juego_humano) {
-                            printf(BOLDRED "[maestro] Te has equivocado con el juego!!!\n" RESET);
-                            //si el jugador miente, se le ignora para evitar bloqueos
-                        }
-                        else {
-                            tengo_juego[i] = juego_humano;
-                        }
+                        tengo_juego[i] = juego_humano;
                     }
 
                     printf(BOLDYELLOW "[maestro] Jugador %d %s tengo juego\n" RESET, i, respuestas[tengo_juego[i]]);
@@ -1005,7 +993,7 @@ int main(int argc, char **argv) {
                         }
 
                     } else { //modo automático
-                        printf("[maestro] MODO AUTOMÁTICO\n");
+                        debug("[maestro] MODO AUTOMÁTICO\n");
 
                         //recibir envite/paso de jugador
                         MPI_Send(envites_jugador, 4, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);

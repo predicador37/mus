@@ -23,3 +23,6 @@
 - No se implementan jugadas especiales
 - No se implementan señas
 - Desarrollo de interfaz gráfico: se implementan colores en la salida de la consola
+
+
+inkscape --export-png=arcg.png --export-dpi=200 --export-background-opacity=0 --without-gui arch.svg
