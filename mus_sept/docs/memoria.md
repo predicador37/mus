@@ -183,6 +183,8 @@ Por "buenas cartas" en esta práctica se entiende:
 
 En general, la lógica de envites presenta matices conservadores, si bien en función del desarrollo del juego las apuestas se vuelven más agresivas. Los envites y conteos de cartas son enviados al maestro, que se encarga de calcular los ganadores en cada lance y apuntar las piedras. 
 
+Si se diese el caso de que envidaran dos jugadores pertenecientes a la misma pareja, sólo se tendría en cuenta la apuesta más alta de ambas.
+
 ### Desarrollo de la práctica
 
 Se siguieron las fases descritas en el enunciado de la siguiente forma:
@@ -270,7 +272,8 @@ Como posibles mejoras al programa entregado se proponen las siguientes:
 
 - Mejora de la lógica de decisión (órdagos, mus corrido, envites, etc.) incluyendo más jugadas o incluso probabilidades calculadas de ganar con una mano determinada a un lance dado ([ver referencia](http://upcommons.upc.edu/bitstream/handle/2099.1/5146/memoria.pdf?sequence=1)).
 - Tratamiento de "mentiras" o "engaños"; por ejemplo, si tres jugadores pasan en un lance y el jugador postre envida, con la lógica actual nunca le van a aceptar o subir el envite (cuando un jugador controlado por el programa pasa es porque cree que tiene una mala mano peor con la información de que dispone, con lo que un envite de postre no iba a cambiar la situación). 
-- Tratamiento de errores de E/S: ¿qué ocurre si un jugador miente y dice que tiene pares cuando no los tiene? Esta situación, equiparable a la anterior, no tiene tratamiento en la versión actual (se presupone que, para el propósito de esta práctica, el jugador humano dice la verdad). 
+- Tratamiento de errores de E/S: ¿qué ocurre si un jugador miente y dice que tiene pares cuando no los tiene? Esta situación, equiparable a la anterior, no tiene tratamiento en la versión actual (se presupone que, para el propósito de esta práctica, el jugador humano dice la verdad).
+- Mejoras estéticas, como evitar que se pueda apostar un número arbitrario de piedras (limitarlo al número de piedras por juego exceptuando las que ya están ganadas sin tener en cuenta el órdago).
 - Corrección de posibles bugs.
 - Las propuestas en el enunciado de la práctica.
 

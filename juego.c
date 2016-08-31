@@ -929,7 +929,7 @@ int main(int argc, char **argv) {
                     (max(envites_jugador[0], envites_jugador[2]) != max(envites_jugador[1], envites_jugador[3]))) {
                     for (k = 0; k < N_JUGADORES; k++) {
                         if (envites_jugador[k] != 1) {
-                            debug("[maestro] Piedra por no: %d\n");
+                            debug("[maestro] Piedra por no.\n");
                             piedras[que_pareja_soy(k, mano)]++;
                             piedra_no[l] = 1;
                             break;
@@ -955,7 +955,7 @@ int main(int argc, char **argv) {
 
                     // 1) la máxima apuesta
                     int maximo = maximo_array(envites_jugador, N_JUGADORES);
-                    printf("MÁXIMA APUESTA: %d", maximo);
+                   debug("MÁXIMA APUESTA: %d", maximo);
                     // 2) el jugador con la máxima apuesta
                     int jugador_maxima_apuesta = buscaIndice(envites_jugador, 4, maximo);
                     // 3) la pareja con el jugador con la máxima apuesta
@@ -966,13 +966,13 @@ int main(int argc, char **argv) {
                     int jugador_apuesta_inicial = buscaIndice(envites_jugador, 4,
                                                               max(envites_jugador[jugador_1_pareja_subida],
                                                                   envites_jugador[jugador_2_pareja_subida]));
-                   printf("Jugador al que han subido la apuesta: %d\n", jugador_apuesta_inicial);
+                   debug("Jugador al que han subido la apuesta: %d\n", jugador_apuesta_inicial);
                     token = 1;
                     //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
                     MPI_Send(&token, 1, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
                     if (((modo_juego == 1) && ((jugador_apuesta_inicial == jugador_humano))  && ((l == 0) || (l==1))) || //grande o chica
-                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
-                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 2) && (tengo_pares[jugador_apuesta_inicial] == 1)) || //pares y tengo pares
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[jugador_apuesta_inicial] == 1)) ||  //juego y tengo juego
                         ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
 
 
@@ -1019,15 +1019,15 @@ int main(int argc, char **argv) {
                     envites_jugador[jugador_apuesta_inicial] = calcular_envite(envites_jugador, envite, envite_N,
                                                                                max(envite_anterior[0],
                                                                                    envite_anterior[1]));
-                    if (envites_jugador[siguiente_jugador] > 1 &&
-                        envites_jugador[siguiente_jugador] >= maximo_array(envites_jugador, N_JUGADORES)) {
-                        if (envites_jugador[add_mod(siguiente_jugador, 2, 4)] !=
+                    if (envites_jugador[jugador_apuesta_inicial] > 1 &&
+                        envites_jugador[jugador_apuesta_inicial] >= maximo_array(envites_jugador, N_JUGADORES)) {
+                        if (envites_jugador[add_mod(jugador_apuesta_inicial, 2, 4)] !=
                             0) { //si el otro miembro de la pareja ya ha envidado, sustituir por este que es mayor
-                            envite_anterior[que_pareja_soy(siguiente_jugador,
-                                                           mano)] = envites_jugador[siguiente_jugador];
+                            envite_anterior[que_pareja_soy(jugador_apuesta_inicial,
+                                                           mano)] = envites_jugador[jugador_apuesta_inicial];
                         } else { //si no, sumar el envite a la apuesta anterior
-                            envite_anterior[que_pareja_soy(siguiente_jugador,
-                                                           mano)] += envites_jugador[siguiente_jugador];
+                            envite_anterior[que_pareja_soy(jugador_apuesta_inicial,
+                                                           mano)] += envites_jugador[jugador_apuesta_inicial];
                         }
 
                     }
@@ -1210,8 +1210,8 @@ int main(int argc, char **argv) {
                 }
             }
 
-            printf(BOLDBLUE "[maestro] PIEDRAS MANO: %d\n" RESET, piedras[1]);
-            printf(BOLDBLUE "[maestro] PIEDRAS POSTRE: %d\n" RESET, piedras[0]);
+            printf(BOLDBLUE "[maestro] PIEDRAS GANADAS POR PAREJA MANO: %d\n" RESET, piedras[1]);
+            printf(BOLDBLUE "[maestro] PIEDRAS GANADAS POR PAREJA POSTRE: %d\n" RESET, piedras[0]);
 
             if (que_pareja_inicial_soy(mano) == 0) {
                 piedras_parejas[0] += piedras[1];
