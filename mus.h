@@ -96,7 +96,7 @@ int busca_indice(int a[], int longitud, int numero);
 
 int que_pareja_soy(int rank, int jugadorMano);
 
-int que_pareja_inicial_soy(int rank);
+int que_pareja_inicial_soy(int rFank);
 
 int misma_pareja(int rank1, int rank2);
 
@@ -129,5 +129,9 @@ int poner_descartadas_en_mazo(Carta *wMazo);
 int contar_cartas_en_estado(Carta *wMazo, int estado);
 
 int que_pareja_etiqueta_tengo(int rank);
+
+int deshacerEmpateComplementario(int *conteos, int jugadorMano, int valor);
+
+int deshacerEmpate(int *conteos, int jugadorMano, int valor);
 
 #endif //MUS_MUS_H

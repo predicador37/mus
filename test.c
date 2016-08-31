@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
     int invertido_1[40]={0, 1, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1};
     int invertido_2[40]={1, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1};
     int pares_1[20]={99, 99, 1, 1, 99, 99, 99, 0, 99, 99, 99, 99, 1, 10, 99,99, 99, 1, 10, 99};
+    int pares_2[20]={99,99,0,99,99, 99,99,1,8,99, 99,1,1,1,99, 99,10,1,10,99};
     int juego_1[4]={31, 34, 22, 31};
 
     int mano_1 = 0;
@@ -160,7 +161,7 @@ int main(int argc, char **argv) {
     int pares[5]={99,10,1,10,99};
     int puntos_juego[4]={31,31,31,31};
     int envites_jugadores[4]={1,1,1,2};
-    int apuesta = apuesta_terminada(envites_jugadores, 4, 2);
+    int apuesta = apuesta_terminada(envites_jugadores, 4);
 
     //envido(envites_3, equivalencias, 4, 2, 99, 2, 0,pares, 0, puntos_juego);
     print_envite(envites_3[0], 0, 1, envites_3[1]);
@@ -168,5 +169,42 @@ int main(int argc, char **argv) {
     printf("TEST 7 ENVITE: %d\n", envite_2);
 
     printf("TEST 8: APUESTA: %d\n", apuesta);
+
+    int r, i;
+    int N = 3,
+            M = 6;
+    //RAND_MAX = 10;
+    /* initialize random seed: */
+    srand (time(NULL));
+    printf("Números aleatorios entre %d y %d\n", N, M);
+    /* generate secret number between 1 and 10: */
+    for(i=0; i < 10 ; i++){
+        r = rand() % (M - N + 1) + N;
+        printf("%d ", r);
+    }
+
+    ganador=calcular_pares(pares_2, 2);
+    printf("TEST 9 A PARES: %d\n", ganador);
+
+    int jugadores[] = {99,1,10,99};
+    int empate = deshacerEmpateComplementario(jugadores, 2, 99);
+
+    printf("TEST 10: EMPATE: %d\n", empate);
+
+    int maximo = maximo_array_excluyendo(jugadores, 4, 99);
+    printf("TEST 11: MAXIMO: %d\n", maximo);
+
+    int pareja_soy = que_pareja_inicial_soy(0);
+    int pareja_no_soy = add_mod(pareja_soy, 1, 2);
+    int puntos_juego_2[]={29,37};
+    int n_puntos_juego = 40;
+    printf("TEST 12: PAREJA SOY: %d\n", pareja_soy);
+    printf("TEST 12: PAREJA NO SOY: %d\n", pareja_no_soy);
+
+
+
+    int ordago_1 = ordago(0, 3, puntos_juego_2, n_puntos_juego);
+    printf ("TEST 13: ORDAGO: %d", ordago_1);
+
     return 0;
 }

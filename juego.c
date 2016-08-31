@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
      * DECLARACIÓN E INICIALIZACIÓN DE VARIABLES
      */
     int rank, size, version, subversion, namelen, universe_size, size_mazo, size_mano, proceso, jugador_humano, corte, repartidor, postre, mano,
-            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, em, ep, piedra_no, contador, indicador_pares, juego_al_punto;
+            ultimo, siguiente_jugador, jugador_espera, mus, token, descarte, repartidor_descartes, turno, n_cartas_a_descartar, envite, envite_N, em, ep, contador, indicador_pares, juego_al_punto;
     char processor_name[MPI_MAX_PROCESSOR_NAME], worker_program[100], c;
     int cartas_a_descartar[N_CARTAS_MANO] = {99, 99, 99, 99};
     //Array de 4 posiciones para los envites, una para cada jugador
@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
     int envites_jugador[N_JUGADORES] = {0, 0, 0, 0};
     int tengo_pares[N_JUGADORES] = {0, 0, 0, 0};
     int tengo_juego[N_JUGADORES] = {0, 0, 0, 0};
+    int piedra_no[N_LANCES] = {0,0,0,0};
     int entradas_posibles[3] = {1, 2, 3};
     int entradas_posibles_mus[2] = {0, 1};
     int entradas_posibles_vacas[2] = {3, 5};
@@ -680,7 +681,7 @@ int main(int argc, char **argv) {
 
             printf(BOLDBLUE "[maestro] Iniciando lance de %s\n" RESET, lances_etiquetas[l]);
 
-            piedra_no = 0; //inicializar a cero en cada lance!
+            piedra_no[l] = 0; //inicializar a cero en cada lance!
 
             siguiente_jugador = mano;
 
@@ -922,15 +923,15 @@ int main(int argc, char **argv) {
 
                 debug("APUESTA: %d\n", apuesta_terminada(envites_jugador, N_JUGADORES));
 
-                //si pareja contraria no acepta un envite, sumar una piedra a la otra inmediatamente
+                //si pareja contraria no acepta un envite, sumar una piedra (envite anterior) a la otra inmediatamente
                 if (((max(envites_jugador[0], envites_jugador[2]) == 1) ||
                      (max(envites_jugador[1], envites_jugador[3]) == 1)) &&
                     (max(envites_jugador[0], envites_jugador[2]) != max(envites_jugador[1], envites_jugador[3]))) {
                     for (k = 0; k < N_JUGADORES; k++) {
                         if (envites_jugador[k] != 1) {
-                            debug("[maestro] Piedra por no\n");
+                            debug("[maestro] Piedra por no: %d\n");
                             piedras[que_pareja_soy(k, mano)]++;
-                            piedra_no = 1;
+                            piedra_no[l] = 1;
                             break;
                         }
 
@@ -954,7 +955,7 @@ int main(int argc, char **argv) {
 
                     // 1) la máxima apuesta
                     int maximo = maximo_array(envites_jugador, N_JUGADORES);
-                    debug("MÁXIMA APUESTA: %d", maximo);
+                    printf("MÁXIMA APUESTA: %d", maximo);
                     // 2) el jugador con la máxima apuesta
                     int jugador_maxima_apuesta = buscaIndice(envites_jugador, 4, maximo);
                     // 3) la pareja con el jugador con la máxima apuesta
@@ -965,14 +966,14 @@ int main(int argc, char **argv) {
                     int jugador_apuesta_inicial = buscaIndice(envites_jugador, 4,
                                                               max(envites_jugador[jugador_1_pareja_subida],
                                                                   envites_jugador[jugador_2_pareja_subida]));
-                    debug("Jugador al que han subido la apuesta: %d\n", jugador_apuesta_inicial);
+                   printf("Jugador al que han subido la apuesta: %d\n", jugador_apuesta_inicial);
                     token = 1;
                     //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
                     MPI_Send(&token, 1, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
-                    if (((modo_juego == 1) && (siguiente_jugador == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
-                        ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
-                        ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
-                        ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
+                    if (((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
 
 
                         envite = 0;
@@ -1042,6 +1043,25 @@ int main(int argc, char **argv) {
                     printf(BOLDBLUE "[maestro] Envites (0: no habla, 1: pasa, 2: envida, N: más, 99:órdago): \n [Jugador 0]: %d\n [Jugador 1]: %d\n [Jugador 2]: %d\n [Jugador 3]: %d\n" RESET,
                            envites_jugador[0], envites_jugador[1],
                            envites_jugador[2], envites_jugador[3]);
+                    //si pareja contraria no acepta un envite, sumar (envite anterior) a la otra inmediatamente
+                    if (((max(envites_jugador[0], envites_jugador[2]) == 1) ||
+                         (max(envites_jugador[1], envites_jugador[3]) == 1)) &&
+                        (max(envites_jugador[0], envites_jugador[2]) != max(envites_jugador[1], envites_jugador[3]))) {
+                        for (k = 0; k < N_JUGADORES; k++) {
+                            if (envites_jugador[k] != 1) {
+                                debug("[maestro] Piedras por no: %d\n", envite_anterior[que_pareja_soy(add_mod(k,1,4), mano)]);
+                                piedras[que_pareja_soy(k, mano)] += envite_anterior[que_pareja_soy(add_mod(k,1,4), mano)];
+                                piedra_no[l] = 1;
+                                break;
+                            }
+
+                        }
+                        printf(BOLDBLUE "[maestro] %s se lleva %d piedras de %s por el no\n" RESET,
+                               parejas_etiquetas[que_pareja_etiqueta_tengo(k)], envite_anterior[que_pareja_soy(add_mod(k,1,4), mano)], lances_etiquetas[l]);
+
+                    }
+
+
                     printf(BOLDBLUE "[maestro] Fin de ronda de apuestas\n" RESET);
                     iteracion++;
                 }
@@ -1117,7 +1137,7 @@ int main(int argc, char **argv) {
                 printf(BOLDBLUE "[maestro] %s se lleva la piedra de juego\n" RESET,
                        parejas_etiquetas[que_pareja_etiqueta_tengo(ganador[l])]);
             } else { //resto de casos: se calculan las piedras en base a envites
-                if (piedra_no != 1) {
+                if (piedra_no[l] != 1) {
                     printf("[maestro] Calculando piedras, ninguna previa...\n");
                     // Calcular envite de pareja mano em
                     em = envite_pareja(1, mano, envites_jugador);
@@ -1135,6 +1155,9 @@ int main(int argc, char **argv) {
                         piedras[1] = 0;
                         piedras_parejas[0] = 0;
                         piedras_parejas[1] = 0;
+                        puntos_juego[0]=0;
+                        puntos_juego[1]=0;
+
                         n_juegos[que_pareja_soy(ganador[l], mano)] += 1;
                         indicador_ordago = 1;
 
@@ -1175,31 +1198,34 @@ int main(int argc, char **argv) {
             }
         }
 
-        for (l = 0; l < N_LANCES; l++) {
+        if (indicador_ordago == 0) { //no hacer conteos si se ha resuelto por órdago
+            for (l = 0; l < N_LANCES; l++) {
 
-            if ((l == 0 && (piedra_no==0)) || (l == 1) && (piedra_no==0) || ((l == 2) && (indicador_pares == 2)) || ((l == 3) && (juego_al_punto != 0))) {
-                printf(BOLDBLUE "[maestro] Mejor mano a %s: jugador %d\n" RESET, lances_etiquetas[l], ganador[l]);
-                printf(BOLDBLUE "[maestro] Mejor pareja a %s: %s\n" RESET, lances_etiquetas[l],
-                       parejas_etiquetas[que_pareja_etiqueta_tengo(ganador[l])]);
+                if (((l == 0) && (piedra_no[l] != 1)) || ((l == 1) && (piedra_no[l] != 1)) ||
+                    ((l == 2) && (indicador_pares == 2) && (piedra_no[l] != 1)) ||
+                    ((l == 3) && (juego_al_punto != 0) && (piedra_no[l] != 1))) {
+                    printf(BOLDBLUE "[maestro] Mejor mano a %s: jugador %d\n" RESET, lances_etiquetas[l], ganador[l]);
+                    printf(BOLDBLUE "[maestro] Mejor pareja a %s: %s\n" RESET, lances_etiquetas[l],
+                           parejas_etiquetas[que_pareja_etiqueta_tengo(ganador[l])]);
+                }
             }
+
+            printf(BOLDBLUE "[maestro] PIEDRAS MANO: %d\n" RESET, piedras[1]);
+            printf(BOLDBLUE "[maestro] PIEDRAS POSTRE: %d\n" RESET, piedras[0]);
+
+            if (que_pareja_inicial_soy(mano) == 0) {
+                piedras_parejas[0] += piedras[1];
+                piedras_parejas[1] += piedras[0];
+            } else {
+                piedras_parejas[0] += piedras[0];
+                piedras_parejas[1] += piedras[1];
+            }
+            printf(BOLDBLUE "[maestro] PIEDRAS PAREJA 0-2: %d\n" RESET, piedras_parejas[0]);
+            printf(BOLDBLUE "[maestro] PIEDRAS PAREJA 1-3: %d\n" RESET, piedras_parejas[1]);
+
+            puntos_juego[0] = piedras_parejas[0];
+            puntos_juego[1] = piedras_parejas[1];
         }
-
-        printf(BOLDBLUE "[maestro] PIEDRAS MANO: %d\n" RESET, piedras[1]);
-        printf(BOLDBLUE "[maestro] PIEDRAS POSTRE: %d\n" RESET, piedras[0]);
-
-        if (que_pareja_inicial_soy(mano) == 0) {
-            piedras_parejas[0] += piedras[1];
-            piedras_parejas[1] += piedras[0];
-        } else {
-            piedras_parejas[0] += piedras[0];
-            piedras_parejas[1] += piedras[1];
-        }
-        printf(BOLDBLUE "[maestro] PIEDRAS PAREJA 0-2: %d\n" RESET, piedras_parejas[0]);
-        printf(BOLDBLUE "[maestro] PIEDRAS PAREJA 1-3: %d\n" RESET, piedras_parejas[1]);
-
-        puntos_juego[0] = piedras_parejas[0];
-        puntos_juego[1] = piedras_parejas[1];
-
 
         MPI_Bcast(puntos_juego, 2, MPI_INT, MPI_ROOT, juego_comm);
 
