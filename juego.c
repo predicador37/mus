@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 
     }
 
-    /******************************************************************************************************************
+   /******************************************************************************************************************
    * COMIENZO DE PARTIDA  *****************************************************************************************************************/
 
     MPI_Bcast(&modo_juego, 1, MPI_INT, MPI_ROOT, juego_comm);
@@ -1006,7 +1006,7 @@ int main(int argc, char **argv) {
                         }
 
                     } else { //modo automático
-                        printf("[maestro] MODO AUTOMÁTICO\n");
+                       debug("[maestro] MODO AUTOMÁTICO\n");
 
                         //recibir envite/paso de jugador
                         MPI_Send(envites_jugador, 4, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
@@ -1157,8 +1157,7 @@ int main(int argc, char **argv) {
                         piedras_parejas[1] = 0;
                         puntos_juego[0]=0;
                         puntos_juego[1]=0;
-
-                        n_juegos[que_pareja_soy(ganador[l], mano)] += 1;
+                        n_juegos[que_pareja_inicial_soy(ganador[l])] += 1;
                         indicador_ordago = 1;
 
                     } else if ((em == ep) &&

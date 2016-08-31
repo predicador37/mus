@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 
     }
 
-    /******************************************************************************************************************
+   /******************************************************************************************************************
    * COMIENZO DE PARTIDA  *****************************************************************************************************************/
 
     MPI_Bcast(&modo_juego, 1, MPI_INT, MPI_ROOT, juego_comm);
@@ -827,12 +827,12 @@ int main(int argc, char **argv) {
                     printf("[maestro]: Siguiente jugador: %d, mano: %d\n", siguiente_jugador, mano);
                     MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                     debug("[maestro] Token %d enviado con valor %d a jugador %d...", i, token, siguiente_jugador);
-                    if (((modo_juego == 1) && (siguiente_jugador == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
+                    if (((modo_juego == 1) && ((siguiente_jugador == jugador_humano) ) && ((l == 0) || (l==1))) || //grande o chica
                         ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 2) && (indicador_pares==2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
                         ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
                         ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
                         printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_humano);
-                        recibir_mazo(mano_jugador, jugador_humano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                        recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
 
                         print_mazo(mano_jugador, N_CARTAS_MANO);
                         do {
@@ -929,7 +929,7 @@ int main(int argc, char **argv) {
                     (max(envites_jugador[0], envites_jugador[2]) != max(envites_jugador[1], envites_jugador[3]))) {
                     for (k = 0; k < N_JUGADORES; k++) {
                         if (envites_jugador[k] != 1) {
-                            debug("[maestro] Piedra por no: %d\n");
+                            debug("[maestro] Piedra por no.\n");
                             piedras[que_pareja_soy(k, mano)]++;
                             piedra_no[l] = 1;
                             break;
@@ -955,7 +955,7 @@ int main(int argc, char **argv) {
 
                     // 1) la máxima apuesta
                     int maximo = maximo_array(envites_jugador, N_JUGADORES);
-                    printf("MÁXIMA APUESTA: %d", maximo);
+                   debug("MÁXIMA APUESTA: %d", maximo);
                     // 2) el jugador con la máxima apuesta
                     int jugador_maxima_apuesta = buscaIndice(envites_jugador, 4, maximo);
                     // 3) la pareja con el jugador con la máxima apuesta
@@ -966,20 +966,20 @@ int main(int argc, char **argv) {
                     int jugador_apuesta_inicial = buscaIndice(envites_jugador, 4,
                                                               max(envites_jugador[jugador_1_pareja_subida],
                                                                   envites_jugador[jugador_2_pareja_subida]));
-                   printf("Jugador al que han subido la apuesta: %d\n", jugador_apuesta_inicial);
+                   debug("Jugador al que han subido la apuesta: %d\n", jugador_apuesta_inicial);
                     token = 1;
                     //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
                     MPI_Send(&token, 1, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
-                    if (((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
-                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
-                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
+                    if (((modo_juego == 1) && ((jugador_apuesta_inicial == jugador_humano))  && ((l == 0) || (l==1))) || //grande o chica
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 2) && (tengo_pares[jugador_apuesta_inicial] == 1)) || //pares y tengo pares
+                        ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[jugador_apuesta_inicial] == 1)) ||  //juego y tengo juego
                         ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
 
 
                         envite = 0;
                         envite_N = 0;
-                        recibir_mazo(mano_jugador, jugador_humano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
-                        printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_humano);
+                        recibir_mazo(mano_jugador,jugador_apuesta_inicial, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                        printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_apuesta_inicial);
                         print_mazo(mano_jugador, N_CARTAS_MANO);
 
                         do {
@@ -1006,7 +1006,7 @@ int main(int argc, char **argv) {
                         }
 
                     } else { //modo automático
-                        printf("[maestro] MODO AUTOMÁTICO\n");
+                       debug("[maestro] MODO AUTOMÁTICO\n");
 
                         //recibir envite/paso de jugador
                         MPI_Send(envites_jugador, 4, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
@@ -1019,15 +1019,15 @@ int main(int argc, char **argv) {
                     envites_jugador[jugador_apuesta_inicial] = calcular_envite(envites_jugador, envite, envite_N,
                                                                                max(envite_anterior[0],
                                                                                    envite_anterior[1]));
-                    if (envites_jugador[siguiente_jugador] > 1 &&
-                        envites_jugador[siguiente_jugador] >= maximo_array(envites_jugador, N_JUGADORES)) {
-                        if (envites_jugador[add_mod(siguiente_jugador, 2, 4)] !=
+                    if (envites_jugador[jugador_apuesta_inicial] > 1 &&
+                        envites_jugador[jugador_apuesta_inicial] >= maximo_array(envites_jugador, N_JUGADORES)) {
+                        if (envites_jugador[add_mod(jugador_apuesta_inicial, 2, 4)] !=
                             0) { //si el otro miembro de la pareja ya ha envidado, sustituir por este que es mayor
-                            envite_anterior[que_pareja_soy(siguiente_jugador,
-                                                           mano)] = envites_jugador[siguiente_jugador];
+                            envite_anterior[que_pareja_soy(jugador_apuesta_inicial,
+                                                           mano)] = envites_jugador[jugador_apuesta_inicial];
                         } else { //si no, sumar el envite a la apuesta anterior
-                            envite_anterior[que_pareja_soy(siguiente_jugador,
-                                                           mano)] += envites_jugador[siguiente_jugador];
+                            envite_anterior[que_pareja_soy(jugador_apuesta_inicial,
+                                                           mano)] += envites_jugador[jugador_apuesta_inicial];
                         }
 
                     }
@@ -1064,7 +1064,7 @@ int main(int argc, char **argv) {
 
                     printf(BOLDBLUE "[maestro] Fin de ronda de apuestas\n" RESET);
                     iteracion++;
-                }
+                }//apuesta terminada
                 int j;
                 siguiente_jugador = 0;
 
@@ -1157,8 +1157,7 @@ int main(int argc, char **argv) {
                         piedras_parejas[1] = 0;
                         puntos_juego[0]=0;
                         puntos_juego[1]=0;
-
-                        n_juegos[que_pareja_soy(ganador[l], mano)] += 1;
+                        n_juegos[que_pareja_inicial_soy(ganador[l])] += 1;
                         indicador_ordago = 1;
 
                     } else if ((em == ep) &&
@@ -1210,8 +1209,8 @@ int main(int argc, char **argv) {
                 }
             }
 
-            printf(BOLDBLUE "[maestro] PIEDRAS MANO: %d\n" RESET, piedras[1]);
-            printf(BOLDBLUE "[maestro] PIEDRAS POSTRE: %d\n" RESET, piedras[0]);
+            printf(BOLDBLUE "[maestro] PIEDRAS GANADAS POR PAREJA MANO: %d\n" RESET, piedras[1]);
+            printf(BOLDBLUE "[maestro] PIEDRAS GANADAS POR PAREJA POSTRE: %d\n" RESET, piedras[0]);
 
             if (que_pareja_inicial_soy(mano) == 0) {
                 piedras_parejas[0] += piedras[1];
@@ -1227,7 +1226,7 @@ int main(int argc, char **argv) {
             puntos_juego[1] = piedras_parejas[1];
         }
 
-        MPI_Bcast(puntos_juego, 2, MPI_INT, MPI_ROOT, juego_comm);
+
 
         //si una pareja gana cuarenta puntos o más, gana un juego
         if (puntos_juego[0] >= n_puntos_juego) {
@@ -1267,6 +1266,8 @@ int main(int argc, char **argv) {
             puntos_juego[0] = 0;
             ronda = 0;
         }
+
+        MPI_Bcast(puntos_juego, 2, MPI_INT, MPI_ROOT, juego_comm);
 
         //reinicialización de variables para la próxima partida
         piedras[0] = 0;

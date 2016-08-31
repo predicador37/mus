@@ -369,7 +369,7 @@ int main(int argc, char **argv) {
                                         int vuelta_al_mazo = poner_descartadas_en_mazo(mazo);
                                         debug("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
                                         barajar_mazo(mazo); //Baraja el mazo
-                                        print_mazo(mazo, N_CARTAS_MAZO);
+                                        //print_mazo(mazo, N_CARTAS_MAZO);
                                         size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                                         //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                                     }
@@ -394,7 +394,7 @@ int main(int argc, char **argv) {
                                         int vuelta_al_mazo = poner_descartadas_en_mazo(mazo);
                                         debug("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
                                         barajar_mazo(mazo); //Baraja el mazo
-                                        print_mazo(mazo, N_CARTAS_MAZO);
+                                        //print_mazo(mazo, N_CARTAS_MAZO);
                                         size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                                         //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                                     }
@@ -687,7 +687,7 @@ int main(int argc, char **argv) {
                                         int vuelta_al_mazo = poner_descartadas_en_mazo(mazo);
                                         debug("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
                                         barajar_mazo(mazo); //Baraja el mazo
-                                        print_mazo(mazo, N_CARTAS_MAZO);
+                                        //print_mazo(mazo, N_CARTAS_MAZO);
                                         size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                                         //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                                     }
@@ -711,7 +711,7 @@ int main(int argc, char **argv) {
                                         int vuelta_al_mazo = poner_descartadas_en_mazo(mazo);
                                         debug("[jugador %d] DEVUELTAS AL MAZO: %d\n", rank, vuelta_al_mazo);
                                         barajar_mazo(mazo); //Baraja el mazo
-                                        print_mazo(mazo, N_CARTAS_MAZO);
+                                        //print_mazo(mazo, N_CARTAS_MAZO);
                                         size_mazo = N_CARTAS_MAZO; // Reestablece el contador para recorrer cartas (representa carta arriba)
                                         //enviar_mazo(mazo, 0, parent, N_CARTAS_MAZO); // se devuelve el mazo al maestro
                                     }
@@ -881,8 +881,8 @@ int main(int argc, char **argv) {
                                      envites[1] = 0;
                                      MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                                  } else {
-                                     envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, rank,
-                                            mano, pares, juego_al_punto, puntos_juego, n_puntos_juego);
+                                     envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, mano, rank,
+                                            pares, juego_al_punto, puntos_juego, n_puntos_juego);
                                      debug("[jugador %d] Generado envite: %d\n", rank, envites[0]);
                                      debug("[jugador %d] Generado envite_N: %d\n", rank, envites[1]);
                                      MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
@@ -912,7 +912,7 @@ int main(int argc, char **argv) {
                             jugador_apuesta_en_vigor = busca_indice(envites_jugadores, N_JUGADORES, apuesta_en_vigor);
 
 
-                            if (((modo_juego == 1) && (rank == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
+                            if (((modo_juego == 1) && ((rank == jugador_humano)) && ((l == 0) || (l==1))) || //grande o chica
                                      ((modo_juego == 1) && (rank == jugador_humano) && (l == 2) && (indicador_pares==2) && (tengoPares(pares) == 1)) || //pares y tengo pares
                                      ((modo_juego == 1) && (rank == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengoJuego(juego) == 1)) ||  //juego y tengo juego
                                      ((modo_juego == 1) && (rank == jugador_humano) && (l == 3) && (juego_al_punto == 1))) {  //enviar mazo para enseñarselo al jugador humano antes de envidar
@@ -935,8 +935,8 @@ int main(int argc, char **argv) {
                                     envites[1] = 0;
                                     MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
                                 } else {
-                                    envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, rank,
-                                           mano, pares, juego_al_punto, puntos_juego, n_puntos_juego);
+                                    envido(envites, equivalencias_jugador, N_CARTAS_MANO, l, apuesta_en_vigor, mano, rank,
+                                           pares, juego_al_punto, puntos_juego, n_puntos_juego);
                                     debug("[jugador %d] Generado envite: %d\n", rank, envites[0]);
                                     debug("[jugador %d] Generado envite_N: %d\n", rank, envites[1]);
                                     MPI_Send(envites, 2, MPI_INT, 0, 0, parent);
@@ -945,6 +945,7 @@ int main(int argc, char **argv) {
 
                             break;
                         case 2:
+                            debug("[jugador %d] Recibido token = 2\n", rank);
                             break;
 
                         case 3:
@@ -1014,7 +1015,7 @@ int main(int argc, char **argv) {
         if (indicador_ordago == 1) {
             indicador_ordago = 0;
         }
-    }
+    } //fin partida
     int token_end = 1;
     MPI_Send(&token_end, 1, MPI_INT, 0, 0, parent);
     //MPI_Comm_disconnect(&parent);

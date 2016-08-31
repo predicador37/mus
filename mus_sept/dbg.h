@@ -1,5 +1,5 @@
 //
-// Created by predicador on 17/06/16.
+// Created by Miguel Expósito Martín, 72056097H
 //
 
 #ifndef __dbg_h__

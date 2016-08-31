@@ -10,7 +10,7 @@ La presente práctica se ha desarrollado para las convocatorias de Febrero y Sep
  
  Para la versión de Septiembre, se ha optado por lo siguiente:
  
- - Refactorización completa del código, aprovechando tan sólo los módulos reutilizables.
+ - Refactorización completa del código, aprovechando tan sólo los módulos reutilizables así como depurando estos considerablemente.
  - Implementación de una arquitectura de la solución mejorada basada en tokens.
  - Implementación de procesos batch para ejecutar trabajos con miles de partidas.
  - Prueba simultánea en el entorno de desarrollo y en la máquina virtual proporcionada por los tutores de la asignatura.
@@ -49,6 +49,10 @@ Para compilar y construir el programa, es posible utilizar tanto la herramienta 
 
         mpicc -g -o ./juego juego.c mus.c
         mpicc -g -o ./jugador jugador.c mus.c
+        
+O bien usar el script shell proporcionado que hace lo mismo, asegurándose previamente de que tiene permisos de ejecución: `chmod +x ./compile.sh`:
+        
+        ./compile.sh
 
 ## Ejecución
 

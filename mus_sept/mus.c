@@ -115,7 +115,7 @@ void barajar_mazo(Carta *wMazo) {
         wMazo[i] = wMazo[j];
         wMazo[j] = temp;
     } /* fin for */
-    printf("Mazo barajado.\n");
+    printf(BOLDBLUE "Mazo barajado.\n" RESET);
 
 }
 
@@ -419,7 +419,7 @@ int calcula_grande(int rbuf[], int jugadorMano) {
                 break;
             }
             else if (ocurrencias != 0) { //gana la mano o el más cercano
-                printf("Se deshace empate con distancia a la mano...\n");
+               debug("Se deshace empate con distancia a la mano...\n");
 
                 for (i = 0; i < 4; i++) {
                     if ((suma[i] == maximo) && (empates[i] == 1)) {
@@ -516,7 +516,7 @@ int calcula_chica(int rbufInv[], int jugadorMano) {
                 break;
             }
             else if (ocurrencias != 0) { //gana la mano o el más cercano
-                printf("Se deshace empate con distancia a la mano...\n");
+                debug("Se deshace empate con distancia a la mano...\n");
 
                 for (i = 0; i < 4; i++) {
                     if ((suma[i] == maximo) && (empates[i] == 1)) {
@@ -686,7 +686,7 @@ int calcular_pares(int paresBuf[], int jugadorMano) {
         }
         else if (ocurrencias != 4) { // hay empates
             int maximo = maximo_array_excluyendo(jugadores, 4, 99);
-            printf("MÁXIMO: %d\n", maximo);
+            debug("MÁXIMO: %d\n", maximo);
             int ocurrencias = ocurrenciasArray(jugadores, 4, maximo);
             if (ocurrencias == 1) { //el jugador gana porque las medias son de mejores cartas
                 ganador = buscaIndice(jugadores, 4, maximo);
@@ -710,7 +710,7 @@ int calcular_pares(int paresBuf[], int jugadorMano) {
             ganador = buscaIndice(jugadores, 4, 1);
         }
         else { // empates
-            printf("Resolviendo empate a parejas...\n");
+            debug("Resolviendo empate a parejas...\n");
             for (i = 0; i < 4; i++) { //se intenta resolver el empate con la pareja
                 if (jugadores[i] == 1) {
                     valoresPares[i] = paresBuf[5 * i + 3];
@@ -769,7 +769,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
     }
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
         for (i = 0; i < N_JUGADORES; i++) {
-            printf("Se deshace empate con distancia a la mano...\n");
+            debug("Se deshace empate con distancia a la mano...\n");
             ganador = deshacerEmpate(juegoBuf, jugadorMano,juegosGanadores[0]);
             return ganador;
         }
@@ -780,7 +780,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
         return ganador;
     }
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
-        printf("Se deshace empate con distancia a la mano...\n");
+        debug("Se deshace empate con distancia a la mano...\n");
         ganador = deshacerEmpate(juegoBuf, jugadorMano, juegosGanadores[1]);
         return ganador;
     }
@@ -791,7 +791,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
         return ganador;
     }
     else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
-        printf("Se deshace empate con distancia a la mano...\n");
+        debug("Se deshace empate con distancia a la mano...\n");
         ganador = deshacerEmpate(juegoBuf, jugadorMano, juegosGanadores[2]);
         return ganador;
     }
@@ -803,7 +803,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
             return ganador;
         }
         else if (ocurrencias > 1) {// empates: gana la mano o el que esté más cerca
-            printf("Se deshace empate con distancia a la mano...\n");
+            debug("Se deshace empate con distancia a la mano...\n");
             ganador = deshacerEmpate(juegoBuf, jugadorMano, i);
             return ganador;
         }
@@ -819,7 +819,7 @@ int calcularJuego(int juegoBuf[], int jugadorMano) {
                 return ganador;
             }
             else if (ocurrencias > 1) { //empates
-                printf("Se deshace empate con distancia a la mano...\n");
+                debug("Se deshace empate con distancia a la mano...\n");
                 return deshacerEmpate(juegoBuf, jugadorMano, i);
             }
         }
@@ -995,11 +995,13 @@ int ordago(int rank, int mano, int puntos_juego[], int n_puntos_juego) {
         return 1;
     }
 
-    else if (r < 0.98) { //órdago aleatorio
-        return 0;
-    }
     else {
-        return 1;
+        if (r < 0.98) { //órdago aleatorio
+            return 0;
+        } else {
+           debug("ORDAGO PROBABILISTICO\n");
+            return 1;
+        }
     }
 }
 
@@ -1026,7 +1028,7 @@ void envido(int envites[], int *equivalencias, int longitud, int lance, int apue
 
 
          if (apuesta_vigor == 99) { //alguien ha lanzado un órdago ya
-             printf("[maestro] Alguien ha lanzado el desafío...HAY UN ÓRDAGO SOBRE LA MESA!\n");
+             debug("[maestro] Alguien ha lanzado el desafío...HAY UN ÓRDAGO SOBRE LA MESA!\n");
              if ((reyes >= 3) && (que_pareja_soy(rank, jugador_mano) == 1)) {
                  envites[0]=2; //se acepta el órdago
                  envites[1]=0;
@@ -1373,7 +1375,7 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
                     printf(BOLDYELLOW "[jugador %d] Envido %d\n" RESET, siguiente_jugador, envite_N);
                 }
                 else {
-                    printf(BOLDYELLOW "[jugador %d] Órdago!\n" RESET, siguiente_jugador);
+                    printf(BOLDRED "[jugador %d] Órdago!\n" RESET, siguiente_jugador);
                 }
                 break;
         }
@@ -1391,7 +1393,7 @@ void print_envite(int envite, int siguiente_jugador, int hay_apuesta, int envite
                     printf(BOLDYELLOW "[jugador %d] Envido %d más\n" RESET, siguiente_jugador, envite_N);
                 }
                 else {
-                    printf(BOLDYELLOW "[jugador %d] Órdago!\n" RESET, siguiente_jugador);
+                    printf(BOLDRED "[jugador %d] Órdago!\n" RESET, siguiente_jugador);
                 }
                 break;
         }
