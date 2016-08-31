@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
     *****************************************************************************************************************/
 
     //Selección de modo (interactivo: 1/automático: 0)
-/*
+
     do {
         printf(BOLDMAGENTA "¿[maestro] ¿Desea jugar en modo automático o interactivo? (0: automático, 1: interactivo)\n" RESET);
     } while (((scanf("%d%c", &modo_juego, &c) != 2 || c != '\n') && clean_stdin()) ||
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
                  esta_valor_en_array(n_puntos_juego, entradas_posibles_puntos, 2) == 0);
 
     }
-*/
+
     /******************************************************************************************************************
    * COMIENZO DE PARTIDA  *****************************************************************************************************************/
 
@@ -827,12 +827,12 @@ int main(int argc, char **argv) {
                     printf("[maestro]: Siguiente jugador: %d, mano: %d\n", siguiente_jugador, mano);
                     MPI_Send(&token, 1, MPI_INT, siguiente_jugador, 0, juego_comm);
                     debug("[maestro] Token %d enviado con valor %d a jugador %d...", i, token, siguiente_jugador);
-                    if (((modo_juego == 1) && (siguiente_jugador == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
+                    if (((modo_juego == 1) && ((siguiente_jugador == jugador_humano) ) && ((l == 0) || (l==1))) || //grande o chica
                         ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 2) && (indicador_pares==2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
                         ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
                         ((modo_juego == 1) && (siguiente_jugador == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
                         printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_humano);
-                        recibir_mazo(mano_jugador, jugador_humano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                        recibir_mazo(mano_jugador, siguiente_jugador, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
 
                         print_mazo(mano_jugador, N_CARTAS_MANO);
                         do {
@@ -970,7 +970,7 @@ int main(int argc, char **argv) {
                     token = 1;
                     //enviar token a jugador con mayor apuesta de pareja a la que han subido la apuesta
                     MPI_Send(&token, 1, MPI_INT, jugador_apuesta_inicial, 0, juego_comm);
-                    if (((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && ((l == 0) || (l==1))) || //grande o chica
+                    if (((modo_juego == 1) && ((jugador_apuesta_inicial == jugador_humano))  && ((l == 0) || (l==1))) || //grande o chica
                         ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 2) && (tengo_pares[siguiente_jugador] == 1)) || //pares y tengo pares
                         ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 2) && (tengo_juego[siguiente_jugador] == 1)) ||  //juego y tengo juego
                         ((modo_juego == 1) && (jugador_apuesta_inicial == jugador_humano) && (l == 3) && (juego_al_punto == 1))) { //juego al punto
@@ -978,8 +978,8 @@ int main(int argc, char **argv) {
 
                         envite = 0;
                         envite_N = 0;
-                        recibir_mazo(mano_jugador, jugador_humano, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
-                        printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_humano);
+                        recibir_mazo(mano_jugador,jugador_apuesta_inicial, juego_comm, N_CARTAS_MANO, MPI_STATUS_IGNORE);
+                        printf("[maestro] Jugador %d, estas son tus cartas:\n", jugador_apuesta_inicial);
                         print_mazo(mano_jugador, N_CARTAS_MANO);
 
                         do {
@@ -1064,7 +1064,7 @@ int main(int argc, char **argv) {
 
                     printf(BOLDBLUE "[maestro] Fin de ronda de apuestas\n" RESET);
                     iteracion++;
-                }
+                }//apuesta terminada
                 int j;
                 siguiente_jugador = 0;
 
@@ -1227,7 +1227,7 @@ int main(int argc, char **argv) {
             puntos_juego[1] = piedras_parejas[1];
         }
 
-        MPI_Bcast(puntos_juego, 2, MPI_INT, MPI_ROOT, juego_comm);
+
 
         //si una pareja gana cuarenta puntos o más, gana un juego
         if (puntos_juego[0] >= n_puntos_juego) {
@@ -1267,6 +1267,8 @@ int main(int argc, char **argv) {
             puntos_juego[0] = 0;
             ronda = 0;
         }
+
+        MPI_Bcast(puntos_juego, 2, MPI_INT, MPI_ROOT, juego_comm);
 
         //reinicialización de variables para la próxima partida
         piedras[0] = 0;

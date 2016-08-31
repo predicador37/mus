@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
     int invertido_2[40]={1, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1};
     int pares_1[20]={99, 99, 1, 1, 99, 99, 99, 0, 99, 99, 99, 99, 1, 10, 99,99, 99, 1, 10, 99};
     int pares_2[20]={99,99,0,99,99, 99,99,1,8,99, 99,1,1,1,99, 99,10,1,10,99};
+    int pares_3[20]= {99, 10, 1, 10, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 10, 1, 10, 99};
     int juego_1[4]={31, 34, 22, 31};
 
     int mano_1 = 0;
@@ -205,6 +206,9 @@ int main(int argc, char **argv) {
 
     int ordago_1 = ordago(0, 3, puntos_juego_2, n_puntos_juego);
     printf ("TEST 13: ORDAGO: %d", ordago_1);
+
+    ganador=calcular_pares(pares_3, 1);
+    printf("TEST 13 A PARES: %d\n", ganador);
 
     return 0;
 }
